@@ -1,0 +1,68 @@
+﻿@{
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    ViewData["Title"] = "Registrar bitácora";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">Registrar bitácora</h2>
+    <a asp-action="Index" class="btn btn-secondary">Volver</a>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body">
+        <form method="post">
+            @Html.AntiForgeryToken()
+
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Cliente</label>
+                    <input class="form-control" value="Taylor Swift" />
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Piscina</label>
+                    <input class="form-control" value="Piscina principal" />
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Fecha</label>
+                    <input type="date" class="form-control" value="2026-04-14" />
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">pH</label>
+                    <input type="number" step="0.1" class="form-control" placeholder="7.2" />
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">Cloro</label>
+                    <input type="number" step="0.1" class="form-control" placeholder="1.5" />
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">Temperatura</label>
+                    <input type="number" step="0.1" class="form-control" placeholder="28" />
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">Estado general</label>
+                    <select class="form-select">
+                        <option selected>Estable</option>
+                        <option>Requiere atención</option>
+                        <option>Crítico</option>
+                    </select>
+                </div>
+
+                <div class="col-md-12">
+                    <label class="form-label">Observaciones</label>
+                    <textarea class="form-control" rows="4" placeholder="Detalle de la visita técnica..."></textarea>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <button type="submit" class="btn btn-primary">Guardar registro</button>
+                <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>

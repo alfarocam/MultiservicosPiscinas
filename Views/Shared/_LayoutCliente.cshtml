@@ -1,0 +1,71 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] — Portal Cliente</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+
+    <nav class="navbar navbar-dark px-3 d-flex justify-content-between"
+         style="background-color:#198754">
+        <a class="navbar-brand fw-bold" href="/Portal">Mi Portal</a>
+        <div class="d-flex align-items-center gap-3">
+            <span class="text-white small">@User.Identity!.Name</span>
+            <form asp-area="Identity" asp-page="/Account/Logout"
+                  asp-route-returnUrl="/" method="post">
+                <button type="submit" class="btn btn-outline-light btn-sm">Salir</button>
+            </form>
+        </div>
+    </nav>
+
+    <div class="d-flex" style="min-height:calc(100vh - 56px)">
+
+        <nav class="d-flex flex-column p-3 text-white"
+             style="width:220px; background-color:#146c43; min-height:100%">
+            <ul class="nav nav-pills flex-column gap-1">
+                <li>
+                    <a asp-controller="Portal" asp-action="Index"
+                       class="nav-link text-white @(ViewContext.RouteData.Values["controller"]?.ToString() == "Portal" ? "active" : "")">
+                        Inicio
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="Piscinas" asp-action="MisPiscinas"
+                       class="nav-link text-white">
+                        Mis Piscinas
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="Agenda" asp-action="MisCitas"
+                       class="nav-link text-white">
+                        Mis Citas
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="Facturacion" asp-action="MisFacturas"
+                       class="nav-link text-white">
+                        Mis Facturas
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="Perfiles" asp-action="Index"
+                       class="nav-link text-white">
+                        Mi Perfil
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <main class="flex-grow-1 p-4" style="background:#f8f9fa">
+            @RenderBody()
+        </main>
+
+    </div>
+
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

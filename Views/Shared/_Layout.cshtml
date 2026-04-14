@@ -1,0 +1,123 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] — Multiservicios y Piscinas</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+
+    <nav class="navbar navbar-dark bg-dark px-3 d-flex justify-content-between">
+        <a class="navbar-brand fw-bold" href="/Dashboard">Multiservicios y Piscinas</a>
+        <div class="d-flex align-items-center gap-3">
+            <span class="text-white small">@User.Identity!.Name</span>
+            <form asp-area="Identity" asp-page="/Account/Logout"
+                  asp-route-returnUrl="/" method="post">
+                <button type="submit" class="btn btn-outline-light btn-sm">
+                    Cerrar sesión
+                </button>
+            </form>
+        </div>
+    </nav>
+
+    <div class="d-flex" style="min-height:calc(100vh - 56px)">
+
+        <nav class="d-flex flex-column p-3 bg-dark text-white"
+             style="width:230px; min-height:100%">
+            <ul class="nav nav-pills flex-column gap-1">
+
+                <li>
+                    <a asp-controller="Dashboard" asp-action="Index"
+                       class="nav-link text-white @(ViewContext.RouteData.Values["controller"]?.ToString() == "Dashboard" ? "active" : "")">
+                        Dashboard
+                    </a>
+                </li>
+
+                <li><hr class="border-secondary my-1" /></li>
+                <li class="px-2 text-secondary" style="font-size:11px">OPERACIONES</li>
+
+                <li>
+                    <a asp-controller="Clientes" asp-action="Index"
+                       class="nav-link text-white @(ViewContext.RouteData.Values["controller"]?.ToString() == "Clientes" ? "active" : "")">
+                        Clientes
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="Piscinas" asp-action="Index"
+                       class="nav-link text-white @(ViewContext.RouteData.Values["controller"]?.ToString() == "Piscinas" ? "active" : "")">
+                        Piscinas
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="ServiciosTecnicos" asp-action="Index"
+                       class="nav-link text-white @(ViewContext.RouteData.Values["controller"]?.ToString() == "ServiciosTecnicos" ? "active" : "")">
+                        Servicios Técnicos
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="Agenda" asp-action="Index"
+                       class="nav-link text-white @(ViewContext.RouteData.Values["controller"]?.ToString() == "Agenda" ? "active" : "")">
+                        Agenda
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="Inventario" asp-action="Index"
+                       class="nav-link text-white @(ViewContext.RouteData.Values["controller"]?.ToString() == "Inventario" ? "active" : "")">
+                        Inventario
+                    </a>
+                </li>
+
+                <li><hr class="border-secondary my-1" /></li>
+                <li class="px-2 text-secondary" style="font-size:11px">FINANZAS</li>
+
+                <li>
+                    <a asp-controller="Cotizacion" asp-action="Index"
+                       class="nav-link text-white @(ViewContext.RouteData.Values["controller"]?.ToString() == "Cotizacion" ? "active" : "")">
+                        Cotizaciones
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="Facturacion" asp-action="Index"
+                       class="nav-link text-white @(ViewContext.RouteData.Values["controller"]?.ToString() == "Facturacion" ? "active" : "")">
+                        Facturación
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="Bitacora" asp-action="Index"
+                       class="nav-link text-white @(ViewContext.RouteData.Values["controller"]?.ToString() == "Bitacora" ? "active" : "")">
+                        Bitácora
+                    </a>
+                </li>
+
+                <li><hr class="border-secondary my-1" /></li>
+                <li class="px-2 text-secondary" style="font-size:11px">SISTEMA</li>
+
+                <li>
+                    <a asp-controller="Roles" asp-action="Index"
+                       class="nav-link text-white @(ViewContext.RouteData.Values["controller"]?.ToString() == "Roles" ? "active" : "")">
+                        Roles y Permisos
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="Perfiles" asp-action="Index"
+                       class="nav-link text-white @(ViewContext.RouteData.Values["controller"]?.ToString() == "Perfiles" ? "active" : "")">
+                        Perfiles
+                    </a>
+                </li>
+
+            </ul>
+        </nav>
+
+        <main class="flex-grow-1 p-4" style="background:#f8f9fa">
+            @RenderBody()
+        </main>
+
+    </div>
+
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

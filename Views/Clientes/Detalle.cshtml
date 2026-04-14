@@ -1,0 +1,110 @@
+﻿@model MultiservicosPiscinas.Models.Cliente
+@{
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    ViewData["Title"] = "Detalle del cliente";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">Detalle del cliente</h2>
+    <div>
+        <a asp-action="Editar" asp-route-id="@Model.Id"
+           class="btn btn-warning">Editar</a>
+        <a asp-action="Index" class="btn btn-secondary ms-2">Volver</a>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-dark text-white">
+                Información del cliente
+            </div>
+            <div class="card-body">
+                <table class="table table-borderless mb-0">
+                    <tr>
+                        <td class="text-muted" style="width:40%">Nombre</td>
+                        <td><strong>@Model.Nombre</strong></td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted">Correo</td>
+                        <td>@Model.Correo</td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted">Teléfono</td>
+                        <td>@Model.Telefono</td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted">Dirección</td>
+                        <td>@Model.Direccion</td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted">Fecha registro</td>
+                        <td>@Model.FechaRegistro.ToString("dd/MM/yyyy")</td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted">Estado</td>
+                        <td>
+                            @if (Model.Activo)
+                            {
+                                <span class="badge bg-success">Activo</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger">Inactivo</span>
+                            }
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-dark text-white d-flex justify-content-between">
+                <span>Piscinas registradas</span>
+                <a asp-controller="Piscinas" asp-action="Crear"
+                   asp-route-clienteId="@Model.Id"
+                   class="btn btn-sm btn-light">+ Agregar</a>
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-bordered mb-0">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Tipo</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var piscina in Model.Piscinas)
+                        {
+                            <tr>
+                                <td>@piscina.Nombre</td>
+                                <td>@piscina.Tipo</td>
+                                <td>
+                                    @if (piscina.Activa)
+                                    {
+                                        <span class="badge bg-success">Activa</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">Inactiva</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                        @if (!Model.Piscinas.Any())
+                        {
+                            <tr>
+                                <td colspan="3" class="text-center text-muted py-3">
+                                    Sin piscinas registradas
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

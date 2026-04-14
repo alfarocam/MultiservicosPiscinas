@@ -1,0 +1,38 @@
+﻿@{
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    ViewData["Title"] = "Bitácora";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">Bitácora de servicios</h2>
+    <a asp-action="Registrar" class="btn btn-primary">+ Registrar bitácora</a>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+        <table class="table table-bordered table-hover mb-0">
+            <thead class="table-dark">
+                <tr>
+                    <th>#</th>
+                    <th>Cliente</th>
+                    <th>Piscina</th>
+                    <th>Fecha</th>
+                    <th>Estado general</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1</td>
+                    <td>Taylor Swift</td>
+                    <td>Piscina principal</td>
+                    <td>14/04/2026</td>
+                    <td><span class="badge bg-success">Estable</span></td>
+                    <td>
+                        <a asp-action="Detalle" asp-route-id="1" class="btn btn-info btn-sm text-white">Ver</a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

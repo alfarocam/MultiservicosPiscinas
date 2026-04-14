@@ -1,0 +1,21 @@
+﻿@{
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    ViewData["Title"] = "Mi perfil";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">Mi perfil</h2>
+    <a asp-action="Editar" class="btn btn-warning">Editar perfil</a>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body">
+        <table class="table table-borderless mb-0">
+            <tr><td class="text-muted" style="width:25%">Nombre</td><td><strong>Administrador del sistema</strong></td></tr>
+            <tr><td class="text-muted">Correo</td><td>admin@test.com</td></tr>
+            <tr><td class="text-muted">Rol</td><td><span class="badge bg-primary">Administrador</span></td></tr>
+            <tr><td class="text-muted">Teléfono</td><td>7777-7777</td></tr>
+            <tr><td class="text-muted">Estado</td><td><span class="badge bg-success">Activo</span></td></tr>
+        </table>
+    </div>
+</div>

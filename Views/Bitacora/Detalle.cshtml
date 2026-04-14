@@ -1,0 +1,56 @@
+﻿@{
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    ViewData["Title"] = "Detalle de bitácora";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">Detalle de bitácora</h2>
+    <div>
+        <a asp-action="Registrar" class="btn btn-warning">Editar</a>
+        <a asp-action="Index" class="btn btn-secondary ms-2">Volver</a>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-dark text-white">
+                Datos del servicio
+            </div>
+            <div class="card-body">
+                <table class="table table-borderless mb-0">
+                    <tr><td class="text-muted" style="width:35%">Cliente</td><td><strong>Taylor Swift</strong></td></tr>
+                    <tr><td class="text-muted">Piscina</td><td>Piscina principal</td></tr>
+                    <tr><td class="text-muted">Fecha</td><td>14/04/2026</td></tr>
+                    <tr><td class="text-muted">Estado</td><td><span class="badge bg-success">Estable</span></td></tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-dark text-white">
+                Parámetros
+            </div>
+            <div class="card-body">
+                <table class="table table-bordered mb-0">
+                    <tr><th>pH</th><td>7.2</td></tr>
+                    <tr><th>Cloro</th><td>1.5</td></tr>
+                    <tr><th>Temperatura</th><td>28°C</td></tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-dark text-white">
+                Observaciones
+            </div>
+            <div class="card-body">
+                <p class="mb-0">Se realizó revisión general, limpieza de superficie y verificación de químicos. No se detectaron anomalías.</p>
+            </div>
+        </div>
+    </div>
+</div>

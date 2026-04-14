@@ -1,0 +1,45 @@
+﻿@{
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    ViewData["Title"] = "Detalle del servicio técnico";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">Detalle del servicio técnico</h2>
+    <div>
+        <a asp-action="Crear" class="btn btn-warning">Editar</a>
+        <a asp-action="Index" class="btn btn-secondary ms-2">Volver</a>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-dark text-white">
+                Información general
+            </div>
+            <div class="card-body">
+                <table class="table table-borderless mb-0">
+                    <tr><td class="text-muted" style="width:35%">Cliente</td><td><strong>Taylor Swift</strong></td></tr>
+                    <tr><td class="text-muted">Piscina</td><td>Piscina principal</td></tr>
+                    <tr><td class="text-muted">Tipo de servicio</td><td>Limpieza y mantenimiento</td></tr>
+                    <tr><td class="text-muted">Fecha</td><td>14/04/2026</td></tr>
+                    <tr><td class="text-muted">Estado</td><td><span class="badge bg-success">Finalizado</span></td></tr>
+                    <tr><td class="text-muted">Técnico asignado</td><td>Carlos Martínez</td></tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-dark text-white">
+                Observaciones
+            </div>
+            <div class="card-body">
+                <p class="mb-0">
+                    Se realizó limpieza general, revisión de niveles químicos y mantenimiento preventivo del sistema de filtrado.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
