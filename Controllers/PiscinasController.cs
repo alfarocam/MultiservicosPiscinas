@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -7,7 +7,7 @@ using MultiservicosPiscinas.Models;
 
 namespace MultiservicosPiscinas.Controllers
 {
-    [Authorize(Roles = "Administrador")]
+    
     public class PiscinasController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -20,11 +20,13 @@ namespace MultiservicosPiscinas.Controllers
         // GET: Piscinas
         public async Task<IActionResult> Index()
         {
-            var piscinas = await _context.Piscinas
-                .Include(p => p.Cliente)
-                .Where(p => p.Activa)
-                .OrderBy(p => p.Nombre)
-                .ToListAsync();
+            var clienteDummy = new Cliente { Id = 1, Nombre = "Juan Perez" };
+
+            var piscinas = new List<Piscina>
+            {
+                new Piscina { Id = 1, Nombre = "Piscina Principal", Largo = 10, Ancho = 5, Tipo = "Cloro", ClienteId = 1, Cliente = clienteDummy, Activa = true },
+                new Piscina { Id = 2, Nombre = "Jacuzzi", Largo = 2, Ancho = 2, Tipo = "Sal", ClienteId = 1, Cliente = clienteDummy, Activa = true }
+            };
 
             return View(piscinas);
         }
@@ -32,9 +34,8 @@ namespace MultiservicosPiscinas.Controllers
         // GET: Piscinas/Detalle/5
         public async Task<IActionResult> Detalle(int id)
         {
-            var piscina = await _context.Piscinas
-                .Include(p => p.Cliente)
-                .FirstOrDefaultAsync(p => p.Id == id);
+            var clienteDummy = new Cliente { Id = 1, Nombre = "Juan Perez" };
+            var piscina = new Piscina { Id = id, Nombre = "Piscina Principal", Largo = 10, Ancho = 5, Tipo = "Cloro", ClienteId = 1, Cliente = clienteDummy, Activa = true };
 
             if (piscina == null)
                 return NotFound();
@@ -45,7 +46,8 @@ namespace MultiservicosPiscinas.Controllers
         // GET: Piscinas/Crear
         public async Task<IActionResult> Crear()
         {
-            await CargarClientesActivos();
+            var clientes = new List<Cliente> { new Cliente { Id = 1, Nombre = "Juan Perez", Activo = true } };
+            ViewBag.ClienteId = new SelectList(clientes, "Id", "Nombre");
             return View();
         }
 
@@ -69,12 +71,12 @@ namespace MultiservicosPiscinas.Controllers
         // GET: Piscinas/Editar/5
         public async Task<IActionResult> Editar(int id)
         {
-            var piscina = await _context.Piscinas.FindAsync(id);
+            var clienteDummy = new Cliente { Id = 1, Nombre = "Juan Perez" };
+            var piscina = new Piscina { Id = id, Nombre = "Piscina Simulada", Largo = 8, Ancho = 4, Tipo = "Sal", ClienteId = 1, Cliente = clienteDummy, Activa = true };
 
-            if (piscina == null)
-                return NotFound();
-
-            await CargarClientesActivos(piscina.ClienteId);
+            var clientes = new List<Cliente> { new Cliente { Id = 1, Nombre = "Juan Perez", Activo = true } };
+            ViewBag.ClienteId = new SelectList(clientes, "Id", "Nombre", piscina.ClienteId);
+            
             return View(piscina);
         }
 
@@ -97,7 +99,7 @@ namespace MultiservicosPiscinas.Controllers
                 }
                 catch (DbUpdateException)
                 {
-                    ModelState.AddModelError("", "Ocurrió un error al actualizar la piscina.");
+                    ModelState.AddModelError("", "Ocurri� un error al actualizar la piscina.");
                 }
             }
 

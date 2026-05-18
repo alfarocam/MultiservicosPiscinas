@@ -1,4 +1,4 @@
-ï»¿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MultiservicosPiscinas.Data;
@@ -6,7 +6,7 @@ using MultiservicosPiscinas.Models;
 
 namespace MultiservicosPiscinas.Controllers
 {
-    [Authorize(Roles = "Administrador")]
+    
     public class ClientesController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -19,19 +19,20 @@ namespace MultiservicosPiscinas.Controllers
         // GET: Clientes
         public async Task<IActionResult> Index()
         {
-            var clientes = await _context.Clientes
-                .Where(c => c.Activo)
-                .OrderBy(c => c.Nombre)
-                .ToListAsync();
+            // Dummy data instead of DB hit
+            var clientes = new List<Cliente>
+            {
+                new Cliente { Id = 1, Nombre = "Juan Perez", Correo = "juan@example.com", Telefono = "555-0001", Direccion = "Calle Falsa 123", Activo = true, FechaRegistro = DateTime.Now.AddDays(-10) },
+                new Cliente { Id = 2, Nombre = "Empresa ABC", Correo = "contacto@empresaabc.com", Telefono = "555-0002", Direccion = "Av. Siempre Viva", Activo = true, FechaRegistro = DateTime.Now.AddDays(-5) }
+            };
+
             return View(clientes);
         }
 
         // GET: Clientes/Detalle/5
         public async Task<IActionResult> Detalle(int id)
         {
-            var cliente = await _context.Clientes
-                .Include(c => c.Piscinas)
-                .FirstOrDefaultAsync(c => c.Id == id);
+            var cliente = new Cliente { Id = id, Nombre = "Cliente Simulado", Correo = "simulado@example.com", Telefono = "555-1234", Direccion = "Calle de Prueba", Activo = true, FechaRegistro = DateTime.Now };
 
             if (cliente == null) return NotFound();
             return View(cliente);
@@ -92,7 +93,7 @@ namespace MultiservicosPiscinas.Controllers
             var cliente = await _context.Clientes.FindAsync(id);
             if (cliente != null)
             {
-                cliente.Activo = false; // Baja lÃ³gica, no fÃ­sica
+                cliente.Activo = false; // Baja lógica, no física
                 await _context.SaveChangesAsync();
                 TempData["Exito"] = "Cliente eliminado correctamente.";
             }

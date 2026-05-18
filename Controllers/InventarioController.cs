@@ -1,9 +1,9 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MultiservicosPiscinas.Controllers
 {
-    [Authorize(Roles = "Administrador")]
+    
     public class InventarioController : Controller
     {
         public IActionResult Index()

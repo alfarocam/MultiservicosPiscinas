@@ -13,9 +13,8 @@
          style="background-color:#198754">
         <a class="navbar-brand fw-bold" href="/Portal">Mi Portal</a>
         <div class="d-flex align-items-center gap-3">
-            <span class="text-white small">@User.Identity!.Name</span>
-            <form asp-area="Identity" asp-page="/Account/Logout"
-                  asp-route-returnUrl="/" method="post">
+            <span class="text-white small">Usuario Local</span>
+            <form asp-controller="Auth" asp-action="Logout" method="post">
                 <button type="submit" class="btn btn-outline-light btn-sm">Salir</button>
             </form>
         </div>

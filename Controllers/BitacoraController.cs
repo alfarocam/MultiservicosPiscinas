@@ -1,9 +1,9 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MultiservicosPiscinas.Controllers
 {
-    [Authorize(Roles = "Administrador")]
+    
     public class BitacoraController : Controller
     {
         public IActionResult Index()

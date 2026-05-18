@@ -1,9 +1,9 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MultiservicosPiscinas.Controllers
 {
-    [Authorize]
+    
     public class PerfilesController : Controller
     {
         public IActionResult Index()
