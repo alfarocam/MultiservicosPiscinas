@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace MultiservicosPiscinas.Controllers
+namespace MultiserviciosPiscinas.Controllers
 {
     
     public class InventarioController : Controller

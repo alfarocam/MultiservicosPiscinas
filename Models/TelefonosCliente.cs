@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace MultiservicosPiscinas.Models;
+namespace MultiserviciosPiscinas.Models;
 
 public partial class TelefonosCliente
 {

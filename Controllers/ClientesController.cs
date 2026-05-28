@@ -1,10 +1,10 @@
 //using Microsoft.AspNetCore.Authorization;
 //using Microsoft.AspNetCore.Mvc;
 //using Microsoft.EntityFrameworkCore;
-//using MultiservicosPiscinas.Data;
-//using MultiservicosPiscinas.Models;
+//using MultiserviciosPiscinas.Data;
+//using MultiserviciosPiscinas.Models;
 
-//namespace MultiservicosPiscinas.Controllers
+//namespace MultiserviciosPiscinas.Controllers
 //{
     
 //    public class ClientesController : Controller

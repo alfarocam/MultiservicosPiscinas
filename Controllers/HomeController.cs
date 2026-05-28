@@ -1,9 +1,11 @@
 using System.Diagnostics;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using MultiservicosPiscinas.Models;
+using MultiserviciosPiscinas.Models;
 
-namespace MultiservicosPiscinas.Controllers
+namespace MultiserviciosPiscinas.Controllers
 {
+    [Authorize]
     public class HomeController : Controller
     {
         [HttpGet]

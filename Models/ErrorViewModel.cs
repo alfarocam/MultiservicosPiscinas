@@ -1,4 +1,4 @@
-namespace MultiservicosPiscinas.Models
+namespace MultiserviciosPiscinas.Models
 {
     public class ErrorViewModel
     {

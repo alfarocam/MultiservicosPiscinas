@@ -2,10 +2,10 @@
 //using Microsoft.AspNetCore.Mvc;
 //using Microsoft.AspNetCore.Mvc.Rendering;
 //using Microsoft.EntityFrameworkCore;
-//using MultiservicosPiscinas.Data;
-//using MultiservicosPiscinas.Models;
+//using MultiserviciosPiscinas.Data;
+//using MultiserviciosPiscinas.Models;
 
-//namespace MultiservicosPiscinas.Controllers
+//namespace MultiserviciosPiscinas.Controllers
 //{
     
 //    public class PiscinasController : Controller

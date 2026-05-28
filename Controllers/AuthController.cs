@@ -2,10 +2,10 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using MultiservicosPiscinas.Models;
+using MultiserviciosPiscinas.Models;
 using System.Security.Claims;
 
-namespace MultiservicosPiscinas.Controllers
+namespace MultiserviciosPiscinas.Controllers
 {
     public class AuthController : Controller
     {
@@ -24,11 +24,36 @@ namespace MultiservicosPiscinas.Controllers
         }
 
         [HttpPost]
-        public IActionResult Login(string username)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Login(string correo, string contrasena)
         {
-            return RedirectToAction("Index", "Home");
+            //busca al usuario por correo en la base de datos
+            var usuario = await _context.Usuarios
+                .FirstOrDefaultAsync(u => u.Correo == correo);
+
+            //verifica si existe el usuario y si la contraseña coincide
+            if (usuario != null && usuario.Contrasena == contrasena)
+            {
+                //inicia sesión creando una identidad con los datos del usuario
+                var claims = new List<Claim>
+                {
+                    new Claim(ClaimTypes.Name, usuario.Nombre),
+                    new Claim(ClaimTypes.Email, usuario.Correo),
+                    new Claim(ClaimTypes.Role, usuario.RolId.ToString()) //de aquí se saca el rol para que vean diferentes vistas
+                };
+
+                var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+
+                //autenticar al usuario en la aplicación
+                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
+
+                return RedirectToAction("Index", "Home");
+            }
+            ViewBag.Error = "Correo o contraseña incorrectos.";
+            return View();
         }
 
+        
         [HttpGet]
         public IActionResult Register()
         {
@@ -41,13 +66,18 @@ namespace MultiservicosPiscinas.Controllers
             usuario.RolId = 3; //rol de cliente seteado por defecto en este caso
             usuario.FechaCreacion = DateTime.Now;
 
-                usuario.Correo,
-                usuario.Contrasena,
-            if (result < 0)
+            try
             {
-                //mensaje en caso de error
-                ViewBag.Message = "Error al registrar el usuario.";
+                //ejecutando el SP para pasar TODOS los parámetros(sin incluir el activo porque ese está declarado en el SP)
+                var usuarioIdResult = await _context.Database
+            .SqlQueryRaw<int>(
+                    "EXEC seg.InsertUserAndClient @p0, @p1, @p2, @p3, @p4, @p5, @p6",
+                    usuario.RolId,
+                    usuario.Nombre,
+                    usuario.ApellidoPaterno,
                     usuario.ApellidoMaterno,
+                    usuario.Correo,
+                    usuario.Contrasena,
                     usuario.FechaCreacion
                 )
                 .ToListAsync();
@@ -98,9 +128,9 @@ namespace MultiservicosPiscinas.Controllers
         }
 
         [HttpPost]
-        public IActionResult Logout()
+        public async Task<IActionResult> Logout()
         {
-            // Simple redirect to login
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return RedirectToAction("Login", "Auth");
         }
     }

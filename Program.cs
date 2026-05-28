@@ -1,7 +1,8 @@
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using MultiservicosPiscinas.Models;
-//using MultiservicosPiscinas.Data;
+using MultiserviciosPiscinas.Models;
+//using MultiserviciosPiscinas.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,6 +23,13 @@ builder.Services.AddControllersWithViews();
 // Agregar soporte para Razor Pages
 builder.Services.AddRazorPages();
 
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/Auth/Login"; //ruta a donde redirige si no está autenticado
+        options.ExpireTimeSpan = TimeSpan.FromMinutes(50); //tiempo de vida de la sesión
+    });
+
 var app = builder.Build();
 
 // Configuración del pipeline HTTP
@@ -39,6 +47,10 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+
+app.UseAuthentication();
+
+app.UseAuthorization();
 
 // Ruta por defecto MVC
 app.MapControllerRoute(

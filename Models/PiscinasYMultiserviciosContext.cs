@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 
-namespace MultiservicosPiscinas.Models;
+namespace MultiserviciosPiscinas.Models;
 
 public partial class PiscinasYMultiserviciosContext : DbContext
 {

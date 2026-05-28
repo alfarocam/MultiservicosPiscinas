@@ -1,7 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace MultiservicosPiscinas.Models;
+namespace MultiserviciosPiscinas.Models;
 
 public partial class Piscina
 {
