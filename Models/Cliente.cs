@@ -1,38 +1,29 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.Collections.Generic;
 
-namespace MultiservicosPiscinas.Models
+namespace MultiservicosPiscinas.Models;
+
+public partial class Cliente
 {
-    public class Cliente
-    {
-        public int Id { get; set; }
+    public int Id { get; set; }
 
-        [Required(ErrorMessage = "El nombre es obligatorio")]
-        [StringLength(100)]
-        [Display(Name = "Nombre completo")]
-        public string Nombre { get; set; } = string.Empty;
+    public int UsuarioId { get; set; }
 
-        [Required(ErrorMessage = "El correo es obligatorio")]
-        [EmailAddress(ErrorMessage = "Correo no válido")]
-        [StringLength(150)]
-        [Display(Name = "Correo electrónico")]
-        public string Correo { get; set; } = string.Empty;
+    public string? Notas { get; set; }
 
-        [Required(ErrorMessage = "El teléfono es obligatorio")]
-        [StringLength(20)]
-        [Display(Name = "Teléfono")]
-        public string Telefono { get; set; } = string.Empty;
+    public virtual ICollection<Carrito> Carritos { get; set; } = new List<Carrito>();
 
-        [StringLength(200)]
-        [Display(Name = "Dirección")]
-        public string Direccion { get; set; } = string.Empty;
+    public virtual ICollection<Cotizacion> Cotizacions { get; set; } = new List<Cotizacion>();
 
-        [Display(Name = "Fecha de registro")]
-        public DateTime FechaRegistro { get; set; } = DateTime.Now;
+    public virtual ICollection<DireccionCliente> DireccionClientes { get; set; } = new List<DireccionCliente>();
 
-        [Display(Name = "Activo")]
-        public bool Activo { get; set; } = true;
+    public virtual ICollection<Factura> Facturas { get; set; } = new List<Factura>();
 
-        // Relación: un cliente puede tener varias piscinas
-        public ICollection<Piscina> Piscinas { get; set; } = new List<Piscina>();
-    }
+    public virtual ICollection<Piscina> Piscinas { get; set; } = new List<Piscina>();
+
+    public virtual ICollection<ProyectoConstruccion> ProyectoConstruccions { get; set; } = new List<ProyectoConstruccion>();
+
+    public virtual ICollection<TelefonosCliente> TelefonosClientes { get; set; } = new List<TelefonosCliente>();
+
+    public virtual Usuario Usuario { get; set; } = null!;
 }

@@ -3,7 +3,6 @@
 @{
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
     ViewData["Title"] = "Detalle de la piscina";
-    var volumen = Model.Largo * Model.Ancho * Model.Profundidad;
 }
 
 <div class="d-flex justify-content-between align-items-center mb-3">
@@ -48,7 +47,7 @@
                     </tr>
                     <tr>
                         <td class="text-muted">Volumen estimado</td>
-                        <td>@volumen.ToString("N2") m³</td>
+                        <td>@Model.VolumenM3.ToString("N2") m³</td>
                     </tr>
                     <tr>
                         <td class="text-muted">Estado</td>

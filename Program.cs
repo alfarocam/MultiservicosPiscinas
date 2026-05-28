@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using MultiservicosPiscinas.Data;
+//using MultiservicosPiscinas.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,8 +9,8 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
 // Configurar DbContext con SQL Server
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(connectionString));
+//builder.Services.AddDbContext<ApplicationDbContext>(options =>
+   // options.UseSqlServer(connectionString));
 
 // Página de errores para migraciones en desarrollo
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
@@ -42,7 +42,7 @@ app.UseRouting();
 // Ruta por defecto MVC
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=Auth}/{action=Login}/{id?}");
 
 // Mapear Razor Pages
 app.MapRazorPages();

@@ -13,8 +13,32 @@ namespace MultiservicosPiscinas.Controllers
         [HttpPost]
         public IActionResult Login(string username)
         {
-            // Simple redirect to home
             return RedirectToAction("Index", "Home");
+        }
+
+        [HttpGet]
+        public IActionResult Register()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public IActionResult Register(string username)
+        {
+            return RedirectToAction("Index", "Home");
+        }
+
+        [HttpGet]
+        public IActionResult RecoverPassword()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public IActionResult RecoverPassword(string email)
+        {
+            // Implementation for password recovery
+            return RedirectToAction("Login", "Auth");
         }
 
         [HttpPost]

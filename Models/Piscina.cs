@@ -1,43 +1,29 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System;
+using System.Collections.Generic;
 
-namespace MultiservicosPiscinas.Models
+namespace MultiservicosPiscinas.Models;
+
+public partial class Piscina
 {
-    public class Piscina
-    {
-        public int Id { get; set; }
+    public int Id { get; set; }
 
-        [Required(ErrorMessage = "El nombre es obligatorio")]
-        [StringLength(100)]
-        [Display(Name = "Nombre / identificador")]
-        public string Nombre { get; set; } = string.Empty;
+    public int ClienteId { get; set; }
 
-        [StringLength(50)]
-        [Display(Name = "Tipo")]
-        public string Tipo { get; set; } = string.Empty; // Residencial, Comercial, etc.
+    public int DireccionId { get; set; }
 
-        [Display(Name = "Largo (m)")]
-        public double Largo { get; set; }
+    public string Tipo { get; set; } = null!;
 
-        [Display(Name = "Ancho (m)")]
-        public double Ancho { get; set; }
+    public double VolumenM3 { get; set; }
 
-        [Display(Name = "Profundidad (m)")]
-        public double Profundidad { get; set; }
+    public string Estado { get; set; } = null!;
 
-        [StringLength(300)]
-        [Display(Name = "Observaciones")]
-        public string Observaciones { get; set; } = string.Empty;
+    public virtual ICollection<Citum> Cita { get; set; } = new List<Citum>();
 
-        [Display(Name = "Activa")]
-        public bool Activa { get; set; } = true;
+    public virtual Cliente Cliente { get; set; } = null!;
 
-        // Llave foránea al cliente
-        [Required]
-        [Display(Name = "Cliente")]
-        public int ClienteId { get; set; }
+    public virtual DireccionCliente Direccion { get; set; } = null!;
 
-        [ForeignKey("ClienteId")]
-        public Cliente? Cliente { get; set; }
-    }
+    public virtual ICollection<PiscinaEquipamiento> PiscinaEquipamientos { get; set; } = new List<PiscinaEquipamiento>();
+
+    public virtual ICollection<ProyectoConstruccion> ProyectoConstruccions { get; set; } = new List<ProyectoConstruccion>();
 }
