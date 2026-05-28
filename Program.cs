@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using MultiservicosPiscinas.Models;
 //using MultiservicosPiscinas.Data;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,8 +10,8 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
 // Configurar DbContext con SQL Server
-//builder.Services.AddDbContext<ApplicationDbContext>(options =>
-   // options.UseSqlServer(connectionString));
+builder.Services.AddDbContext<PiscinasYMultiserviciosContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Página de errores para migraciones en desarrollo
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
