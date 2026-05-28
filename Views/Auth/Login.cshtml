@@ -5,10 +5,21 @@
 <div class="card shadow-sm border-0 rounded-3" style="width: 100%; max-width: 400px;">
     <div class="card-body p-5">
         <h4 class="card-title text-center mb-4 fw-bold">Iniciar Sesión</h4>
+
+        @if (ViewBag.Mensaje != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show text-center small" role="alert">
+                @ViewBag.Mensaje
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3 small"></div>
+
         <form asp-controller="Auth" asp-action="Login" method="post">
             <div class="mb-3">
                 <label for="Correo" class="form-label fw-semibold">Correo</label>
-                <input type="text" class="form-control form-control-lg bg-light" id="Correo" name="Correo" placeholder="Ingresa tu correo" required>
+                <input type="email" class="form-control form-control-lg bg-light" id="Correo" name="Correo" placeholder="Ingresa tu correo" required>
             </div>
             <div class="mb-3">
                 <label for="Contrasena" class="form-label fw-semibold">Contraseña</label>

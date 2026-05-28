@@ -49,7 +49,7 @@ namespace MultiserviciosPiscinas.Controllers
 
                 return RedirectToAction("Index", "Home");
             }
-            ViewBag.Error = "Correo o contraseña incorrectos.";
+            ViewBag.Mensaje = "Correo o contraseña incorrectos.";
             return View();
         }
 
@@ -63,6 +63,17 @@ namespace MultiserviciosPiscinas.Controllers
         [HttpPost]
         public async Task<IActionResult> Register(Usuario usuario)
         {
+            //se usa AnyAsync y no FirstOrDefaultAsync porque con Any se deja de 
+            //buscar apenas se encuentra una coincidencia, ahorrando recurso y ayudando el tiempo de procesamiento
+            bool correoExiste = await _context.Usuarios
+            .AnyAsync(u => u.Correo == usuario.Correo);
+
+            if(correoExiste)
+            {
+                ViewBag.Mensaje = "El correo ya está registrado. Por favor, elige otro.";
+                return View(usuario);
+            }
+
             usuario.RolId = 3; //rol de cliente seteado por defecto en este caso
             usuario.FechaCreacion = DateTime.Now;
 
@@ -70,7 +81,7 @@ namespace MultiserviciosPiscinas.Controllers
             {
                 //ejecutando el SP para pasar TODOS los parámetros(sin incluir el activo porque ese está declarado en el SP)
                 var usuarioIdResult = await _context.Database
-            .SqlQueryRaw<int>(
+                .SqlQueryRaw<int>(
                     "EXEC seg.InsertUserAndClient @p0, @p1, @p2, @p3, @p4, @p5, @p6",
                     usuario.RolId,
                     usuario.Nombre,
@@ -107,7 +118,7 @@ namespace MultiserviciosPiscinas.Controllers
 
                 return RedirectToAction("Login", "Auth");
             }
-                catch(Exception ex)
+                catch(Exception)
             {
                 ViewBag.Mensaje = "Ocurrió un error inesperado en el servidor.";
                 return View();
