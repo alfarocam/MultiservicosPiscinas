@@ -16,7 +16,7 @@
 
         <div asp-validation-summary="ModelOnly" class="text-danger mb-3 small"></div>
 
-        <form asp-controller="Auth" asp-action="Login" method="post">
+        <form asp-controller="Auth" asp-action="InicioSesion" method="post">
             <div class="mb-3">
                 <label for="Correo" class="form-label fw-semibold">Correo</label>
                 <input type="email" class="form-control form-control-lg bg-light" id="Correo" name="Correo" placeholder="Ingresa tu correo" required>
@@ -27,8 +27,8 @@
             </div>
 
             <div class="d-flex justify-content-between align-items-center mb-4 text-sm mt-3">
-                <a href="@Url.Action("Register", "Auth")" class="text-decoration-none small">¿Crear cuenta?</a>
-                <a href="@Url.Action("RecoverPassword", "Auth")" class="text-decoration-none small">¿Olvidaste tu contraseña?</a>
+                <a href="@Url.Action("Registrar", "Auth")" class="text-decoration-none small">¿Crear cuenta?</a>
+                <a href="@Url.Action("RecuperarContrasena", "Auth")" class="text-decoration-none small">¿Olvidaste tu contraseña?</a>
             </div>
 
             <div class="d-grid gap-2 mt-4">
