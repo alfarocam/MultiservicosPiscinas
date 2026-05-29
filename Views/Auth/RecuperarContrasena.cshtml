@@ -1,4 +1,5 @@
-﻿@{
+﻿@model Usuario
+@{
     Layout = "~/Views/Shared/_LayoutExterno.cshtml";
     ViewData["Title"] = "Recuperar Contraseña";
 }
@@ -17,7 +18,7 @@
         <form asp-controller="Auth" asp-action="RecuperarContrasena" method="post">
             <div class="mb-4">
                 <label for="Correo" class="form-label fw-semibold">Correo Electrónico</label>
-                <input type="email" class="form-control form-control-lg bg-light" id="Correo" name="Correo" placeholder="nombre@ejemplo.com" required>
+                <input asp-for="Correo" name="Correo" type="email" class="form-control form-control-lg bg-light" placeholder="nombre@ejemplo.com" required>
             </div>
 
             <div class="d-grid gap-2">
@@ -25,7 +26,7 @@
             </div>
 
             <div class="text-center mt-4">
-                <a href="@Url.Action("InicioSesion", "Auth")" class="text-decoration-none small">Volver al inicio de sesión</a>
+                <a asp-action="InicioSesion" asp-controller="Auth" class="text-decoration-none small">Volver al inicio de sesión</a>
             </div>
         </form>
     </div>

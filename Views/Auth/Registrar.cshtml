@@ -1,4 +1,5 @@
-﻿@{
+﻿@model Usuario
+@{
     Layout = "~/Views/Shared/_LayoutExterno.cshtml";
     ViewData["Title"] = "Registro";
 }
@@ -20,25 +21,25 @@
         <form asp-controller="Auth" asp-action="Registrar" method="post">
             <div class="mb-3">
                 <label for="Nombre" class="form-label fw-semibold">Nombre</label>
-                <input type="text" class="form-control form-control-lg bg-light" id="Nombre" name="Nombre" placeholder="Ingresa tu nombre" required>
+                <input asp-for="Nombre" name="Nombre" type="text" class="form-control form-control-lg bg-light" placeholder="Ingresa tu nombre" required>
             </div>
             <div class="row">
                 <div class="col-sm-6 mb-3">
                     <label for="ApellidoPaterno" class="form-label fw-semibold">Apellido Paterno</label>
-                    <input type="text" class="form-control form-control-lg bg-light" id="ApellidoPaterno" name="ApellidoPaterno" placeholder="Primer apellido" required>
+                    <input asp-for="ApellidoPaterno" name="ApellidoPaterno" type="text" class="form-control form-control-lg bg-light" placeholder="Primer apellido" required>
                 </div>
                 <div class="col-sm-6 mb-3">
                     <label for="ApellidoMaterno" class="form-label fw-semibold">Apellido Materno</label>
-                    <input type="text" class="form-control form-control-lg bg-light" id="ApellidoMaterno" name="ApellidoMaterno" placeholder="Segundo apellido">
+                    <input asp-for="ApellidoMaterno" name="ApellidoMaterno" type="text" class="form-control form-control-lg bg-light" placeholder="Segundo apellido">
                 </div>
             </div>
             <div class="mb-3">
                 <label for="Correo" class="form-label fw-semibold">Correo Electrónico</label>
-                <input type="email" class="form-control form-control-lg bg-light" id="Correo" name="Correo" placeholder="correo@ejemplo.com" required>
+                <input asp-for="Correo" name="Correo" type="email" class="form-control form-control-lg bg-light" placeholder="correo@ejemplo.com" required>
             </div>
             <div class="mb-3">
                 <label for="Contrasena" class="form-label fw-semibold">Contraseña</label>
-                <input type="password" class="form-control form-control-lg bg-light" id="Contrasena" name="Contrasena" placeholder="Crea una contraseña" required>
+                <input asp-for="Contrasena" name="Contrasena" type="password" class="form-control form-control-lg bg-light" placeholder="Crea una contraseña" required>
             </div>
 
             <div class="d-grid gap-2 mt-4">
@@ -46,7 +47,7 @@
             </div>
 
             <div class="text-center mt-4">
-                <a href="@Url.Action("InicioSesion", "Auth")" class="text-decoration-none small">¿Ya tienes una cuenta? Inicia sesión</a>
+                <a asp-action="InicioSesion" asp-controller="Auth" class="text-decoration-none small">¿Ya tienes una cuenta? Inicia sesión</a>
             </div>
         </form>
     </div>
