@@ -1,4 +1,11 @@
-﻿// Please see documentation at https://learn.microsoft.com/aspnet/core/client-side/bundling-and-minification
-// for details on configuring this project to bundle and minify static web assets.
+// Lógica para colapsar y expandir la barra lateral (Sidebar)
+document.addEventListener("DOMContentLoaded", function () {
+    const sidebarToggle = document.getElementById("sidebarToggle");
+    const appContainer = document.querySelector(".t-app-container");
 
-// Write your JavaScript code.
+    if (sidebarToggle && appContainer) {
+        sidebarToggle.addEventListener("click", function () {
+            appContainer.classList.toggle("t-sidebar-collapsed");
+        });
+    }
+});

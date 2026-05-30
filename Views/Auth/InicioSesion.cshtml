@@ -3,9 +3,9 @@
     Layout = "~/Views/Shared/_LayoutExterno.cshtml";
 }
 
-<div class="card shadow-sm border-0 rounded-3" style="width: 100%; max-width: 400px;">
-    <div class="card-body p-5">
-        <h4 class="card-title text-center mb-4 fw-bold">Iniciar Sesión</h4>
+<div class="card o-form-card shadow-sm" style="width: 100%; max-width: 400px;">
+    <div class="card-body p-4">
+        <h4 class="a-title text-center mb-4">Iniciar Sesión</h4>
 
         @if (ViewBag.Mensaje != null)
         {
@@ -18,22 +18,22 @@
         <div asp-validation-summary="ModelOnly" class="text-danger mb-3 small"></div>
 
         <form asp-controller="Auth" asp-action="InicioSesion" method="post">
-            <div class="mb-3">
+            <div class="m-form-field">
                 <label for="Correo" class="form-label fw-semibold">Correo</label>
-                <input asp-for="Correo" name="Correo" type="email" class="form-control form-control-lg bg-light" placeholder="Ingresa tu correo" required>
+                <input asp-for="Correo" name="Correo" type="email" class="form-control form-control-lg a-input" placeholder="Ingresa tu correo" required>
             </div>
-            <div class="mb-3">
+            <div class="m-form-field">
                 <label for="Contrasena" class="form-label fw-semibold">Contraseña</label>
-                <input asp-for="Contrasena" name="Contrasena" type="password" class="form-control form-control-lg bg-light" placeholder="Ingresa tu contraseña" required>
+                <input asp-for="Contrasena" name="Contrasena" type="password" class="form-control form-control-lg a-input" placeholder="Ingresa tu contraseña" required>
             </div>
 
             <div class="d-flex justify-content-between align-items-center mb-4 text-sm mt-3">
-                <a asp-action="Registrar" asp-controller="Auth" class="text-decoration-none small">¿Crear cuenta?</a>
-                <a asp-action="RecuperarContrasena" asp-controller="Auth" class="text-decoration-none small">¿Olvidaste tu contraseña?</a>
+                <a asp-action="Registrar" asp-controller="Auth" class="text-decoration-none small a-text-dark">¿Crear cuenta?</a>
+                <a asp-action="RecuperarContrasena" asp-controller="Auth" class="text-decoration-none small a-text-dark">¿Olvidaste tu contraseña?</a>
             </div>
 
             <div class="d-grid gap-2 mt-4">
-                <button type="submit" class="btn btn-primary btn-lg shadow-sm">Ingresar al sistema</button>
+                <button type="submit" class="btn a-btn btn-lg shadow-sm">Ingresar al sistema</button>
             </div>
         </form>
     </div>
