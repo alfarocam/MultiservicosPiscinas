@@ -12,14 +12,24 @@ document.addEventListener("DOMContentLoaded", function () {
     // Lógica para marcar como activa la opción del menú al darle click
     const navLinks = document.querySelectorAll(".t-sidebar .nav-link");
 
-    // Recuperar la opción activa almacenada previamente
-    const activeLinkHref = localStorage.getItem("activeSidebarLink");
+    // Recuperar la opción activa almacenada previamente, o usar la ruta actual si no hay ninguna
+    let activeLinkHref = localStorage.getItem("activeSidebarLink");
+    
+    if (!activeLinkHref) {
+        activeLinkHref = window.location.pathname;
+    }
+
     if (activeLinkHref) {
+        let found = false;
         navLinks.forEach(link => {
             if (link.getAttribute("href") === activeLinkHref) {
                 link.classList.add("active");
+                found = true;
             }
         });
+        
+        // Si no se encontró coincidencia exacta y la URL es solo la raíz u otro,
+        // al menos intentar asegurar que se marque algo, pero dejaremos que el click actúe
     }
 
     // Agregar evento click a los enlaces

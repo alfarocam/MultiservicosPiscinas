@@ -20,7 +20,7 @@
         </div>
         <div class="d-flex align-items-center gap-3">
             <span class="text-white small">@User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value</span>
-            <form asp-controller="Auth" asp-action="CerrarSesion" method="post">
+            <form asp-controller="Auth" asp-action="CerrarSesion" method="post" onsubmit="localStorage.removeItem('activeSidebarLink')">
                 <button type="submit" class="btn btn-outline-light btn-sm">Salir</button>
             </form>
         </div>
@@ -42,21 +42,21 @@
                 <li class="px-2 text-secondary" style="font-size:11px">Mis Servicios</li>
 
                 <li>
-                    <a asp-controller="Clientes" asp-action="Index"
+                    <a asp-controller="ServiciosTecnicos" asp-action="Index"
                        class="nav-link text-white ">
                         Servicios Asignados
                     </a>
                 </li>
 
                 <li>
-                    <a asp-controller="Clientes" asp-action="Index"
+                    <a asp-controller="Agenda" asp-action="Index"
                        class="nav-link text-white ">
                         Mi agenda
                     </a>
                 </li>
 
                 <li>
-                    <a asp-controller="Clientes" asp-action="Index"
+                    <a asp-controller="Rutas" asp-action="Index"
                        class="nav-link text-white ">
                         Rutas del Día
                     </a>
@@ -84,7 +84,7 @@
                 </li>
 
                 <li>
-                    <a asp-controller="" asp-action=""
+                    <a asp-controller="Gastos" asp-action="Index"
                        class="nav-link text-white ">
                         Mis Gastos
                     </a>
@@ -94,7 +94,7 @@
                 <li class="px-2 text-secondary" style="font-size:11px">Inventario y Gastos</li>
 
                 <li>
-                    <a asp-controller="" asp-action=""
+                    <a asp-controller="TablonAnuncios" asp-action="Index"
                        class="nav-link text-white ">
                         Tablon de anuncios
                     </a>
@@ -103,7 +103,7 @@
             </ul>
         </nav>
 
-        <main class="flex-grow-1 p-4" style="background:#f8f9fa">
+        <main class="flex-grow-1 p-4" >
             @RenderBody()
         </main>
     </div>

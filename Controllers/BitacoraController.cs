@@ -3,7 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace MultiserviciosPiscinas.Controllers
 {
-    
+
+    [Authorize(Roles = "1")]
     public class BitacoraController : Controller
     {
         public IActionResult Index()
