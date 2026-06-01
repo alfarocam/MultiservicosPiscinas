@@ -405,3 +405,39 @@ form.card:hover,
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 1.5rem;
 }
+/* ==========================================================================
+   6. FONDOS GLOBALES Y ESTILOS ESPECÍFICOS DE VISTAS (ej. Reportes)
+   ========================================================================== */
+
+/* Fondo global con la imagen de la piscina para todas las vistas */
+main {
+    background: transparent !important;
+    position: relative !important;
+    overflow: hidden !important;
+}
+
+main::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url('/images/pool-bg.jpg');
+    background-size: cover;
+    background-position: center;
+    filter: blur(2px) brightness(0.90) saturate(1.1);
+    transform: scale(1.04);
+    z-index: 0;
+}
+
+main::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(236, 254, 255, 0.80);
+    z-index: 1;
+}
+
+/* Todos los elementos dentro del main deben quedar por encima de los fondos */
+main > * {
+    position: relative;
+    z-index: 2;
+}

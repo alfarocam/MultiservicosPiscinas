@@ -1,8 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using MultiserviciosPiscinas.Models;
 
 namespace MultiserviciosPiscinas.Controllers
 {
+    [Authorize(Roles = "3")]
     public class ContactoController : Controller
     {
         public IActionResult Index()

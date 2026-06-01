@@ -4,7 +4,7 @@ using MultiserviciosPiscinas.Interfaces;
 
 namespace MultiserviciosPiscinas.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "1")]
     public class ReporteSatisfaccionController : Controller
     {
         private readonly IReporteSatisfaccionRepository _reporteRepo;

@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace MultiserviciosPiscinas.Controllers
 {
-    
+    [Authorize]
     public class PerfilesController : Controller
     {
         public IActionResult Index()

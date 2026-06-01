@@ -1,3 +1,21 @@
-﻿@{
-    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+﻿@using System.Security.Claims
+@{
+    string layout = "~/Views/Shared/_LayoutExterno.cshtml";
+    if (User.Identity != null && User.Identity.IsAuthenticated)
+    {
+        var roleClaim = User.FindFirst(ClaimTypes.Role)?.Value;
+        if (roleClaim == "1")
+        {
+            layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+        }
+        else if (roleClaim == "2")
+        {
+            layout = "~/Views/Shared/_LayoutTecnico.cshtml";
+        }
+        else
+        {
+            layout = "~/Views/Shared/_LayoutCliente.cshtml";
+        }
+    }
+    Layout = layout;
 }
