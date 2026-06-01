@@ -1,0 +1,57 @@
+﻿@model List<MultiserviciosPiscinas.Models.Encuestum>
+
+<h2>Dashboard de Satisfacción</h2>
+
+<div class="row">
+
+    <div class="col-md-4">
+        <div class="card p-3">
+            <h4>Total Encuestas</h4>
+            <h2>@ViewBag.TotalEncuestas</h2>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card p-3">
+            <h4>Promedio</h4>
+            <h2>@ViewBag.Promedio</h2>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card p-3">
+            <h4>Calificaciones Críticas</h4>
+            <h2>@ViewBag.Criticas</h2>
+        </div>
+    </div>
+
+</div>
+
+<hr />
+
+<table class="table table-striped">
+
+    <thead>
+        <tr>
+            <th>Servicio</th>
+            <th>Calificación</th>
+            <th>Comentario</th>
+            <th>Fecha</th>
+        </tr>
+    </thead>
+
+    <tbody>
+
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.ServicioId</td>
+                <td>@item.Calificacion</td>
+                <td>@item.Comentario</td>
+                <td>@item.FechaEnvio</td>
+            </tr>
+        }
+
+    </tbody>
+
+</table>

@@ -1,0 +1,38 @@
+﻿@model MultiserviciosPiscinas.Models.ContactoViewModel
+
+<h2>Contacto y Soporte</h2>
+
+@if (TempData["Exito"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["Exito"]
+    </div>
+}
+
+<form asp-action="Enviar" method="post">
+
+    <div class="mb-3">
+        <label>Nombre</label>
+        <input asp-for="Nombre" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label>Correo</label>
+        <input asp-for="Correo" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label>Asunto</label>
+        <input asp-for="Asunto" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label>Mensaje</label>
+        <textarea asp-for="Mensaje" class="form-control"></textarea>
+    </div>
+
+    <button type="submit" class="btn btn-success">
+        Enviar Consulta
+    </button>
+
+</form>

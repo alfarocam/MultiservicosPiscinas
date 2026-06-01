@@ -1,0 +1,43 @@
+﻿@model MultiserviciosPiscinas.Models.Encuestum
+
+<h2>Encuesta de Satisfacción</h2>
+
+<form asp-action="Crear" method="post">
+
+    <input type="hidden" asp-for="ServicioId" />
+
+    <div class="mb-3">
+
+        <label>Calificación</label>
+
+        <select asp-for="Calificacion"
+                class="form-control">
+
+            <option value="">Seleccione</option>
+            <option value="1">1 - Muy Malo</option>
+            <option value="2">2 - Malo</option>
+            <option value="3">3 - Regular</option>
+            <option value="4">4 - Bueno</option>
+            <option value="5">5 - Excelente</option>
+
+        </select>
+
+    </div>
+
+    <div class="mb-3">
+
+        <label>Comentario</label>
+
+        <textarea asp-for="Comentario"
+                  class="form-control">
+        </textarea>
+
+    </div>
+
+    <button class="btn btn-primary">
+
+        Enviar Encuesta
+
+    </button>
+
+</form>
