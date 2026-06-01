@@ -1,0 +1,259 @@
+@model MultiserviciosPiscinas.DTOs.DetalleServicioDto
+@{
+    ViewData["Title"] = "Detalle del Servicio";
+    Layout = "~/Views/Shared/_LayoutCliente.cshtml";
+}
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+
+<style>
+    .detalle-wrap { font-family: 'DM Sans', sans-serif; }
+
+    .back-link {
+        display: inline-flex; align-items: center; gap: 6px;
+        color: #0d9488; font-size: 0.88rem; font-weight: 600;
+        text-decoration: none; margin-bottom: 22px;
+        padding: 8px 16px;
+        background: #f0fdfa; border: 1.5px solid #99f6e4;
+        border-radius: 10px; transition: all 0.2s;
+    }
+    .back-link:hover { background: #0d9488; color: #fff; border-color: #0d9488; }
+
+    .page-header {
+        background: linear-gradient(135deg, #0d9488 0%, #0891b2 100%);
+        border-radius: 18px; padding: 28px 36px; margin-bottom: 24px;
+        position: relative; overflow: hidden;
+    }
+    .page-header::before {
+        content:''; position:absolute; top:-40px; right:-40px;
+        width:180px; height:180px; background:rgba(255,255,255,0.07); border-radius:50%;
+    }
+    .page-header h1 {
+        font-family: 'DM Serif Display', serif;
+        color:#fff; font-size:1.7rem; margin:0 0 4px; position:relative; z-index:1;
+    }
+    .page-header p { color:rgba(255,255,255,0.8); margin:0; font-size:0.88rem; position:relative; z-index:1; }
+
+    .info-card {
+        background: #fff; border-radius: 16px;
+        border: 1px solid #e0f2f1;
+        box-shadow: 0 2px 14px rgba(13,148,136,0.07);
+        margin-bottom: 20px; overflow: hidden;
+    }
+    .info-card-header {
+        background: linear-gradient(90deg, #f0fdfa, #e0f7fa);
+        padding: 14px 24px; border-bottom: 1px solid #e0f2f1;
+        font-weight: 700; font-size: 0.85rem;
+        text-transform: uppercase; letter-spacing: 0.07em;
+        color: #0f766e; display: flex; align-items: center; gap: 8px;
+    }
+    .info-card-body { padding: 24px; }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 20px;
+    }
+    .info-item label {
+        font-size: 0.75rem; font-weight: 600; text-transform: uppercase;
+        letter-spacing: 0.06em; color: #9ca3af; display: block; margin-bottom: 4px;
+    }
+    .info-item .value { font-size: 0.95rem; font-weight: 600; color: #134e4a; }
+    .info-full { grid-column: 1 / -1; }
+
+    .badge-estado { padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; }
+    .badge-cerrado   { background: #d1fae5; color: #065f46; }
+    .badge-progreso  { background: #fef3c7; color: #92400e; }
+    .badge-cancelado { background: #fee2e2; color: #991b1b; }
+    .badge-abierto   { background: #dbeafe; color: #1e40af; }
+
+    .tarea-row {
+        display: flex; align-items: center;
+        padding: 14px 0; border-bottom: 1px solid #f0fdfa; gap: 14px;
+    }
+    .tarea-row:last-child { border-bottom: none; }
+    .tarea-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .dot-completada { background: #10b981; }
+    .dot-progreso   { background: #f59e0b; }
+    .dot-cancelada  { background: #ef4444; }
+    .dot-pendiente  { background: #9ca3af; }
+    .tarea-desc { flex: 1; font-size: 0.92rem; color: #374151; font-weight: 500; }
+    .tarea-dates { font-size: 0.78rem; color: #9ca3af; }
+
+    .quim-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+        gap: 14px;
+    }
+    .quim-item {
+        background: linear-gradient(135deg, #f0fdfa, #e0f7fa);
+        border-radius: 14px; padding: 16px; text-align: center;
+        border: 1px solid #ccfbf1;
+    }
+    .quim-item .qval { font-size: 1.4rem; font-weight: 700; color: #0f766e; display: block; }
+    .quim-item .qname { font-size: 0.75rem; color: #6b7280; font-weight: 500; margin-top: 2px; }
+
+    .obs-box {
+        background: #f8fafc; border-radius: 10px;
+        padding: 14px 18px; font-size: 0.9rem; color: #374151;
+        border: 1px solid #e0f2f1; margin-top: 16px;
+    }
+</style>
+
+<div class="detalle-wrap">
+
+    <a asp-action="Index" class="back-link">← Volver al historial</a>
+
+    <div class="page-header">
+        <h1>Servicio #@Model.Id</h1>
+        <p>@Model.Tipo &nbsp;·&nbsp; @Model.FechaHora.ToString("dd/MM/yyyy HH:mm") &nbsp;·&nbsp; Técnico: @Model.NombreTecnico</p>
+    </div>
+
+    <!-- Info general -->
+    <div class="info-card">
+        <div class="info-card-header">📋 Información General</div>
+        <div class="info-card-body">
+            <div class="info-grid">
+                <div class="info-item">
+                    <label>Tipo</label>
+                    <div class="value">@Model.Tipo</div>
+                </div>
+                <div class="info-item">
+                    <label>Fecha de cita</label>
+                    <div class="value">@Model.FechaHora.ToString("dd/MM/yyyy HH:mm")</div>
+                </div>
+                <div class="info-item">
+                    <label>Técnico</label>
+                    <div class="value">@Model.NombreTecnico</div>
+                </div>
+                <div class="info-item">
+                    <label>Estado</label>
+                    <div class="value">
+                        @{
+                            string bc = Model.EstadoServicio == "Cerrado" ? "badge-cerrado"
+                                      : Model.EstadoServicio == "En progreso" ? "badge-progreso"
+                                      : Model.EstadoServicio == "Cancelado" ? "badge-cancelado"
+                                      : "badge-abierto";
+                        }
+                        <span class="badge-estado @bc">@Model.EstadoServicio</span>
+                    </div>
+                </div>
+                <div class="info-item">
+                    <label>Fecha apertura</label>
+                    <div class="value">@Model.FechaApertura.ToString("dd/MM/yyyy")</div>
+                </div>
+                <div class="info-item">
+                    <label>Fecha cierre</label>
+                    <div class="value">
+                        @(Model.FechaCierre.HasValue ? Model.FechaCierre.Value.ToString("dd/MM/yyyy") : "Pendiente")
+                    </div>
+                </div>
+                @if (!string.IsNullOrEmpty(Model.Notas))
+                {
+                    <div class="info-item info-full">
+                        <label>Notas</label>
+                        <div class="value">@Model.Notas</div>
+                    </div>
+                }
+                <div class="info-item info-full">
+                    <label>Trabajo realizado</label>
+                    <div class="value">@Model.TrabajoRealizado</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tareas -->
+    <div class="info-card">
+        <div class="info-card-header">✅ Tareas del Servicio</div>
+        <div class="info-card-body" style="padding-top:8px; padding-bottom:8px;">
+            @if (!Model.Tareas.Any())
+            {
+                <p class="text-muted" style="padding:12px 0; margin:0; font-size:0.9rem;">No hay tareas registradas.</p>
+            }
+            else
+            {
+                foreach (var tarea in Model.Tareas)
+                {
+                    string dotClass = tarea.Estado == "Completada" ? "dot-completada"
+                                    : tarea.Estado == "En progreso" ? "dot-progreso"
+                                    : tarea.Estado == "Cancelada" ? "dot-cancelada"
+                                    : "dot-pendiente";
+                    string badgeT = tarea.Estado == "Completada" ? "badge-cerrado"
+                                  : tarea.Estado == "En progreso" ? "badge-progreso"
+                                  : tarea.Estado == "Cancelada" ? "badge-cancelado"
+                                  : "badge-abierto";
+
+                    <div class="tarea-row">
+                        <div class="tarea-dot @dotClass"></div>
+                        <div class="tarea-desc">@tarea.Descripcion</div>
+                        <div class="tarea-dates">
+                            @tarea.FechaAsignacion.ToString("dd/MM/yyyy")
+                            @if (tarea.FechaCompletacion.HasValue)
+                            {
+                                <text> → @tarea.FechaCompletacion.Value.ToString("dd/MM/yyyy")</text>
+                            }
+                        </div>
+                        <span class="badge-estado @badgeT">@tarea.Estado</span>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+
+    <!-- Inspección química -->
+    @if (Model.Inspeccion != null)
+    {
+        <div class="info-card">
+            <div class="info-card-header">🧪 Inspección Química — @Model.Inspeccion.FechaInspeccion.ToString("dd/MM/yyyy")</div>
+            <div class="info-card-body">
+                <div class="quim-grid">
+                    @if (Model.Inspeccion.CloroPpm.HasValue)
+                    {
+                        <div class="quim-item">
+                            <span class="qval">@Model.Inspeccion.CloroPpm.Value.ToString("F2")</span>
+                            <span class="qname">Cloro (ppm)</span>
+                        </div>
+                    }
+                    @if (Model.Inspeccion.Ph.HasValue)
+                    {
+                        <div class="quim-item">
+                            <span class="qval">@Model.Inspeccion.Ph.Value.ToString("F2")</span>
+                            <span class="qname">pH</span>
+                        </div>
+                    }
+                    @if (Model.Inspeccion.Alcalinidad.HasValue)
+                    {
+                        <div class="quim-item">
+                            <span class="qval">@Model.Inspeccion.Alcalinidad.Value.ToString("F2")</span>
+                            <span class="qname">Alcalinidad</span>
+                        </div>
+                    }
+                    @if (Model.Inspeccion.Calcio.HasValue)
+                    {
+                        <div class="quim-item">
+                            <span class="qval">@Model.Inspeccion.Calcio.Value.ToString("F2")</span>
+                            <span class="qname">Calcio</span>
+                        </div>
+                    }
+                    @if (Model.Inspeccion.AcidoCianurico.HasValue)
+                    {
+                        <div class="quim-item">
+                            <span class="qval">@Model.Inspeccion.AcidoCianurico.Value.ToString("F2")</span>
+                            <span class="qname">Ác. Cianúrico</span>
+                        </div>
+                    }
+                </div>
+                @if (!string.IsNullOrEmpty(Model.Inspeccion.Observaciones))
+                {
+                    <div class="obs-box">
+                        <strong style="font-size:0.78rem; text-transform:uppercase; letter-spacing:0.05em; color:#0d9488;">Observaciones</strong><br />
+                        @Model.Inspeccion.Observaciones
+                    </div>
+                }
+            </div>
+        </div>
+    }
+
+</div>

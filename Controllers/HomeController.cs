@@ -1,7 +1,6 @@
-using System.Diagnostics;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using MultiserviciosPiscinas.Models;
+using System.Security.Claims;
 
 namespace MultiserviciosPiscinas.Controllers
 {
@@ -11,8 +10,17 @@ namespace MultiserviciosPiscinas.Controllers
         [HttpGet]
         public IActionResult Index()
         {
-            return View();
-        }
+            // Redirigir según rol:
+            // 1 = Administrador → Dashboard
+            // 2 = Técnico       → Dashboard
+            // 3 = Cliente       → Portal
+            var rolClaim = User.FindFirst(ClaimTypes.Role)?.Value;
 
+            return rolClaim switch
+            {
+                "3" => RedirectToAction("Index", "Portal"),
+                _ => RedirectToAction("Index", "Dashboard")
+            };
+        }
     }
 }

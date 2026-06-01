@@ -110,6 +110,15 @@
                         Perfiles
                     </a>
                 </li>
+
+                <!-- ✅ NUEVO — Camila HU-3.4 -->
+                <li>
+                    <a asp-controller="ReporteSatisfaccion" asp-action="Index"
+                       class="nav-link text-white @(ViewContext.RouteData.Values["controller"]?.ToString() == "ReporteSatisfaccion" ? "active" : "")">
+                        Reporte Satisfacción
+                    </a>
+                </li>
+
             </ul>
         </nav>
 
