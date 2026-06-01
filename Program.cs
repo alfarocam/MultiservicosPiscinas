@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using MultiserviciosPiscinas.Interfaces;     
 using MultiserviciosPiscinas.Models;
+using MultiserviciosPiscinas.Repositories; 
 using MultiserviciosPiscinas.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -31,6 +33,10 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     });
 
 builder.Services.AddTransient<Generales>();
+
+// Repositorios Camila — HU-2.5 y HU-3.4
+builder.Services.AddScoped<IHistorialServicioRepository, HistorialServicioRepository>();
+builder.Services.AddScoped<IReporteSatisfaccionRepository, ReporteSatisfaccionRepository>();
 
 var app = builder.Build();
 
