@@ -41,7 +41,8 @@ namespace MultiserviciosPiscinas.Controllers
                 //inicia sesión creando una identidad con los datos del usuario
                 var declaraciones = new List<Claim>
                 {
-                    new Claim(ClaimTypes.Name, usuario.Nombre),
+                    new Claim(ClaimTypes.Name, usuario.Correo),
+                    new Claim("NombreCompleto", usuario.Nombre),
                     new Claim(ClaimTypes.Email, usuario.Correo),
                     new Claim(ClaimTypes.Role, usuario.RolId.ToString()) //de aquí se saca el rol para que vean diferentes vistas
                 };
