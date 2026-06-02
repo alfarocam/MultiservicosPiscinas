@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MultiserviciosPiscinas.Models;
-using System.Threading.Tasks;
 
 namespace MultiserviciosPiscinas.Controllers
 {
@@ -16,6 +15,9 @@ namespace MultiserviciosPiscinas.Controllers
             _context = context;
         }
 
+        // ==========================
+        // VER PERFIL
+        // ==========================
         public async Task<IActionResult> Detalle()
         {
             string? correoLogueado = User.Identity?.Name;
@@ -33,13 +35,15 @@ namespace MultiserviciosPiscinas.Controllers
 
             if (usuario == null)
             {
-                return NotFound("Usuario no encontrado.");
+                return NotFound();
             }
 
             return View(usuario);
         }
 
-   
+        // ==========================
+        // CARGAR FORMULARIO
+        // ==========================
         public async Task<IActionResult> Editar()
         {
             string? correoLogueado = User.Identity?.Name;
@@ -50,8 +54,8 @@ namespace MultiserviciosPiscinas.Controllers
             }
 
             var usuario = await _context.Usuarios
-                .Include(u => u.Rol)
                 .Include(u => u.Cliente)
+                    .ThenInclude(c => c.TelefonosClientes)
                 .FirstOrDefaultAsync(u => u.Correo == correoLogueado);
 
             if (usuario == null)
@@ -62,21 +66,50 @@ namespace MultiserviciosPiscinas.Controllers
             return View(usuario);
         }
 
+        // ==========================
+        // GUARDAR CAMBIOS
+        // ==========================
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Editar(
             int id,
             string nombre,
             string correo,
+            string telefono,
             string? contrasena)
         {
-            var usuarioDb = await _context.Usuarios.FindAsync(id);
+            var usuarioDb = await _context.Usuarios
+                .Include(u => u.Cliente)
+                    .ThenInclude(c => c.TelefonosClientes)
+                .FirstOrDefaultAsync(u => u.Id == id);
 
             if (usuarioDb == null)
             {
                 return NotFound();
             }
 
+            // VALIDACIONES
+            if (string.IsNullOrWhiteSpace(nombre))
+            {
+                ModelState.AddModelError("", "El nombre es obligatorio.");
+            }
+
+            if (string.IsNullOrWhiteSpace(correo))
+            {
+                ModelState.AddModelError("", "El correo es obligatorio.");
+            }
+
+            if (string.IsNullOrWhiteSpace(telefono))
+            {
+                ModelState.AddModelError("", "El teléfono es obligatorio.");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return View(usuarioDb);
+            }
+
+            // ACTUALIZAR USUARIO
             usuarioDb.Nombre = nombre;
             usuarioDb.Correo = correo;
 
@@ -85,20 +118,48 @@ namespace MultiserviciosPiscinas.Controllers
                 usuarioDb.Contrasena = contrasena;
             }
 
+            // ==========================
+            // ACTUALIZAR TELEFONO
+            // ==========================
+            if (usuarioDb.Cliente != null)
+            {
+                var telefonoPrincipal = await _context.TelefonosClientes
+                    .FirstOrDefaultAsync(t =>
+                        t.ClienteId == usuarioDb.Cliente.Id &&
+                        t.EsPrincipal == 1);
+
+                if (telefonoPrincipal != null)
+                {
+                    telefonoPrincipal.NumeroTelefono = telefono;
+                    _context.TelefonosClientes.Update(telefonoPrincipal);
+                }
+                else
+                {
+                    var nuevoTelefono = new TelefonosCliente
+                    {
+                        ClienteId = usuarioDb.Cliente.Id,
+                        TipoTelefono = "Principal",
+                        NumeroTelefono = telefono,
+                        EsPrincipal = 1
+                    };
+
+                    await _context.TelefonosClientes.AddAsync(nuevoTelefono);
+                }
+            }
+
             try
             {
-                _context.Update(usuarioDb);
                 await _context.SaveChangesAsync();
 
                 TempData["MensajeExito"] =
-                    "¡Perfil actualizado correctamente!";
+                    "Información actualizada correctamente.";
 
                 return RedirectToAction(nameof(Detalle));
             }
-            catch (DbUpdateConcurrencyException)
+            catch
             {
                 ModelState.AddModelError("",
-                    "Error al actualizar el perfil.");
+                    "Ocurrió un error al actualizar.");
 
                 return View(usuarioDb);
             }
