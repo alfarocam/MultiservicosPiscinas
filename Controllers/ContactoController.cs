@@ -1,18 +1,20 @@
-﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MultiserviciosPiscinas.Models;
 
 namespace MultiserviciosPiscinas.Controllers
 {
-    [Authorize(Roles = "3")]
     public class ContactoController : Controller
     {
+        
+        [HttpGet]
         public IActionResult Index()
         {
             return View();
         }
 
+        
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult Enviar(ContactoViewModel model)
         {
             if (!ModelState.IsValid)
@@ -20,11 +22,13 @@ namespace MultiserviciosPiscinas.Controllers
                 return View("Index", model);
             }
 
-            TempData["Exito"] = "La consulta fue enviada correctamente.";
+            
+            TempData["Exito"] = "La consulta fue enviada correctamente. Nos pondremos en contacto contigo pronto.";
 
             return RedirectToAction(nameof(Index));
         }
 
+        
         public IActionResult Informacion()
         {
             return View();
