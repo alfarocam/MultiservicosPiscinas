@@ -1,4 +1,6 @@
-﻿@{
+﻿@model MultiserviciosPiscinas.Models.Usuario
+
+@{
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
     ViewData["Title"] = "Editar perfil";
 }
@@ -10,28 +12,24 @@
 
 <div class="card border-0 shadow-sm">
     <div class="card-body">
-        <form method="post">
+        <form asp-action="Editar" method="post">
             @Html.AntiForgeryToken()
+
+            <input type="hidden" name="id" value="@Model.Id" />
 
             <div class="row g-3">
                 <div class="col-md-6">
-                    <label class="form-label">Nombre completo</label>
-                    <input class="form-control" value="Administrador del sistema" />
+                    <label class="form-label">Nombre</label>
+                    <input type="text" name="nombre" class="form-control" value="@Model.Nombre" required />
                 </div>
 
                 <div class="col-md-6">
                     <label class="form-label">Correo electrónico</label>
-                    <input class="form-control" value="admin@test.com" />
+                    <input type="email" name="correo" class="form-control" value="@Model.Correo" required />
                 </div>
-
-                <div class="col-md-6">
-                    <label class="form-label">Teléfono</label>
-                    <input class="form-control" value="7777-7777" />
-                </div>
-
                 <div class="col-md-6">
                     <label class="form-label">Nueva contraseña</label>
-                    <input type="password" class="form-control" placeholder="********" />
+                    <input type="password" name="contrasena" class="form-control" placeholder="Dejar en blanco para mantener la actual" />
                 </div>
             </div>
 
