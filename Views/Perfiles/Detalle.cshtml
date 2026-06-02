@@ -8,39 +8,98 @@
 @if (TempData["MensajeExito"] != null)
 {
     <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
-        <i class="bi bi-check-circle-fill me-2"></i> @TempData["MensajeExito"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        <i class="bi bi-check-circle-fill me-2"></i>
+        @TempData["MensajeExito"]
+
+        <button type="button"
+                class="btn-close"
+                data-bs-dismiss="alert">
+        </button>
     </div>
 }
 
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h2 class="mb-0">Mi perfil</h2>
-    <a asp-action="Editar" class="btn btn-warning">Editar perfil</a>
+
+    <a asp-action="Editar"
+       class="btn btn-warning">
+        Editar perfil
+    </a>
 </div>
 
 <div class="card border-0 shadow-sm">
     <div class="card-body">
+
         <table class="table table-borderless mb-0">
+
             <tr>
-                <td class="text-muted" style="width:25%">Nombre</td>
-                <td><strong>@Model.Nombre @Model.ApellidoPaterno</strong></td>
+                <td class="text-muted" style="width:25%">
+                    Nombre
+                </td>
+                <td>
+                    <strong>
+                        @Model.Nombre
+                        @Model.ApellidoPaterno
+                        @Model.ApellidoMaterno
+                    </strong>
+                </td>
             </tr>
+
             <tr>
-                <td class="text-muted">Correo</td>
-                <td>@Model.Correo</td>
+                <td class="text-muted">
+                    Correo
+                </td>
+                <td>
+                    @Model.Correo
+                </td>
             </tr>
+
             <tr>
-                <td class="text-muted">Rol</td>
-                <td><span class="badge bg-primary">@(Model.Rol?.Nombre ?? "Asignado")</span></td>
+                <td class="text-muted">
+                    Teléfono
+                </td>
+                <td>
+                    @(Model.Cliente?.TelefonosClientes?
+                                        .FirstOrDefault(t => t.EsPrincipal == 1)?
+                                        .NumeroTelefono
+                                        ?? "No registrado")
+                </td>
             </tr>
+
             <tr>
-                <td class="text-muted">Estado</td>
+                <td class="text-muted">
+                    Rol
+                </td>
+                <td>
+                    <span class="badge bg-primary">
+                        @(Model.Rol?.Nombre ?? "Sin rol")
+                    </span>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="text-muted">
+                    Permisos
+                </td>
+                <td>
+                    @(Model.Rol?.Descripcion
+                                        ?? "Sin permisos definidos")
+                </td>
+            </tr>
+
+            <tr>
+                <td class="text-muted">
+                    Estado
+                </td>
+
                 <td>
                     <span class="badge @(Model.Activo ? "bg-success" : "bg-danger")">
                         @(Model.Activo ? "Activo" : "Inactivo")
                     </span>
                 </td>
             </tr>
+
         </table>
+
     </div>
 </div>

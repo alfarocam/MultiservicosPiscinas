@@ -11,35 +11,35 @@ namespace MultiserviciosPiscinas.Controllers
     {
         private readonly PiscinasYMultiserviciosContext _context;
 
-        // Inyección a bd
         public PerfilesController(PiscinasYMultiserviciosContext context)
         {
             _context = context;
         }
 
-        //  ver lo q es el Perfil con datos reales de la sesión q esta activa
         public async Task<IActionResult> Detalle()
         {
             string? correoLogueado = User.Identity?.Name;
 
             if (string.IsNullOrEmpty(correoLogueado))
             {
-                return Challenge(); // si no hay sesión lo redirecciona al login
+                return Challenge();
             }
 
             var usuario = await _context.Usuarios
-                .Include(u => u.Rol) 
+                .Include(u => u.Rol)
+                .Include(u => u.Cliente)
+                    .ThenInclude(c => c.TelefonosClientes)
                 .FirstOrDefaultAsync(u => u.Correo == correoLogueado);
 
             if (usuario == null)
             {
-                return NotFound("El usuario de la sesión no existe en la base de datos.");
+                return NotFound("Usuario no encontrado.");
             }
 
             return View(usuario);
         }
 
-        // Carga formulario de la edición con los datos actuales
+   
         public async Task<IActionResult> Editar()
         {
             string? correoLogueado = User.Identity?.Name;
@@ -50,6 +50,8 @@ namespace MultiserviciosPiscinas.Controllers
             }
 
             var usuario = await _context.Usuarios
+                .Include(u => u.Rol)
+                .Include(u => u.Cliente)
                 .FirstOrDefaultAsync(u => u.Correo == correoLogueado);
 
             if (usuario == null)
@@ -60,10 +62,13 @@ namespace MultiserviciosPiscinas.Controllers
             return View(usuario);
         }
 
-        // Recibo modificaciones y las guardo en el sql
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Editar(int id, string nombre, string correo, string? contrasena)
+        public async Task<IActionResult> Editar(
+            int id,
+            string nombre,
+            string correo,
+            string? contrasena)
         {
             var usuarioDb = await _context.Usuarios.FindAsync(id);
 
@@ -72,12 +77,10 @@ namespace MultiserviciosPiscinas.Controllers
                 return NotFound();
             }
 
-            //actualización de campos en clasee usuario 
             usuarioDb.Nombre = nombre;
             usuarioDb.Correo = correo;
 
-            // por si cambia de contra , se le da
-            if (!string.IsNullOrEmpty(contrasena))
+            if (!string.IsNullOrWhiteSpace(contrasena))
             {
                 usuarioDb.Contrasena = contrasena;
             }
@@ -85,14 +88,18 @@ namespace MultiserviciosPiscinas.Controllers
             try
             {
                 _context.Update(usuarioDb);
-                await _context.SaveChangesAsync(); // Guarda los cambios en sql
+                await _context.SaveChangesAsync();
 
-                TempData["MensajeExito"] = "¡Perfil actualizado correctamente en la base de datos!";
+                TempData["MensajeExito"] =
+                    "¡Perfil actualizado correctamente!";
+
                 return RedirectToAction(nameof(Detalle));
             }
             catch (DbUpdateConcurrencyException)
             {
-                ModelState.AddModelError("", "Error de concurrencia al guardar los datos. Inténtalo de nuevo.");
+                ModelState.AddModelError("",
+                    "Error al actualizar el perfil.");
+
                 return View(usuarioDb);
             }
         }
