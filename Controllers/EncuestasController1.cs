@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MultiserviciosPiscinas.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace MultiserviciosPiscinas.Controllers
 {
+    [Authorize(Roles = "1,3")]
     public class EncuestasController : Controller
     {
         private readonly PiscinasYMultiserviciosContext _context;
