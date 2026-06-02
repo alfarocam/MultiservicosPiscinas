@@ -8,7 +8,8 @@ using MultiserviciosPiscinas.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Obtener cadena de conexión
+///// viejo
+//Obtener cadena de conexión
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
@@ -16,6 +17,21 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<PiscinasYMultiserviciosContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+////////
+///
+///new
+
+// Obtener cadena de conexión apuntando directamente a tu SQL Server Local
+//builder.Services.AddDbContext<PiscinasYMultiserviciosContext>(options =>
+//    options.UseSqlServer("Server=LOCALHOST\\MSSQLSERVER01;Database=Piscinas_Y_Multiservicios;Trusted_Connection=True;TrustServerCertificate=True;"));
+
+// Conexión forzada con formato de texto plano (@) para evitar fallas con la barra inclinada
+// Configuración de DbContext apuntando a tu base de datos con permisos locales habilitados
+//builder.Services.AddDbContext<PiscinasYMultiserviciosContext>(options =>
+//    options.UseSqlServer(@"Server=LOCALHOST\MSSQLSERVER01;Database=Piscinas_Y_Multiservicios;Trusted_Connection=True;TrustServerCertificate=True;Encrypt=False;"));
+
+
+////////////
 // Página de errores para migraciones en desarrollo
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
