@@ -1,64 +1,151 @@
 ﻿@model MultiserviciosPiscinas.Models.Encuestum
-
-<h2>Encuesta de Satisfacción</h2>
-
-@if (TempData["Error"] != null)
-{
-    <div class="alert alert-danger">
-        @TempData["Error"]
-    </div>
+@{
+    ViewData["Title"] = "Encuesta de Satisfacción";
+    Layout = "~/Views/Shared/_LayoutCliente.cshtml";
 }
 
-<form asp-action="Crear" method="post">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
 
-    @Html.AntiForgeryToken()
+<style>
+    .encuesta-wrap {
+        font-family: 'DM Sans', sans-serif;
+        max-width: 700px;
+        margin: auto;
+    }
 
-    <input type="hidden" asp-for="ServicioId" />
+    .page-header {
+        background: linear-gradient(135deg,#0d9488,#0891b2);
+        border-radius: 18px;
+        padding: 28px 36px;
+        margin-bottom: 24px;
+        color: white;
+    }
 
-    <div class="mb-3">
+        .page-header h1 {
+            font-family: 'DM Serif Display', serif;
+            margin: 0;
+            font-size: 1.8rem;
+        }
 
-        <label class="form-label">
-            Calificación *
-        </label>
+        .page-header p {
+            margin-top: 6px;
+            opacity: .9;
+        }
 
-        <select asp-for="Calificacion"
-                class="form-control">
+    .card-box {
+        background: white;
+        border-radius: 16px;
+        padding: 30px;
+        box-shadow: 0 4px 18px rgba(0,0,0,.08);
+        border: 1px solid #e0f2f1;
+    }
 
-            <option value="">Seleccione</option>
-            <option value="1">⭐ 1</option>
-            <option value="2">⭐⭐ 2</option>
-            <option value="3">⭐⭐⭐ 3</option>
-            <option value="4">⭐⭐⭐⭐ 4</option>
-            <option value="5">⭐⭐⭐⭐⭐ 5</option>
+    .form-label {
+        font-weight: 600;
+        color: #0f766e;
+        margin-bottom: 8px;
+    }
 
-        </select>
+    .form-control {
+        border-radius: 10px;
+        border: 1px solid #cbd5e1;
+        padding: 12px;
+    }
 
-        <span asp-validation-for="Calificacion"
-              class="text-danger">
-        </span>
+    .btn-enviar {
+        background: linear-gradient(135deg,#0d9488,#0891b2);
+        border: none;
+        color: white;
+        border-radius: 10px;
+        padding: 12px 24px;
+        font-weight: 600;
+    }
+
+        .btn-enviar:hover {
+            opacity: .92;
+            color: white;
+        }
+
+    .back-link {
+        display: inline-block;
+        margin-bottom: 18px;
+        text-decoration: none;
+        color: #0d9488;
+        font-weight: 600;
+    }
+</style>
+
+<div class="encuesta-wrap">
+
+    <a asp-controller="Historial"
+       asp-action="Detalle"
+       asp-route-id="@Model.ServicioId"
+       class="back-link">
+        ← Volver al servicio
+    </a>
+
+    <div class="page-header">
+        <h1>⭐ Encuesta de Satisfacción</h1>
+        <p>Calificá la calidad del mantenimiento realizado.</p>
+    </div>
+
+    <div class="card-box">
+
+        <form asp-action="Crear" method="post">
+
+            @Html.AntiForgeryToken()
+
+            <input type="hidden" asp-for="ServicioId" />
+
+            <div class="mb-4">
+
+                <label class="form-label">
+                    Calificación *
+                </label>
+
+                <select asp-for="Calificacion"
+                        class="form-control">
+
+                    <option value="">Seleccione</option>
+                    <option value="1">⭐ 1 - Muy malo</option>
+                    <option value="2">⭐⭐ 2 - Malo</option>
+                    <option value="3">⭐⭐⭐ 3 - Regular</option>
+                    <option value="4">⭐⭐⭐⭐ 4 - Bueno</option>
+                    <option value="5">⭐⭐⭐⭐⭐ 5 - Excelente</option>
+
+                </select>
+
+                <span asp-validation-for="Calificacion"
+                      class="text-danger">
+                </span>
+
+            </div>
+
+            <div class="mb-4">
+
+                <label class="form-label">
+                    Comentario (opcional)
+                </label>
+
+                <textarea asp-for="Comentario"
+                          rows="5"
+                          class="form-control"
+                          placeholder="Contanos cómo fue tu experiencia...">
+                </textarea>
+
+            </div>
+
+            <button type="submit"
+                    class="btn btn-enviar">
+                Enviar Opinión
+            </button>
+
+        </form>
 
     </div>
 
-    <div class="mb-3">
-
-        <label class="form-label">
-            Comentario (opcional)
-        </label>
-
-        <textarea asp-for="Comentario"
-                  class="form-control">
-        </textarea>
-
-    </div>
-
-    <button type="submit"
-            class="btn btn-success">
-
-        Enviar Opinión
-
-    </button>
-
-</form>
+</div>
 
 @section Scripts {
     @{

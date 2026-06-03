@@ -1,5 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MultiserviciosPiscinas.Models;
 
@@ -26,7 +26,10 @@ namespace MultiserviciosPiscinas.Controllers
                 TempData["Error"] =
                     "Este servicio ya ha sido calificado, gracias.";
 
-                return RedirectToAction("Index", "Portal");
+                return RedirectToAction(
+                    "Detalle",
+                    "Historial",
+                    new { id = servicioId });
             }
 
             var encuesta = new Encuestum
@@ -45,8 +48,9 @@ namespace MultiserviciosPiscinas.Controllers
             {
                 ModelState.AddModelError(
                     "Calificacion",
-                    "La calificación es obligatoria."
-                );
+                    "La calificación es obligatoria.");
+
+                return View(encuesta);
             }
 
             bool existe = await _context.Encuesta
@@ -57,12 +61,10 @@ namespace MultiserviciosPiscinas.Controllers
                 TempData["Error"] =
                     "Este servicio ya ha sido calificado, gracias.";
 
-                return RedirectToAction("Index", "Portal");
-            }
-
-            if (!ModelState.IsValid)
-            {
-                return View(encuesta);
+                return RedirectToAction(
+                    "Detalle",
+                    "Historial",
+                    new { id = encuesta.ServicioId });
             }
 
             encuesta.FechaEnvio = DateTime.Now;
@@ -74,7 +76,10 @@ namespace MultiserviciosPiscinas.Controllers
             TempData["Exito"] =
                 "La calificación fue enviada exitosamente.";
 
-            return RedirectToAction("Index", "Portal");
+            return RedirectToAction(
+                "Detalle",
+                "Historial",
+                new { id = encuesta.ServicioId });
         }
     }
 }
