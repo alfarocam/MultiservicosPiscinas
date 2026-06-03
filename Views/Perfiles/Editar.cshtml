@@ -7,36 +7,88 @@
 
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h2 class="mb-0">Editar perfil</h2>
-    <a asp-action="Detalle" class="btn btn-secondary">Volver</a>
+
+    <a asp-action="Detalle"
+       class="btn btn-secondary">
+        Volver
+    </a>
 </div>
 
 <div class="card border-0 shadow-sm">
     <div class="card-body">
+
         <form asp-action="Editar" method="post">
+
             @Html.AntiForgeryToken()
 
-            <input type="hidden" name="id" value="@Model.Id" />
+            <input type="hidden"
+                   name="id"
+                   value="@Model.Id" />
+
+            <div asp-validation-summary="All"
+                 class="text-danger mb-3">
+            </div>
 
             <div class="row g-3">
                 <div class="col-md-6">
-                    <label class="form-label">Nombre</label>
-                    <input type="text" name="nombre" class="form-control" value="@Model.Nombre" required />
-                </div>
+                    <label class="form-label">
+                        Nombre
+                    </label>
 
-                <div class="col-md-6">
-                    <label class="form-label">Correo electrónico</label>
-                    <input type="email" name="correo" class="form-control" value="@Model.Correo" required />
+                    <input type="text"
+                           name="nombre"
+                           class="form-control"
+                           value="@Model.Nombre"
+                           required />
                 </div>
                 <div class="col-md-6">
-                    <label class="form-label">Nueva contraseña</label>
-                    <input type="password" name="contrasena" class="form-control" placeholder="Dejar en blanco para mantener la actual" />
+                    <label class="form-label">
+                        Correo electrónico
+                    </label>
+
+                    <input type="email"
+                           name="correo"
+                           class="form-control"
+                           value="@Model.Correo"
+                           required />
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">
+                        Teléfono
+                    </label>
+
+                    <input type="text"
+                           name="telefono"
+                           class="form-control"
+                           value="@(Model.Cliente?.TelefonosClientes
+                                                           ?.FirstOrDefault(t => t.EsPrincipal == 1)
+                                                           ?.NumeroTelefono ?? "")"
+                           required />
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">
+                        Nueva contraseña
+                    </label>
+
+                    <input type="password"
+                           name="contrasena"
+                           class="form-control"
+                           placeholder="Dejar en blanco para mantener la actual" />
                 </div>
             </div>
-
             <div class="mt-4">
-                <button type="submit" class="btn btn-warning">Guardar cambios</button>
-                <a asp-action="Detalle" class="btn btn-secondary">Cancelar</a>
+                <button type="submit"
+                        class="btn btn-warning">
+                    Guardar cambios
+                </button>
+
+                <a asp-action="Detalle"
+                   class="btn btn-secondary">
+                    Cancelar
+                </a>
             </div>
+
         </form>
+
     </div>
 </div>

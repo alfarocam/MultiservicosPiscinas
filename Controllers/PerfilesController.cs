@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MultiserviciosPiscinas.Models;
-using System.Threading.Tasks;
 
 namespace MultiserviciosPiscinas.Controllers
 {
@@ -11,35 +10,36 @@ namespace MultiserviciosPiscinas.Controllers
     {
         private readonly PiscinasYMultiserviciosContext _context;
 
-        // Inyección a bd
         public PerfilesController(PiscinasYMultiserviciosContext context)
         {
             _context = context;
         }
 
-        //  ver lo q es el Perfil con datos reales de la sesión q esta activa
+ 
         public async Task<IActionResult> Detalle()
         {
             string? correoLogueado = User.Identity?.Name;
 
             if (string.IsNullOrEmpty(correoLogueado))
             {
-                return Challenge(); // si no hay sesión lo redirecciona al login
+                return Challenge();
             }
 
             var usuario = await _context.Usuarios
-                .Include(u => u.Rol) 
+                .Include(u => u.Rol)
+                .Include(u => u.Cliente)
+                    .ThenInclude(c => c.TelefonosClientes)
                 .FirstOrDefaultAsync(u => u.Correo == correoLogueado);
 
             if (usuario == null)
             {
-                return NotFound("El usuario de la sesión no existe en la base de datos.");
+                return NotFound();
             }
 
             return View(usuario);
         }
 
-        // carga formulario de la edición 
+
         public async Task<IActionResult> Editar()
         {
             string? correoLogueado = User.Identity?.Name;
@@ -50,6 +50,8 @@ namespace MultiserviciosPiscinas.Controllers
             }
 
             var usuario = await _context.Usuarios
+                .Include(u => u.Cliente)
+                    .ThenInclude(c => c.TelefonosClientes)
                 .FirstOrDefaultAsync(u => u.Correo == correoLogueado);
 
             if (usuario == null)
@@ -60,26 +62,78 @@ namespace MultiserviciosPiscinas.Controllers
             return View(usuario);
         }
 
-        // Recib modificaciones y las guardo en el sql
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Editar(int id, string nombre, string correo, string? contrasena)
+        public async Task<IActionResult> Editar(
+            int id,
+            string nombre,
+            string correo,
+            string telefono,
+            string? contrasena)
         {
-            var usuarioDb = await _context.Usuarios.FindAsync(id);
+            var usuarioDb = await _context.Usuarios
+                .Include(u => u.Cliente)
+                    .ThenInclude(c => c.TelefonosClientes)
+                .FirstOrDefaultAsync(u => u.Id == id);
 
             if (usuarioDb == null)
             {
                 return NotFound();
             }
 
-            //actualización de campos en clasee usuario 
+            if (string.IsNullOrWhiteSpace(nombre))
+            {
+                ModelState.AddModelError("", "El nombre es obligatorio.");
+            }
+
+            if (string.IsNullOrWhiteSpace(correo))
+            {
+                ModelState.AddModelError("", "El correo es obligatorio.");
+            }
+
+            if (string.IsNullOrWhiteSpace(telefono))
+            {
+                ModelState.AddModelError("", "El teléfono es obligatorio.");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return View(usuarioDb);
+            }
+
             usuarioDb.Nombre = nombre;
             usuarioDb.Correo = correo;
 
-            // por si cambia de contra , se le da
-            if (!string.IsNullOrEmpty(contrasena))
+            if (!string.IsNullOrWhiteSpace(contrasena))
             {
                 usuarioDb.Contrasena = contrasena;
+            }
+
+            if (usuarioDb.Cliente != null)
+            {
+                var telefonoPrincipal = await _context.TelefonosClientes
+                    .FirstOrDefaultAsync(t =>
+                        t.ClienteId == usuarioDb.Cliente.Id &&
+                        t.EsPrincipal == 1);
+
+                if (telefonoPrincipal != null)
+                {
+                    telefonoPrincipal.NumeroTelefono = telefono;
+                    _context.TelefonosClientes.Update(telefonoPrincipal);
+                }
+                else
+                {
+                    var nuevoTelefono = new TelefonosCliente
+                    {
+                        ClienteId = usuarioDb.Cliente.Id,
+                        TipoTelefono = "Principal",
+                        NumeroTelefono = telefono,
+                        EsPrincipal = 1
+                    };
+
+                    await _context.TelefonosClientes.AddAsync(nuevoTelefono);
+                }
             }
 
             try
@@ -87,12 +141,22 @@ namespace MultiserviciosPiscinas.Controllers
                 _context.Update(usuarioDb);
                 await _context.SaveChangesAsync(); 
 
-                TempData["MensajeExito"] = "¡Perfil actualizado correctamente en la base de datos!";
+                await _context.SaveChangesAsync();
+
+                TempData["MensajeExito"] =
+                    "Información actualizada correctamente.";
+
+
                 return RedirectToAction(nameof(Detalle));
             }
-            catch (DbUpdateConcurrencyException)
+            catch
             {
                 ModelState.AddModelError("", "Error de simultaneidad al guardar los datos. Inténtalo de nuevo.");
+
+                ModelState.AddModelError("",
+                    "Ocurrió un error al actualizar.");
+
+
                 return View(usuarioDb);
             }
         }

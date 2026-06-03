@@ -1,53 +1,72 @@
-﻿@model MultiserviciosPiscinas.Models.Cliente
+﻿@model MultiserviciosPiscinas.Models.ClienteCreateViewModel
+
 @{
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
-    ViewData["Title"] = "Nuevo cliente";
+    ViewData["Title"] = "Nuevo Cliente";
 }
 
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h2 class="mb-0">Nuevo cliente</h2>
-    <a asp-action="Index" class="btn btn-secondary">Volver</a>
+    <h2>Nuevo Cliente</h2>
+
+    <a asp-action="Index" class="btn btn-secondary">
+        Volver
+    </a>
 </div>
 
-<div class="card border-0 shadow-sm">
+<div class="card shadow-sm">
     <div class="card-body">
-        <form asp-action="Crear" method="post">
-            @Html.AntiForgeryToken()
-            <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
 
-            <div class="row g-3">
-                <div class="col-md-6">
+        <form asp-action="Crear" method="post">
+
+            @Html.AntiForgeryToken()
+
+            <div asp-validation-summary="All" class="text-danger"></div>
+
+            <div class="row">
+
+                <div class="col-md-6 mb-3">
                     <label asp-for="Nombre" class="form-label"></label>
                     <input asp-for="Nombre" class="form-control" />
                     <span asp-validation-for="Nombre" class="text-danger"></span>
                 </div>
-                <div class="col-md-6">
+
+                <div class="col-md-6 mb-3">
+                    <label asp-for="ApellidoPaterno" class="form-label"></label>
+                    <input asp-for="ApellidoPaterno" class="form-control" />
+                    <span asp-validation-for="ApellidoPaterno" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label asp-for="ApellidoMaterno" class="form-label"></label>
+                    <input asp-for="ApellidoMaterno" class="form-control" />
+                    <span asp-validation-for="ApellidoMaterno" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6 mb-3">
                     <label asp-for="Correo" class="form-label"></label>
                     <input asp-for="Correo" class="form-control" />
                     <span asp-validation-for="Correo" class="text-danger"></span>
                 </div>
-                <div class="col-md-6">
+
+                <div class="col-md-6 mb-3">
                     <label asp-for="Telefono" class="form-label"></label>
                     <input asp-for="Telefono" class="form-control" />
                     <span asp-validation-for="Telefono" class="text-danger"></span>
                 </div>
-                <div class="col-md-6">
+
+                <div class="col-md-6 mb-3">
                     <label asp-for="Direccion" class="form-label"></label>
                     <input asp-for="Direccion" class="form-control" />
                     <span asp-validation-for="Direccion" class="text-danger"></span>
                 </div>
+
             </div>
 
-            <div class="mt-4">
-                <button type="submit" class="btn btn-primary">Guardar cliente</button>
-                <a asp-action="Index" class="btn btn-secondary ms-2">Cancelar</a>
-            </div>
+            <button type="submit" class="btn btn-primary">
+                Guardar Cliente
+            </button>
+
         </form>
+
     </div>
 </div>
-
-@section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
-}

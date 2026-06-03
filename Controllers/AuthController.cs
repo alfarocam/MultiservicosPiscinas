@@ -10,16 +10,23 @@ namespace MultiserviciosPiscinas.Controllers
 {
     public class AuthController : Controller
     {
-
         private readonly PiscinasYMultiserviciosContext _contexto;
         private readonly Generales _generales;
         private readonly IWebHostEnvironment _entornoWeb;
-        public AuthController(PiscinasYMultiserviciosContext context, Generales generales, IWebHostEnvironment entornoWeb)
+
+        public AuthController(
+            PiscinasYMultiserviciosContext context,
+            Generales generales,
+            IWebHostEnvironment entornoWeb)
         {
             _contexto = context;
             _generales = generales;
             _entornoWeb = entornoWeb;
         }
+
+        // =========================
+        // LOGIN
+        // =========================
 
         [HttpGet]
         public IActionResult InicioSesion()
@@ -31,32 +38,55 @@ namespace MultiserviciosPiscinas.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> InicioSesion(string correo, string contrasena)
         {
-            //busca al usuario por correo en la base de datos
+            // Buscar usuario por correo
             var usuario = await _contexto.Usuarios
                 .FirstOrDefaultAsync(u => u.Correo == correo);
 
-            //verifica si existe el usuario y si la contraseña coincide
-            if (usuario != null && usuario.Contrasena == contrasena)
+            // Validar existencia y contraseña
+            if (usuario != null &&
+                usuario.Contrasena == contrasena &&
+                usuario.Activo == true)
             {
-                //inicia sesión creando una identidad con los datos del usuario
                 var declaraciones = new List<Claim>
                 {
-                    new Claim(ClaimTypes.Name, usuario.Nombre),
+                    new Claim(ClaimTypes.Name, usuario.Correo),
+                    new Claim("NombreCompleto", usuario.Nombre),
                     new Claim(ClaimTypes.Email, usuario.Correo),
-                    new Claim(ClaimTypes.Role, usuario.RolId.ToString()) //de aquí se saca el rol para que vean diferentes vistas
+                    new Claim(ClaimTypes.Role, usuario.RolId.ToString())
                 };
 
-                var identidadDeclaraciones = new ClaimsIdentity(declaraciones, CookieAuthenticationDefaults.AuthenticationScheme);
+                var identidad = new ClaimsIdentity(
+                    declaraciones,
+                    CookieAuthenticationDefaults.AuthenticationScheme);
 
-                //autenticar al usuario en la aplicación
-                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identidadDeclaraciones));
+                await HttpContext.SignInAsync(
+                    CookieAuthenticationDefaults.AuthenticationScheme,
+                    new ClaimsPrincipal(identidad));
 
-                return RedirectToAction("Index", "Home");
+                // REDIRECCIÓN SEGÚN ROL
+                if (usuario.RolId == 1) // Admin
+                {
+                    return RedirectToAction("Index", "Dashboard");
+                }
+                else if (usuario.RolId == 2) // Técnico
+                {
+                    return RedirectToAction("Index", "ServiciosTecnicos");
+                }
+                else if (usuario.RolId == 3) // Cliente
+                {
+                    return RedirectToAction("Index", "Portal");
+                }
+
+                return RedirectToAction("InicioSesion");
             }
+
             ViewBag.Mensaje = "Correo o contraseña incorrectos.";
             return View();
         }
 
+        // =========================
+        // REGISTRO
+        // =========================
 
         [HttpGet]
         public IActionResult Registrar()
@@ -67,10 +97,8 @@ namespace MultiserviciosPiscinas.Controllers
         [HttpPost]
         public async Task<IActionResult> Registrar(Usuario usuario)
         {
-            //se usa AnyAsync y no FirstOrDefaultAsync porque con Any se deja de 
-            //buscar apenas se encuentra una coincidencia, ahorrando recurso y ayudando el tiempo de procesamiento
             bool correoExiste = await _contexto.Usuarios
-            .AnyAsync(u => u.Correo == usuario.Correo);
+                .AnyAsync(u => u.Correo == usuario.Correo);
 
             if (correoExiste)
             {
@@ -78,34 +106,32 @@ namespace MultiserviciosPiscinas.Controllers
                 return View(usuario);
             }
 
-            usuario.RolId = 3; //rol de cliente seteado por defecto en este caso
+            usuario.RolId = 3;
             usuario.FechaCreacion = DateTime.Now;
 
             try
             {
-                //ejecutando el SP para pasar TODOS los parámetros(sin incluir el activo porque ese está declarado en el SP)
                 var usuarioIdResult = await _contexto.Database
-                .SqlQueryRaw<int>(
-                    "EXEC seg.InsertUserAndClient @p0, @p1, @p2, @p3, @p4, @p5, @p6",
-                    usuario.RolId,
-                    usuario.Nombre,
-                    usuario.ApellidoPaterno,
-                    usuario.ApellidoMaterno,
-                    usuario.Correo,
-                    usuario.Contrasena,
-                    usuario.FechaCreacion
-                )
-                .ToListAsync();
+                    .SqlQueryRaw<int>(
+                        "EXEC seg.InsertUserAndClient @p0, @p1, @p2, @p3, @p4, @p5, @p6",
+                        usuario.RolId,
+                        usuario.Nombre,
+                        usuario.ApellidoPaterno,
+                        usuario.ApellidoMaterno,
+                        usuario.Correo,
+                        usuario.Contrasena,
+                        usuario.FechaCreacion
+                    )
+                    .ToListAsync();
 
                 int nuevoUsuarioId = usuarioIdResult.FirstOrDefault();
 
                 if (nuevoUsuarioId <= 0)
                 {
-                    //mensaje en caso de error
-                    ViewBag.Message = "Error al registrar el usuario.";
+                    ViewBag.Mensaje = "Error al registrar el usuario.";
                     return View();
                 }
-                //luego de insertar en la tabla usuario, se inserta en cliente
+
                 string notasCliente = "Cliente registrado desde registro de usuario.";
 
                 var clienteResult = await _contexto.Database.ExecuteSqlRawAsync(
@@ -129,6 +155,10 @@ namespace MultiserviciosPiscinas.Controllers
             }
         }
 
+        // =========================
+        // RECUPERAR CONTRASEÑA
+        // =========================
+
         [HttpGet]
         public IActionResult RecuperarContrasena()
         {
@@ -138,11 +168,11 @@ namespace MultiserviciosPiscinas.Controllers
         [HttpPost]
         public async Task<IActionResult> RecuperarContrasena(Usuario usuario)
         {
-
             var correoLimpio = usuario.Correo.Trim();
 
             var resultado = await _contexto.Database
-                .SqlQuery<ResultadoValidacionUsuario>($"EXEC seg.ValidarCorreoRecuperacion @Correo={correoLimpio}")
+                .SqlQuery<ResultadoValidacionUsuario>(
+                    $"EXEC seg.ValidarCorreoRecuperacion @Correo={correoLimpio}")
                 .AsAsyncEnumerable()
                 .FirstOrDefaultAsync();
 
@@ -154,9 +184,9 @@ namespace MultiserviciosPiscinas.Controllers
 
             var nuevaContrasena = _generales.GenerarContrasena();
 
-            //actualizamos la contraseña
             int filasAfectadas = await _contexto.Database
-                .ExecuteSqlAsync($"EXEC seg.ActualizarContrasena @Contrasena={nuevaContrasena}, @IdUsuario={resultado.Id}");
+                .ExecuteSqlAsync(
+                    $"EXEC seg.ActualizarContrasena @Contrasena={nuevaContrasena}, @IdUsuario={resultado.Id}");
 
             if (filasAfectadas <= 0)
             {
@@ -164,8 +194,10 @@ namespace MultiserviciosPiscinas.Controllers
                 return View();
             }
 
-            //se accede a la carpeta templates para enviar el correo con la nueva contraseña
-            string rutaHtml = Path.Combine(_entornoWeb.ContentRootPath, "Template", "RecuperarContrasena.html");
+            string rutaHtml = Path.Combine(
+                _entornoWeb.ContentRootPath,
+                "Template",
+                "RecuperarContrasena.html");
 
             if (!System.IO.File.Exists(rutaHtml))
             {
@@ -179,20 +211,31 @@ namespace MultiserviciosPiscinas.Controllers
                 .Replace("{{NOMBRE_USUARIO}}", resultado.Nombre)
                 .Replace("{{NUEVA_CONTRASENA}}", nuevaContrasena);
 
-            //envío del correo electrónico
-            _generales.EnviarCorreo(resultado.Correo, "Recuperar Acceso", htmlFinal);
+            _generales.EnviarCorreo(
+                resultado.Correo,
+                "Recuperar Acceso",
+                htmlFinal);
 
             return RedirectToAction("InicioSesion", "Auth");
         }
+
+        // =========================
+        // CERRAR SESIÓN
+        // =========================
 
         [HttpPost]
         public async Task<IActionResult> CerrarSesion()
         {
-            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            await HttpContext.SignOutAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme);
+
             return RedirectToAction("InicioSesion", "Auth");
         }
 
-        //DTO
+        // =========================
+        // DTO
+        // =========================
+
         public class ResultadoValidacionUsuario
         {
             public int Id { get; set; }

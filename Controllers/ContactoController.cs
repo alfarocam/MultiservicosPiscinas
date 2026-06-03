@@ -5,14 +5,19 @@ namespace MultiserviciosPiscinas.Controllers
 {
     public class ContactoController : Controller
     {
-        
+        private readonly PiscinasYMultiserviciosContext _context;
+
+        public ContactoController(PiscinasYMultiserviciosContext context)
+        {
+            _context = context;
+        }
+
         [HttpGet]
         public IActionResult Index()
         {
             return View();
         }
 
-        
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Enviar(ContactoViewModel model)
@@ -22,16 +27,18 @@ namespace MultiserviciosPiscinas.Controllers
                 return View("Index", model);
             }
 
-            
-            TempData["Exito"] = "La consulta fue enviada correctamente. Nos pondremos en contacto contigo pronto.";
+            TempData["Exito"] =
+                "La consulta fue enviada correctamente.";
 
             return RedirectToAction(nameof(Index));
         }
 
-        
         public IActionResult Informacion()
         {
-            return View();
+            var contacto =
+                _context.ContactoEmpresas.FirstOrDefault();
+
+            return View(contacto);
         }
     }
 }

@@ -255,5 +255,41 @@
             </div>
         </div>
     }
+    <!-- Encuesta de satisfacción -->
+    <div class="info-card">
+        <div class="info-card-header">
+            ⭐ Encuesta de Satisfacción
+        </div>
+
+        <div class="info-card-body">
+
+            @if (ViewBag.YaCalificado == true)
+            {
+                <div class="alert alert-success" style="border-radius:12px;">
+                    Este servicio ya ha sido calificado, gracias.
+                </div>
+            }
+            else if (Model.EstadoServicio == "Cerrado")
+            {
+                <p style="color:#6b7280; margin-bottom:16px;">
+                    ¿Cómo fue tu experiencia con este mantenimiento?
+                </p>
+
+                <a asp-controller="Encuestas"
+                   asp-action="Crear"
+                   asp-route-servicioId="@Model.Id"
+                   class="btn-detalle">
+                    Completar encuesta →
+                </a>
+            }
+            else
+            {
+                <div class="alert alert-warning" style="border-radius:12px;">
+                    La encuesta estará disponible cuando el servicio esté cerrado.
+                </div>
+            }
+
+        </div>
+    </div>
 
 </div>
