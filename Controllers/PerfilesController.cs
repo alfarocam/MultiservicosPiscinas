@@ -15,7 +15,9 @@ namespace MultiserviciosPiscinas.Controllers
             _context = context;
         }
 
- 
+        //ver el perfil 
+        //get
+        //info asociada de roles y clientes
         public async Task<IActionResult> Detalle()
         {
             string? correoLogueado = User.Identity?.Name;
@@ -38,8 +40,9 @@ namespace MultiserviciosPiscinas.Controllers
 
             return View(usuario);
         }
-
-
+        //edit
+        //
+        //cargar el formulario
         public async Task<IActionResult> Editar()
         {
             string? correoLogueado = User.Identity?.Name;
@@ -63,6 +66,9 @@ namespace MultiserviciosPiscinas.Controllers
         }
 
 
+        //guardar cambios
+        //
+        // valida token
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Editar(
@@ -81,7 +87,7 @@ namespace MultiserviciosPiscinas.Controllers
             {
                 return NotFound();
             }
-
+            //validacioness
             if (string.IsNullOrWhiteSpace(nombre))
             {
                 ModelState.AddModelError("", "El nombre es obligatorio.");
@@ -101,7 +107,8 @@ namespace MultiserviciosPiscinas.Controllers
             {
                 return View(usuarioDb);
             }
-
+            //act usuario
+            //
             usuarioDb.Nombre = nombre;
             usuarioDb.Correo = correo;
 
@@ -110,6 +117,9 @@ namespace MultiserviciosPiscinas.Controllers
                 usuarioDb.Contrasena = contrasena;
             }
 
+            //actualiza tel
+            //modificca tel prin
+            //si no existe crea identidad
             if (usuarioDb.Cliente != null)
             {
                 var telefonoPrincipal = await _context.TelefonosClientes
