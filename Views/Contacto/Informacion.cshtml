@@ -1,15 +1,33 @@
-﻿<h2>Información de Contacto</h2>
+﻿@model MultiserviciosPiscinas.Models.ContactoEmpresa
 
-<div class="card">
+<h2>Medios de Contacto</h2>
+
+<div class="card shadow-sm">
     <div class="card-body">
 
-        <p><strong>Teléfono:</strong> 2222-2222</p>
+        <h5 class="mb-3">
+            Información de contacto
+        </h5>
 
-        <p><strong>Correo:</strong> soporte@multiserviciospiscinas.com</p>
+        <p>
+            <strong>Teléfono:</strong>
+            @Model?.Telefono
+        </p>
 
-        <p><strong>Dirección:</strong> Alajuela, Costa Rica</p>
+        <p>
+            <strong>Correo:</strong>
+            @Model?.Correo
+        </p>
 
-        <p><strong>Horario:</strong> Lunes a Viernes de 8:00 a.m. a 5:00 p.m.</p>
+        <p>
+            <strong>Dirección:</strong>
+            @Model?.Direccion
+        </p>
+
+        <p>
+            <strong>Horario:</strong>
+            @Model?.Horario
+        </p>
 
     </div>
 </div>

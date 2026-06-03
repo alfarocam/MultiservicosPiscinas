@@ -2,31 +2,48 @@
 
 <h2>Encuesta de Satisfacción</h2>
 
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["Error"]
+    </div>
+}
+
 <form asp-action="Crear" method="post">
+
+    @Html.AntiForgeryToken()
 
     <input type="hidden" asp-for="ServicioId" />
 
     <div class="mb-3">
 
-        <label>Calificación</label>
+        <label class="form-label">
+            Calificación *
+        </label>
 
         <select asp-for="Calificacion"
                 class="form-control">
 
             <option value="">Seleccione</option>
-            <option value="1">1 - Muy Malo</option>
-            <option value="2">2 - Malo</option>
-            <option value="3">3 - Regular</option>
-            <option value="4">4 - Bueno</option>
-            <option value="5">5 - Excelente</option>
+            <option value="1">⭐ 1</option>
+            <option value="2">⭐⭐ 2</option>
+            <option value="3">⭐⭐⭐ 3</option>
+            <option value="4">⭐⭐⭐⭐ 4</option>
+            <option value="5">⭐⭐⭐⭐⭐ 5</option>
 
         </select>
+
+        <span asp-validation-for="Calificacion"
+              class="text-danger">
+        </span>
 
     </div>
 
     <div class="mb-3">
 
-        <label>Comentario</label>
+        <label class="form-label">
+            Comentario (opcional)
+        </label>
 
         <textarea asp-for="Comentario"
                   class="form-control">
@@ -34,10 +51,17 @@
 
     </div>
 
-    <button class="btn btn-primary">
+    <button type="submit"
+            class="btn btn-success">
 
-        Enviar Encuesta
+        Enviar Opinión
 
     </button>
 
 </form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

@@ -1,11 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using MultiserviciosPiscinas.Models;
-using Microsoft.AspNetCore.Authorization;
 
 namespace MultiserviciosPiscinas.Controllers
 {
-    [Authorize(Roles = "1,3")]
+    [Authorize(Roles = "3")]
     public class EncuestasController : Controller
     {
         private readonly PiscinasYMultiserviciosContext _context;
@@ -15,8 +15,20 @@ namespace MultiserviciosPiscinas.Controllers
             _context = context;
         }
 
-        public IActionResult Crear(int servicioId)
+        [HttpGet]
+        public async Task<IActionResult> Crear(int servicioId)
         {
+            bool existe = await _context.Encuesta
+                .AnyAsync(x => x.ServicioId == servicioId);
+
+            if (existe)
+            {
+                TempData["Error"] =
+                    "Este servicio ya ha sido calificado, gracias.";
+
+                return RedirectToAction("Index", "Portal");
+            }
+
             var encuesta = new Encuestum
             {
                 ServicioId = servicioId
@@ -26,17 +38,31 @@ namespace MultiserviciosPiscinas.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Crear(Encuestum encuesta)
         {
+            if (encuesta.Calificacion < 1 || encuesta.Calificacion > 5)
+            {
+                ModelState.AddModelError(
+                    "Calificacion",
+                    "La calificación es obligatoria."
+                );
+            }
+
             bool existe = await _context.Encuesta
                 .AnyAsync(x => x.ServicioId == encuesta.ServicioId);
 
             if (existe)
             {
                 TempData["Error"] =
-                    "Este servicio ya posee una encuesta.";
+                    "Este servicio ya ha sido calificado, gracias.";
 
                 return RedirectToAction("Index", "Portal");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return View(encuesta);
             }
 
             encuesta.FechaEnvio = DateTime.Now;
@@ -46,7 +72,7 @@ namespace MultiserviciosPiscinas.Controllers
             await _context.SaveChangesAsync();
 
             TempData["Exito"] =
-                "Encuesta registrada correctamente.";
+                "La calificación fue enviada exitosamente.";
 
             return RedirectToAction("Index", "Portal");
         }
