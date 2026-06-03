@@ -15,9 +15,7 @@ namespace MultiserviciosPiscinas.Controllers
             _context = context;
         }
 
-        // ==========================
-        // VER PERFIL
-        // ==========================
+ 
         public async Task<IActionResult> Detalle()
         {
             string? correoLogueado = User.Identity?.Name;
@@ -41,9 +39,7 @@ namespace MultiserviciosPiscinas.Controllers
             return View(usuario);
         }
 
-        // ==========================
-        // CARGAR FORMULARIO
-        // ==========================
+
         public async Task<IActionResult> Editar()
         {
             string? correoLogueado = User.Identity?.Name;
@@ -66,9 +62,7 @@ namespace MultiserviciosPiscinas.Controllers
             return View(usuario);
         }
 
-        // ==========================
-        // GUARDAR CAMBIOS
-        // ==========================
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Editar(
@@ -88,7 +82,6 @@ namespace MultiserviciosPiscinas.Controllers
                 return NotFound();
             }
 
-            // VALIDACIONES
             if (string.IsNullOrWhiteSpace(nombre))
             {
                 ModelState.AddModelError("", "El nombre es obligatorio.");
@@ -109,7 +102,6 @@ namespace MultiserviciosPiscinas.Controllers
                 return View(usuarioDb);
             }
 
-            // ACTUALIZAR USUARIO
             usuarioDb.Nombre = nombre;
             usuarioDb.Correo = correo;
 
@@ -118,9 +110,6 @@ namespace MultiserviciosPiscinas.Controllers
                 usuarioDb.Contrasena = contrasena;
             }
 
-            // ==========================
-            // ACTUALIZAR TELEFONO
-            // ==========================
             if (usuarioDb.Cliente != null)
             {
                 var telefonoPrincipal = await _context.TelefonosClientes
@@ -149,17 +138,24 @@ namespace MultiserviciosPiscinas.Controllers
 
             try
             {
+                _context.Update(usuarioDb);
+                await _context.SaveChangesAsync(); 
+
                 await _context.SaveChangesAsync();
 
                 TempData["MensajeExito"] =
                     "Información actualizada correctamente.";
 
+
                 return RedirectToAction(nameof(Detalle));
             }
             catch
             {
+                ModelState.AddModelError("", "Error de simultaneidad al guardar los datos. Inténtalo de nuevo.");
+
                 ModelState.AddModelError("",
                     "Ocurrió un error al actualizar.");
+
 
                 return View(usuarioDb);
             }

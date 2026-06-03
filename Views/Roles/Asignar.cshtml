@@ -1,40 +1,36 @@
 ﻿@{
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
-    ViewData["Title"] = "Asignar rol";
+    ViewData["Title"] = "Modificar Rol";
 }
 
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h2 class="mb-0">Asignar rol a usuario</h2>
+    <h2 class="mb-0">Modificar Rol de Usuario (HU-1.6)</h2>
     <a asp-action="Index" class="btn btn-secondary">Volver</a>
 </div>
 
 <div class="card border-0 shadow-sm">
     <div class="card-body">
-        <form method="post">
+        <form asp-action="Asignar" method="post">
             @Html.AntiForgeryToken()
 
             <div class="row g-3">
                 <div class="col-md-6">
-                    <label class="form-label">Usuario</label>
-                    <select class="form-select">
-                        <option selected>admin@test.com</option>
-                        <option>tecnico@test.com</option>
-                        <option>cliente@test.com</option>
+                    <label class="form-label fw-bold">Seleccione el Usuario</label>
+                    <select name="usuarioId" class="form-select" asp-items="ViewBag.Usuarios" required>
+                        <option value="" disabled selected>-- Seleccionar por Correo --</option>
                     </select>
                 </div>
 
                 <div class="col-md-6">
-                    <label class="form-label">Rol</label>
-                    <select class="form-select">
-                        <option selected>Administrador</option>
-                        <option>Tecnico</option>
-                        <option>Cliente</option>
+                    <label class="form-label fw-bold">Seleccione el Nuevo Rol</label>
+                    <select name="rolId" class="form-select" asp-items="ViewBag.Roles" required>
+                        <option value="" disabled selected>-- Asignar nuevo rol --</option>
                     </select>
                 </div>
             </div>
 
             <div class="mt-4">
-                <button type="submit" class="btn btn-primary">Asignar rol</button>
+                <button type="submit" class="btn btn-primary">Guardar Cambios de Rol</button>
                 <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
             </div>
         </form>
