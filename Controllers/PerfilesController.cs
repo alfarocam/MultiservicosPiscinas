@@ -39,7 +39,7 @@ namespace MultiserviciosPiscinas.Controllers
             return View(usuario);
         }
 
-        // Carga formulario de la edición con los datos actuales
+        // carga formulario de la edición 
         public async Task<IActionResult> Editar()
         {
             string? correoLogueado = User.Identity?.Name;
@@ -60,7 +60,7 @@ namespace MultiserviciosPiscinas.Controllers
             return View(usuario);
         }
 
-        // Recibo modificaciones y las guardo en el sql
+        // Recib modificaciones y las guardo en el sql
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Editar(int id, string nombre, string correo, string? contrasena)
@@ -85,14 +85,14 @@ namespace MultiserviciosPiscinas.Controllers
             try
             {
                 _context.Update(usuarioDb);
-                await _context.SaveChangesAsync(); // Guarda los cambios en sql
+                await _context.SaveChangesAsync(); 
 
                 TempData["MensajeExito"] = "¡Perfil actualizado correctamente en la base de datos!";
                 return RedirectToAction(nameof(Detalle));
             }
             catch (DbUpdateConcurrencyException)
             {
-                ModelState.AddModelError("", "Error de concurrencia al guardar los datos. Inténtalo de nuevo.");
+                ModelState.AddModelError("", "Error de simultaneidad al guardar los datos. Inténtalo de nuevo.");
                 return View(usuarioDb);
             }
         }
