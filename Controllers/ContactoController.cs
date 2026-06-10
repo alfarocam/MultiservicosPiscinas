@@ -70,8 +70,13 @@ namespace MultiserviciosPiscinas.Controllers
 
         public IActionResult Informacion()
         {
-            var contacto =
-                _contexto.ContactoEmpresas.FirstOrDefault();
+            var contacto = new ContactoEmpresa
+            {
+                Telefono = _configuracion["DatosContacto:Telefono"] ?? "No disponible",
+                Correo = _configuracion["DatosContacto:Correo"] ?? "No disponible",
+                Direccion = _configuracion["DatosContacto:Direccion"] ?? "No disponible",
+                HorarioAtencion = _configuracion["DatosContacto:HorarioAtencion"] ?? "No disponible"
+            };
 
             return View(contacto);
         }
