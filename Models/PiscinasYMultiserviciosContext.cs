@@ -80,6 +80,8 @@ public partial class PiscinasYMultiserviciosContext : DbContext
     public virtual DbSet<VisitaRutum> VisitaRuta { get; set; }
 
     public virtual DbSet<ContactoEmpresa> ContactoEmpresas { get; set; }
+
+    public virtual DbSet<ConsultaContacto> ConsultaContactos { get; set; }
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         optionsBuilder.UseSqlServer("Server=localhost;Database=Piscinas_Y_Multiservicios;Trusted_Connection=True;TrustServerCertificate=True;");
@@ -991,8 +993,43 @@ public partial class PiscinasYMultiserviciosContext : DbContext
                 .HasColumnName("horario");
         });
 
+        modelBuilder.Entity<ConsultaContacto>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.ToTable("CONSULTA_CONTACTO", "crm");
+
+            entity.Property(e => e.Id)
+                .HasColumnName("id");
+
+            entity.Property(e => e.Nombre)
+                .HasMaxLength(100)
+                .IsUnicode(false)
+                .HasColumnName("nombre");
+
+            entity.Property(e => e.Correo)
+                .HasMaxLength(150)
+                .IsUnicode(false)
+                .HasColumnName("correo");
+
+            entity.Property(e => e.Asunto)
+                .HasMaxLength(200)
+                .IsUnicode(false)
+                .HasColumnName("asunto");
+
+            entity.Property(e => e.Mensaje)
+                .HasColumnName("mensaje");
+
+            entity.Property(e => e.FechaEnvio)
+                .HasColumnName("fecha_envio");
+        });
+
+
+
         OnModelCreatingPartial(modelBuilder);
     }
+
+
 
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
 }

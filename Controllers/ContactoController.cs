@@ -27,6 +27,19 @@ namespace MultiserviciosPiscinas.Controllers
                 return View("Index", model);
             }
 
+            var consulta = new ConsultaContacto
+            {
+                Nombre = model.Nombre,
+                Correo = model.Correo,
+                Asunto = model.Asunto,
+                Mensaje = model.Mensaje,
+                FechaEnvio = DateTime.Now
+            };
+
+            _context.ConsultaContactos.Add(consulta);
+            _context.SaveChanges();
+
+
             TempData["Exito"] =
                 "La consulta fue enviada correctamente.";
 
