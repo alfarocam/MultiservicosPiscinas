@@ -8,22 +8,8 @@ using System.Security.Claims;
 
 namespace MultiserviciosPiscinas.Controllers
 {
-    public class AuthController : Controller
+    public class AuthController(PiscinasYMultiserviciosContext _contexto, Generales _generales, IWebHostEnvironment _entornoWeb) : Controller
     {
-        private readonly PiscinasYMultiserviciosContext _contexto;
-        private readonly Generales _generales;
-        private readonly IWebHostEnvironment _entornoWeb;
-
-        public AuthController(
-            PiscinasYMultiserviciosContext context,
-            Generales generales,
-            IWebHostEnvironment entornoWeb)
-        {
-            _contexto = context;
-            _generales = generales;
-            _entornoWeb = entornoWeb;
-        }
-
         // =========================
         // LOGIN
         // =========================

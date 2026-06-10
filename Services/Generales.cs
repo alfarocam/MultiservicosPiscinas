@@ -7,18 +7,24 @@ namespace MultiserviciosPiscinas.Services
 {
     public class Generales(IConfiguration configuration)
     {
-        public void EnviarCorreo(string destinatario, string asunto, string cuerpo)
+        public void EnviarCorreo(string destinatario, string asunto, string cuerpo, string? replyTo = null)
         {
             //leemos desde appsettings.json
             var emailAccount = configuration["EmailSettings:Account"];
             var emailPassword = configuration["EmailSettings:Password"];
 
             using var mail = new MailMessage();
-            mail.From = new MailAddress(emailAccount);
+            mail.From = new MailAddress(emailAccount);//siempre sale de la empresa, no del cliente
             mail.To.Add(destinatario);
             mail.Subject = asunto;
             mail.Body = cuerpo;
             mail.IsBodyHtml = true;
+
+            // Si se desea agregar una dirección de respuesta diferente al remitente, se puede hacer así:
+            if (!string.IsNullOrEmpty(replyTo))
+            {
+                mail.ReplyToList.Add(new MailAddress(replyTo));
+            }
 
             using var smtp = new SmtpClient("smtp.gmail.com", 587);
             smtp.Credentials = new NetworkCredential(emailAccount, emailPassword);

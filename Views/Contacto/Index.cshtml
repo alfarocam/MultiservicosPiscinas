@@ -2,33 +2,27 @@
 
 <h2>Contacto y Soporte</h2>
 
-@if (TempData["Exito"] != null)
+@if (TempData["Mensaje"] != null)
 {
-    <div class="alert alert-success">
-        @TempData["Exito"]
+    // Recuperamos el tipo de mensaje (si no viene, por defecto será 'success')
+    var tipoAlert = TempData["TipoMensaje"]?.ToString() ?? "success";
+
+    <div class="alert alert-@tipoAlert alert-dismissible fade show text-center small" role="alert">
+        @TempData["Mensaje"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 }
 
 <form asp-action="Enviar" method="post">
 
     <div class="mb-3">
-        <label>Nombre</label>
-        <input asp-for="Nombre" class="form-control" />
-    </div>
-
-    <div class="mb-3">
-        <label>Correo</label>
-        <input asp-for="Correo" class="form-control" />
-    </div>
-
-    <div class="mb-3">
         <label>Asunto</label>
-        <input asp-for="Asunto" class="form-control" />
+        <input asp-for="Asunto" class="form-control" required />
     </div>
 
     <div class="mb-3">
         <label>Mensaje</label>
-        <textarea asp-for="Mensaje" class="form-control"></textarea>
+        <textarea asp-for="Mensaje" class="form-control" required></textarea>
     </div>
 
     <button type="submit" class="btn btn-success">
