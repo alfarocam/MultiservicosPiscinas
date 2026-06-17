@@ -18,6 +18,24 @@ namespace MultiserviciosPiscinas.Controllers
         }
 
         [HttpGet]
+        public IActionResult Crear()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public IActionResult Crear(Piscina piscina)
+        {
+            if (ModelState.IsValid)
+            {
+                _contexto.Piscina.Add(piscina);
+                _contexto.SaveChanges();
+                return RedirectToAction("Index");
+            }
+            return View(piscina);
+        }
+
+        [HttpGet]
         public IActionResult Detalle()
         {
             return View();
@@ -29,11 +47,7 @@ namespace MultiserviciosPiscinas.Controllers
             return View();
         }
 
-        [HttpGet]
-        public IActionResult Crear()
-        {
-            return View();
-        }
+        
 
     }
 }
