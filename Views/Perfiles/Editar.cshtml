@@ -60,7 +60,7 @@
                     <input type="text"
                            name="telefono"
                            class="form-control"
-                           value="@(Model.Cliente?.TelefonosClientes
+                           value="@(Model.Cliente?.TelefonosCliente
                                                            ?.FirstOrDefault(t => t.EsPrincipal == 1)
                                                            ?.NumeroTelefono ?? "")"
                            required />

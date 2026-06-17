@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace MultiserviciosPiscinas.Models;
 
-public partial class BitacoraAuditorium
+public partial class BitacoraAuditoria
 {
     public int Id { get; set; }
 

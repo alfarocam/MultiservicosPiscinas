@@ -17,13 +17,13 @@ public partial class Piscina
 
     public string Estado { get; set; } = null!;
 
-    public virtual ICollection<Citum> Cita { get; set; } = new List<Citum>();
+    public virtual ICollection<Cita> Cita { get; set; } = new List<Cita>();
 
     public virtual Cliente Cliente { get; set; } = null!;
 
     public virtual DireccionCliente Direccion { get; set; } = null!;
 
-    public virtual ICollection<PiscinaEquipamiento> PiscinaEquipamientos { get; set; } = new List<PiscinaEquipamiento>();
+    public virtual ICollection<PiscinaEquipamiento> PiscinaEquipamiento { get; set; } = new List<PiscinaEquipamiento>();
 
-    public virtual ICollection<ProyectoConstruccion> ProyectoConstruccions { get; set; } = new List<ProyectoConstruccion>();
+    public virtual ICollection<ProyectoConstruccion> ProyectoConstruccion { get; set; } = new List<ProyectoConstruccion>();
 }

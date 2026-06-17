@@ -27,7 +27,7 @@ public partial class GastoOperativo
 
     public virtual CategoriaGastoOperativo Categoria { get; set; } = null!;
 
-    public virtual Citum? Cita { get; set; }
+    public virtual Cita? Cita { get; set; }
 
     public virtual Usuario Usuario { get; set; } = null!;
 }

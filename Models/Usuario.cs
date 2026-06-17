@@ -23,19 +23,19 @@ public partial class Usuario
 
     public DateTime FechaCreacion { get; set; }
 
-    public virtual ICollection<Anuncio> Anuncios { get; set; } = new List<Anuncio>();
+    public virtual ICollection<Anuncio> Anuncio { get; set; } = new List<Anuncio>();
 
-    public virtual ICollection<BitacoraAuditorium> BitacoraAuditoria { get; set; } = new List<BitacoraAuditorium>();
+    public virtual ICollection<BitacoraAuditoria> BitacoraAuditoria { get; set; } = new List<BitacoraAuditoria>();
 
-    public virtual ICollection<Citum> Cita { get; set; } = new List<Citum>();
+    public virtual ICollection<Cita> Cita { get; set; } = new List<Cita>();
 
     public virtual Cliente? Cliente { get; set; }
 
-    public virtual ICollection<GastoOperativo> GastoOperativos { get; set; } = new List<GastoOperativo>();
+    public virtual ICollection<GastoOperativo> GastoOperativo { get; set; } = new List<GastoOperativo>();
 
     public virtual Rol Rol { get; set; } = null!;
 
-    public virtual ICollection<RutaOptimizadum> RutaOptimizada { get; set; } = new List<RutaOptimizadum>();
+    public virtual ICollection<RutaOptimizada> RutaOptimizada { get; set; } = new List<RutaOptimizada>();
 
-    public virtual ICollection<Vehiculo> Vehiculos { get; set; } = new List<Vehiculo>();
+    public virtual ICollection<Vehiculo> Vehiculo { get; set; } = new List<Vehiculo>();
 }

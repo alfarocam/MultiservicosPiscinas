@@ -25,7 +25,7 @@ public partial class Cotizacion
 
     public virtual Cliente Cliente { get; set; } = null!;
 
-    public virtual ICollection<DetalleCotizacion> DetalleCotizacions { get; set; } = new List<DetalleCotizacion>();
+    public virtual ICollection<DetalleCotizacion> DetalleCotizacion { get; set; } = new List<DetalleCotizacion>();
 
     public virtual Factura? Factura { get; set; }
 }

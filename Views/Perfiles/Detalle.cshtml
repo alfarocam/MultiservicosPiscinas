@@ -59,7 +59,7 @@
                     Teléfono
                 </td>
                 <td>
-                    @(Model.Cliente?.TelefonosClientes?
+                    @(Model.Cliente?.TelefonosCliente?
                                         .FirstOrDefault(t => t.EsPrincipal == 1)?
                                         .NumeroTelefono
                                         ?? "No registrado")

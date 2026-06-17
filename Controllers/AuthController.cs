@@ -25,7 +25,7 @@ namespace MultiserviciosPiscinas.Controllers
         public async Task<IActionResult> InicioSesion(string correo, string contrasena)
         {
             // Buscar usuario por correo
-            var usuario = await _contexto.Usuarios
+            var usuario = await _contexto.Usuario
                 .FirstOrDefaultAsync(u => u.Correo == correo);
 
             // Validar existencia y contraseña
@@ -83,7 +83,7 @@ namespace MultiserviciosPiscinas.Controllers
         [HttpPost]
         public async Task<IActionResult> Registrar(Usuario usuario)
         {
-            bool correoExiste = await _contexto.Usuarios
+            bool correoExiste = await _contexto.Usuario
                 .AnyAsync(u => u.Correo == usuario.Correo);
 
             if (correoExiste)

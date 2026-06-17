@@ -23,5 +23,5 @@ public partial class DireccionCliente
 
     public virtual Distrito Distrito { get; set; } = null!;
 
-    public virtual ICollection<Piscina> Piscinas { get; set; } = new List<Piscina>();
+    public virtual ICollection<Piscina> Piscina { get; set; } = new List<Piscina>();
 }

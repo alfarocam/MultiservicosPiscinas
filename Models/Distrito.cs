@@ -13,5 +13,5 @@ public partial class Distrito
 
     public virtual Canton Canton { get; set; } = null!;
 
-    public virtual ICollection<DireccionCliente> DireccionClientes { get; set; } = new List<DireccionCliente>();
+    public virtual ICollection<DireccionCliente> DireccionCliente { get; set; } = new List<DireccionCliente>();
 }

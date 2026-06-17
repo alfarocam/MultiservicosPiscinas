@@ -21,9 +21,9 @@ public partial class Producto
 
     public virtual CategoriaProducto Categoria { get; set; } = null!;
 
-    public virtual ICollection<DetalleCotizacion> DetalleCotizacions { get; set; } = new List<DetalleCotizacion>();
+    public virtual ICollection<DetalleCotizacion> DetalleCotizacion { get; set; } = new List<DetalleCotizacion>();
 
-    public virtual ICollection<DetalleFactura> DetalleFacturas { get; set; } = new List<DetalleFactura>();
+    public virtual ICollection<DetalleFactura> DetalleFactura { get; set; } = new List<DetalleFactura>();
 
-    public virtual ICollection<ItemCarrito> ItemCarritos { get; set; } = new List<ItemCarrito>();
+    public virtual ICollection<ItemCarrito> ItemCarrito { get; set; } = new List<ItemCarrito>();
 }
