@@ -1,1 +1,51 @@
-﻿
+﻿<div class="container my-5" style="max-width: 600px;">
+    <div class="mb-4">
+        <h1 class="a-title">Registrar Nueva Piscina</h1>
+        <p class="a-text-muted">Introduzca los datos correspondientes para dar de alta la estructura en el sistema.</p>
+    </div>
+
+    <div class="o-form-card">
+        <form action="/Piscina/Index" method="post">
+
+            <div class="m-form-field">
+                <label for="ClienteId">ID del Cliente</label>
+                <input type="number" id="ClienteId" name="ClienteId" class="a-input" placeholder="Ej. 102" required />
+            </div>
+
+            <div class="m-form-field">
+                <label for="DireccionId">ID de la Dirección</label>
+                <input type="number" id="DireccionId" name="DireccionId" class="a-input" placeholder="Ej. 540" required />
+            </div>
+
+            <div class="m-form-field">
+                <label for="Tipo">Tipo de Piscina</label>
+                <select id="Tipo" name="Tipo" class="a-input" required>
+                    <option value="" disabled selected>Seleccione una opción...</option>
+                    <option value="Fibra de Vidrio">Fibra de Vidrio</option>
+                    <option value="Concreto">Concreto</option>
+                    <option value="Paneles de Acero">Paneles de Acero</option>
+                    <option value="Infantil / Desmontable">Infantil / Desmontable</option>
+                </select>
+            </div>
+
+            <div class="m-form-field">
+                <label for="VolumenM3">Volumen (m³)</label>
+                <input type="number" step="0.01" id="VolumenM3" name="VolumenM3" class="a-input" placeholder="Ej. 45.50" required />
+            </div>
+
+            <div class="m-form-field">
+                <label for="Estado">Estado Inicial</label>
+                <select id="Estado" name="Estado" class="a-input" required>
+                    <option value="Activa">Activa</option>
+                    <option value="Mantenimiento">Mantenimiento</option>
+                    <option value="Inactiva">Inactiva</option>
+                </select>
+            </div>
+
+            <div class="d-flex justify-content-end gap-2 mt-4">
+                <a asp-action="Index" asp-controller="Piscinas" class="btn a-btn-outline d-flex align-items-center" style="color: var(--color-navbar-bg) !important; border-color: var(--color-navbar-bg) !important;">Cancelar</a>
+                <button type="submit" class="a-btn">Guardar Registro</button>
+            </div>
+        </form>
+    </div>
+</div>

@@ -1,9 +1,10 @@
-﻿@model MultiserviciosPiscinas.Models.Usuario
+@model MultiserviciosPiscinas.Models.Usuario
 
 @{
-    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
     ViewData["Title"] = "Editar perfil";
+    Layout = "~/Views/Shared/_LayoutCliente.cshtml";
 }
+
 
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h2 class="mb-0">Editar perfil</h2>
@@ -14,11 +15,12 @@
     </a>
 </div>
 
-<div class="card border-0 shadow-sm">
+<!-- Card 1: Información Personal y Dirección -->
+<div class="card border-0 shadow-sm mb-4">
     <div class="card-body">
+        <h4 class="card-title mb-4">Información personal</h4>
 
         <form asp-action="Editar" method="post">
-
             @Html.AntiForgeryToken()
 
             <input type="hidden"
@@ -31,10 +33,9 @@
 
             <div class="row g-3">
                 <div class="col-md-6">
-                    <label class="form-label">
+                    <label class="form-label fw-semibold">
                         Nombre
                     </label>
-
                     <input type="text"
                            name="nombre"
                            class="form-control"
@@ -42,40 +43,100 @@
                            required />
                 </div>
                 <div class="col-md-6">
-                    <label class="form-label">
+                    <label class="form-label fw-semibold">
                         Correo electrónico
                     </label>
-
                     <input type="email"
                            name="correo"
                            class="form-control"
                            value="@Model.Correo"
                            required />
                 </div>
-                <div class="col-md-6">
-                    <label class="form-label">
-                        Teléfono
-                    </label>
 
-                    <input type="text"
-                           name="telefono"
-                           class="form-control"
-                           value="@(Model.Cliente?.TelefonosCliente
-                                                           ?.FirstOrDefault(t => t.EsPrincipal == 1)
-                                                           ?.NumeroTelefono ?? "")"
-                           required />
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label">
-                        Nueva contraseña
-                    </label>
+                @if (Model.Cliente != null)
+                {
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">
+                            Teléfono
+                        </label>
+                        <input type="text"
+                               name="telefono"
+                               class="form-control"
+                               value="@(Model.Cliente?.TelefonosCliente
+                                                               ?.FirstOrDefault(t => t.EsPrincipal == 1)
+                                                               ?.NumeroTelefono ?? "")"
+                               required />
+                    </div>
 
-                    <input type="password"
-                           name="contrasena"
-                           class="form-control"
-                           placeholder="Dejar en blanco para mantener la actual" />
-                </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">
+                            Provincia
+                        </label>
+                        <select id="provinciaSelect" name="provinciaId" class="form-select" required>
+                            <option value="">Seleccione una provincia...</option>
+                            @foreach (var p in ViewBag.Provincias)
+                            {
+                                if (p.Id == ViewBag.SelectedProvinciaId)
+                                {
+                                    <option value="@p.Id" selected="selected">@p.Nombre</option>
+                                }
+                                else
+                                {
+                                    <option value="@p.Id">@p.Nombre</option>
+                                }
+                            }
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">
+                            Cantón
+                        </label>
+                        <select id="cantonSelect" name="cantonId" class="form-select" @(ViewBag.Cantones.Count == 0 ? "disabled" : "") required>
+                            <option value="">Seleccione un cantón...</option>
+                            @foreach (var c in ViewBag.Cantones)
+                            {
+                                if (c.Id == ViewBag.SelectedCantonId)
+                                {
+                                    <option value="@c.Id" selected="selected">@c.Nombre</option>
+                                }
+                                else
+                                {
+                                    <option value="@c.Id">@c.Nombre</option>
+                                }
+                            }
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">
+                            Distrito
+                        </label>
+                        <select id="distritoSelect" name="distritoId" class="form-select" @(ViewBag.Distritos.Count == 0 ? "disabled" : "") required>
+                            <option value="">Seleccione un distrito...</option>
+                            @foreach (var d in ViewBag.Distritos)
+                            {
+                                if (d.Id == ViewBag.SelectedDistritoId)
+                                {
+                                    <option value="@d.Id" selected="selected">@d.Nombre</option>
+                                }
+                                else
+                                {
+                                    <option value="@d.Id">@d.Nombre</option>
+                                }
+                            }
+                        </select>
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">
+                            Detalles de la dirección
+                        </label>
+                        <textarea name="detalles" class="form-control" rows="3" placeholder="Otras señas exactas de la dirección..." required>@ViewBag.DireccionDetalles</textarea>
+                    </div>
+                }
             </div>
+
             <div class="mt-4">
                 <button type="submit"
                         class="btn btn-warning">
@@ -87,8 +148,64 @@
                     Cancelar
                 </a>
             </div>
-
         </form>
-
     </div>
 </div>
+
+<!-- Card 2: Cambiar Contraseña -->
+<div class="card border-0 shadow-sm">
+    <div class="card-body">
+        <h4 class="card-title mb-4">Seguridad del perfil</h4>
+
+        @if (TempData["MensajeErrorContrasena"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show shadow-sm mb-3" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                @TempData["MensajeErrorContrasena"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+            </div>
+        }
+
+        <form asp-action="CambiarContrasena" method="post">
+            @Html.AntiForgeryToken()
+
+            <input type="hidden"
+                   name="id"
+                   value="@Model.Id" />
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">
+                        Nueva contraseña
+                    </label>
+                    <input type="password"
+                           name="contrasena"
+                           class="form-control"
+                           placeholder="Nueva contraseña"
+                           required />
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">
+                        Confirmar contraseña
+                    </label>
+                    <input type="password"
+                           name="confirmarContrasena"
+                           class="form-control"
+                           placeholder="Confirmar contraseña"
+                           required />
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <button type="submit"
+                        class="btn btn-warning">
+                    Cambiar contraseña
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/ubicaciones.js"></script>
+}
