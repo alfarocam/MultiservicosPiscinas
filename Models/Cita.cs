@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace MultiserviciosPiscinas.Models;
 
-public partial class Citum
+public partial class Cita
 {
     public int Id { get; set; }
 
@@ -19,7 +19,7 @@ public partial class Citum
 
     public string? Notas { get; set; }
 
-    public virtual ICollection<GastoOperativo> GastoOperativos { get; set; } = new List<GastoOperativo>();
+    public virtual ICollection<GastoOperativo> GastoOperativo { get; set; } = new List<GastoOperativo>();
 
     public virtual Piscina Piscina { get; set; } = null!;
 
@@ -27,5 +27,5 @@ public partial class Citum
 
     public virtual Usuario Tecnico { get; set; } = null!;
 
-    public virtual VisitaRutum? VisitaRutum { get; set; }
+    public virtual VisitaRuta? VisitaRuta { get; set; }
 }

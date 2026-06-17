@@ -15,10 +15,10 @@ namespace MultiserviciosPiscinas.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var clientes = await _context.Clientes
+            var clientes = await _context.Cliente
                 .Include(c => c.Usuario)
-                .Include(c => c.TelefonosClientes)
-                .Include(c => c.DireccionClientes)
+                .Include(c => c.TelefonosCliente)
+                .Include(c => c.DireccionCliente)
                 .ToListAsync();
 
             return View(clientes);
@@ -26,11 +26,11 @@ namespace MultiserviciosPiscinas.Controllers
 
         public async Task<IActionResult> Detalle(int id)
         {
-            var cliente = await _context.Clientes
+            var cliente = await _context.Cliente
                 .Include(c => c.Usuario)
-                .Include(c => c.TelefonosClientes)
-                .Include(c => c.DireccionClientes)
-                .Include(c => c.Piscinas)
+                .Include(c => c.TelefonosCliente)
+                .Include(c => c.DireccionCliente)
+                .Include(c => c.Piscina)
                 .FirstOrDefaultAsync(c => c.Id == id);
 
             if (cliente == null)
@@ -51,7 +51,7 @@ namespace MultiserviciosPiscinas.Controllers
             if (!ModelState.IsValid)
                 return View(model);
 
-            bool correoExiste = await _context.Usuarios
+            bool correoExiste = await _context.Usuario
                 .AnyAsync(u => u.Correo == model.Correo);
 
             if (correoExiste)
@@ -72,7 +72,7 @@ namespace MultiserviciosPiscinas.Controllers
                 FechaCreacion = DateTime.Now
             };
 
-            _context.Usuarios.Add(usuario);
+            _context.Usuario.Add(usuario);
             await _context.SaveChangesAsync();
 
             var cliente = new Cliente
@@ -81,7 +81,7 @@ namespace MultiserviciosPiscinas.Controllers
                 Notas = ""
             };
 
-            _context.Clientes.Add(cliente);
+            _context.Cliente.Add(cliente);
             await _context.SaveChangesAsync();
 
             var telefono = new TelefonosCliente
@@ -92,7 +92,7 @@ namespace MultiserviciosPiscinas.Controllers
                 EsPrincipal = 1
             };
 
-            _context.TelefonosClientes.Add(telefono);
+            _context.TelefonosCliente.Add(telefono);
 
             var direccion = new DireccionCliente
             {
@@ -103,7 +103,7 @@ namespace MultiserviciosPiscinas.Controllers
                 EsPrincipal = 1
             };
 
-            _context.DireccionClientes.Add(direccion);
+            _context.DireccionCliente.Add(direccion);
 
             await _context.SaveChangesAsync();
 
@@ -114,10 +114,10 @@ namespace MultiserviciosPiscinas.Controllers
 
         public async Task<IActionResult> Editar(int id)
         {
-            var cliente = await _context.Clientes
+            var cliente = await _context.Cliente
                 .Include(c => c.Usuario)
-                .Include(c => c.TelefonosClientes)
-                .Include(c => c.DireccionClientes)
+                .Include(c => c.TelefonosCliente)
+                .Include(c => c.DireccionCliente)
                 .FirstOrDefaultAsync(c => c.Id == id);
 
             if (cliente == null)
@@ -130,7 +130,7 @@ namespace MultiserviciosPiscinas.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Eliminar(int id)
         {
-            var cliente = await _context.Clientes
+            var cliente = await _context.Cliente
                 .Include(c => c.Usuario)
                 .FirstOrDefaultAsync(c => c.Id == id);
 

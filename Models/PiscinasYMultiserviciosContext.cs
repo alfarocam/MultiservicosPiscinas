@@ -15,73 +15,73 @@ public partial class PiscinasYMultiserviciosContext : DbContext
     {
     }
 
-    public virtual DbSet<Anuncio> Anuncios { get; set; }
+    public virtual DbSet<Anuncio> Anuncio { get; set; }
 
-    public virtual DbSet<BitacoraAuditorium> BitacoraAuditoria { get; set; }
+    public virtual DbSet<BitacoraAuditoria> BitacoraAuditoria { get; set; }
 
-    public virtual DbSet<Canton> Cantons { get; set; }
+    public virtual DbSet<Canton> Canton { get; set; }
 
-    public virtual DbSet<Carrito> Carritos { get; set; }
+    public virtual DbSet<Carrito> Carrito { get; set; }
 
-    public virtual DbSet<CategoriaGastoOperativo> CategoriaGastoOperativos { get; set; }
+    public virtual DbSet<CategoriaGastoOperativo> CategoriaGastoOperativo { get; set; }
 
-    public virtual DbSet<CategoriaProducto> CategoriaProductos { get; set; }
+    public virtual DbSet<CategoriaProducto> CategoriaProducto { get; set; }
 
-    public virtual DbSet<Citum> Cita { get; set; }
+    public virtual DbSet<Cita> Cita { get; set; }
 
-    public virtual DbSet<Cliente> Clientes { get; set; }
+    public virtual DbSet<Cliente> Cliente { get; set; }
 
-    public virtual DbSet<Cotizacion> Cotizacions { get; set; }
+    public virtual DbSet<Cotizacion> Cotizacion { get; set; }
 
-    public virtual DbSet<DetalleCotizacion> DetalleCotizacions { get; set; }
+    public virtual DbSet<DetalleCotizacion> DetalleCotizacion { get; set; }
 
-    public virtual DbSet<DetalleFactura> DetalleFacturas { get; set; }
+    public virtual DbSet<DetalleFactura> DetalleFactura { get; set; }
 
-    public virtual DbSet<DireccionCliente> DireccionClientes { get; set; }
+    public virtual DbSet<DireccionCliente> DireccionCliente { get; set; }
 
-    public virtual DbSet<Distrito> Distritos { get; set; }
+    public virtual DbSet<Distrito> Distrito { get; set; }
 
-    public virtual DbSet<Encuestum> Encuesta { get; set; }
+    public virtual DbSet<Encuesta> Encuesta { get; set; }
 
-    public virtual DbSet<Equipamiento> Equipamientos { get; set; }
+    public virtual DbSet<Equipamiento> Equipamiento { get; set; }
 
-    public virtual DbSet<Factura> Facturas { get; set; }
+    public virtual DbSet<Factura> Factura { get; set; }
 
-    public virtual DbSet<GastoOperativo> GastoOperativos { get; set; }
+    public virtual DbSet<GastoOperativo> GastoOperativo { get; set; }
 
-    public virtual DbSet<Inspeccion> Inspeccions { get; set; }
+    public virtual DbSet<Inspeccion> Inspeccion { get; set; }
 
-    public virtual DbSet<ItemCarrito> ItemCarritos { get; set; }
+    public virtual DbSet<ItemCarrito> ItemCarrito { get; set; }
 
-    public virtual DbSet<Piscina> Piscinas { get; set; }
+    public virtual DbSet<Piscina> Piscina { get; set; }
 
-    public virtual DbSet<PiscinaEquipamiento> PiscinaEquipamientos { get; set; }
+    public virtual DbSet<PiscinaEquipamiento> PiscinaEquipamiento { get; set; }
 
-    public virtual DbSet<Producto> Productos { get; set; }
+    public virtual DbSet<Producto> Producto { get; set; }
 
-    public virtual DbSet<Provincium> Provincia { get; set; }
+    public virtual DbSet<Provincia> Provincia { get; set; }
 
-    public virtual DbSet<ProyectoConstruccion> ProyectoConstruccions { get; set; }
+    public virtual DbSet<ProyectoConstruccion> ProyectoConstruccion { get; set; }
 
-    public virtual DbSet<Rol> Rols { get; set; }
+    public virtual DbSet<Rol> Rol { get; set; }
 
-    public virtual DbSet<RutaOptimizadum> RutaOptimizada { get; set; }
+    public virtual DbSet<RutaOptimizada> RutaOptimizada { get; set; }
 
-    public virtual DbSet<Servicio> Servicios { get; set; }
+    public virtual DbSet<Servicio> Servicio { get; set; }
 
-    public virtual DbSet<TareaServicio> TareaServicios { get; set; }
+    public virtual DbSet<TareaServicio> TareaServicio { get; set; }
 
-    public virtual DbSet<TelefonosCliente> TelefonosClientes { get; set; }
+    public virtual DbSet<TelefonosCliente> TelefonosCliente { get; set; }
 
-    public virtual DbSet<Usuario> Usuarios { get; set; }
+    public virtual DbSet<Usuario> Usuario { get; set; }
 
-    public virtual DbSet<Vehiculo> Vehiculos { get; set; }
+    public virtual DbSet<Vehiculo> Vehiculo { get; set; }
 
-    public virtual DbSet<VisitaRutum> VisitaRuta { get; set; }
+    public virtual DbSet<VisitaRuta> VisitaRuta { get; set; }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        optionsBuilder.UseSqlServer("Server=localhost;Database=Piscinas_Y_Multiservicios;Trusted_Connection=True;TrustServerCertificate=True;");
-    }
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
+        => optionsBuilder.UseSqlServer("Server=localhost; Database=Piscinas_Y_Multiservicios; Integrated Security=True; TrustServerCertificate=True;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -107,13 +107,13 @@ public partial class PiscinasYMultiserviciosContext : DbContext
                 .IsUnicode(false)
                 .HasColumnName("titulo");
 
-            entity.HasOne(d => d.Autor).WithMany(p => p.Anuncios)
+            entity.HasOne(d => d.Autor).WithMany(p => p.Anuncio)
                 .HasForeignKey(d => d.AutorId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_ANUNCIO_AUTOR");
         });
 
-        modelBuilder.Entity<BitacoraAuditorium>(entity =>
+        modelBuilder.Entity<BitacoraAuditoria>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__BITACORA__3213E83FD494B8F9");
 
@@ -159,7 +159,7 @@ public partial class PiscinasYMultiserviciosContext : DbContext
                 .HasColumnName("nombre");
             entity.Property(e => e.ProvinciaId).HasColumnName("provincia_id");
 
-            entity.HasOne(d => d.Provincia).WithMany(p => p.Cantons)
+            entity.HasOne(d => d.Provincia).WithMany(p => p.Canton)
                 .HasForeignKey(d => d.ProvinciaId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_CANTON_PROVINCIA");
@@ -177,7 +177,7 @@ public partial class PiscinasYMultiserviciosContext : DbContext
                 .HasColumnType("datetime")
                 .HasColumnName("creado_en");
 
-            entity.HasOne(d => d.Cliente).WithMany(p => p.Carritos)
+            entity.HasOne(d => d.Cliente).WithMany(p => p.Carrito)
                 .HasForeignKey(d => d.ClienteId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_CARRITO_CLIENTE");
@@ -209,7 +209,7 @@ public partial class PiscinasYMultiserviciosContext : DbContext
                 .HasColumnName("nombre_categoria");
         });
 
-        modelBuilder.Entity<Citum>(entity =>
+        modelBuilder.Entity<Cita>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__CITA__3213E83F7BE5BB6B");
 
@@ -293,7 +293,7 @@ public partial class PiscinasYMultiserviciosContext : DbContext
                 .HasColumnType("decimal(12, 2)")
                 .HasColumnName("total");
 
-            entity.HasOne(d => d.Cliente).WithMany(p => p.Cotizacions)
+            entity.HasOne(d => d.Cliente).WithMany(p => p.Cotizacion)
                 .HasForeignKey(d => d.ClienteId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_COTIZACION_CLIENTE");
@@ -327,12 +327,12 @@ public partial class PiscinasYMultiserviciosContext : DbContext
                 .HasColumnName("precio_unitario");
             entity.Property(e => e.ProductoId).HasColumnName("producto_id");
 
-            entity.HasOne(d => d.Cotizacion).WithMany(p => p.DetalleCotizacions)
+            entity.HasOne(d => d.Cotizacion).WithMany(p => p.DetalleCotizacion)
                 .HasForeignKey(d => d.CotizacionId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_DETALLE_COT_COTIZACION");
 
-            entity.HasOne(d => d.Producto).WithMany(p => p.DetalleCotizacions)
+            entity.HasOne(d => d.Producto).WithMany(p => p.DetalleCotizacion)
                 .HasForeignKey(d => d.ProductoId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_DETALLE_COT_PRODUCTO");
@@ -366,12 +366,12 @@ public partial class PiscinasYMultiserviciosContext : DbContext
                 .HasColumnName("precio_unitario_final");
             entity.Property(e => e.ProductoId).HasColumnName("producto_id");
 
-            entity.HasOne(d => d.Factura).WithMany(p => p.DetalleFacturas)
+            entity.HasOne(d => d.Factura).WithMany(p => p.DetalleFactura)
                 .HasForeignKey(d => d.FacturaId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_DETALLE_FAC_FACTURA");
 
-            entity.HasOne(d => d.Producto).WithMany(p => p.DetalleFacturas)
+            entity.HasOne(d => d.Producto).WithMany(p => p.DetalleFactura)
                 .HasForeignKey(d => d.ProductoId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_DETALLE_FAC_PRODUCTO");
@@ -397,12 +397,12 @@ public partial class PiscinasYMultiserviciosContext : DbContext
                 .IsUnicode(false)
                 .HasColumnName("tipo_direccion");
 
-            entity.HasOne(d => d.Cliente).WithMany(p => p.DireccionClientes)
+            entity.HasOne(d => d.Cliente).WithMany(p => p.DireccionCliente)
                 .HasForeignKey(d => d.ClienteId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_DIRECCION_CLIENTE_CLIENTE");
 
-            entity.HasOne(d => d.Distrito).WithMany(p => p.DireccionClientes)
+            entity.HasOne(d => d.Distrito).WithMany(p => p.DireccionCliente)
                 .HasForeignKey(d => d.DistritoId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_DIRECCION_CLIENTE_DISTRITO");
@@ -421,13 +421,13 @@ public partial class PiscinasYMultiserviciosContext : DbContext
                 .IsUnicode(false)
                 .HasColumnName("nombre");
 
-            entity.HasOne(d => d.Canton).WithMany(p => p.Distritos)
+            entity.HasOne(d => d.Canton).WithMany(p => p.Distrito)
                 .HasForeignKey(d => d.CantonId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_DISTRITO_CANTON");
         });
 
-        modelBuilder.Entity<Encuestum>(entity =>
+        modelBuilder.Entity<Encuesta>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__ENCUESTA__3213E83F919BD247");
 
@@ -445,8 +445,8 @@ public partial class PiscinasYMultiserviciosContext : DbContext
                 .HasColumnName("fecha_envio");
             entity.Property(e => e.ServicioId).HasColumnName("servicio_id");
 
-            entity.HasOne(d => d.Servicio).WithOne(p => p.Encuestum)
-                .HasForeignKey<Encuestum>(d => d.ServicioId)
+            entity.HasOne(d => d.Servicio).WithOne(p => p.Encuesta)
+                .HasForeignKey<Encuesta>(d => d.ServicioId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_ENCUESTA_SERVICIO");
         });
@@ -509,7 +509,7 @@ public partial class PiscinasYMultiserviciosContext : DbContext
                 .HasColumnType("decimal(12, 2)")
                 .HasColumnName("total");
 
-            entity.HasOne(d => d.Cliente).WithMany(p => p.Facturas)
+            entity.HasOne(d => d.Cliente).WithMany(p => p.Factura)
                 .HasForeignKey(d => d.ClienteId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_FACTURA_CLIENTE");
@@ -550,16 +550,16 @@ public partial class PiscinasYMultiserviciosContext : DbContext
                 .HasColumnName("motivo_rechazo");
             entity.Property(e => e.UsuarioId).HasColumnName("usuario_id");
 
-            entity.HasOne(d => d.Categoria).WithMany(p => p.GastoOperativos)
+            entity.HasOne(d => d.Categoria).WithMany(p => p.GastoOperativo)
                 .HasForeignKey(d => d.CategoriaId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_GASTO_CATEGORIA");
 
-            entity.HasOne(d => d.Cita).WithMany(p => p.GastoOperativos)
+            entity.HasOne(d => d.Cita).WithMany(p => p.GastoOperativo)
                 .HasForeignKey(d => d.CitaId)
                 .HasConstraintName("FK_GASTO_CITA");
 
-            entity.HasOne(d => d.Usuario).WithMany(p => p.GastoOperativos)
+            entity.HasOne(d => d.Usuario).WithMany(p => p.GastoOperativo)
                 .HasForeignKey(d => d.UsuarioId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_GASTO_USUARIO");
@@ -583,7 +583,7 @@ public partial class PiscinasYMultiserviciosContext : DbContext
             entity.Property(e => e.Ph).HasColumnName("ph");
             entity.Property(e => e.ServicioId).HasColumnName("servicio_id");
 
-            entity.HasOne(d => d.Servicio).WithMany(p => p.Inspeccions)
+            entity.HasOne(d => d.Servicio).WithMany(p => p.Inspeccion)
                 .HasForeignKey(d => d.ServicioId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_INSPECCION_SERVICIO");
@@ -600,12 +600,12 @@ public partial class PiscinasYMultiserviciosContext : DbContext
             entity.Property(e => e.CarritoId).HasColumnName("carrito_id");
             entity.Property(e => e.ProductoId).HasColumnName("producto_id");
 
-            entity.HasOne(d => d.Carrito).WithMany(p => p.ItemCarritos)
+            entity.HasOne(d => d.Carrito).WithMany(p => p.ItemCarrito)
                 .HasForeignKey(d => d.CarritoId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_ITEM_CARRITO");
 
-            entity.HasOne(d => d.Producto).WithMany(p => p.ItemCarritos)
+            entity.HasOne(d => d.Producto).WithMany(p => p.ItemCarrito)
                 .HasForeignKey(d => d.ProductoId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_ITEM_PRODUCTO");
@@ -630,12 +630,12 @@ public partial class PiscinasYMultiserviciosContext : DbContext
                 .HasColumnName("tipo");
             entity.Property(e => e.VolumenM3).HasColumnName("volumen_m3");
 
-            entity.HasOne(d => d.Cliente).WithMany(p => p.Piscinas)
+            entity.HasOne(d => d.Cliente).WithMany(p => p.Piscina)
                 .HasForeignKey(d => d.ClienteId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_PISCINA_CLIENTE");
 
-            entity.HasOne(d => d.Direccion).WithMany(p => p.Piscinas)
+            entity.HasOne(d => d.Direccion).WithMany(p => p.Piscina)
                 .HasForeignKey(d => d.DireccionId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_PISCINA_DIRECCION");
@@ -653,12 +653,12 @@ public partial class PiscinasYMultiserviciosContext : DbContext
             entity.Property(e => e.EquipamientoId).HasColumnName("equipamiento_id");
             entity.Property(e => e.PiscinaId).HasColumnName("piscina_id");
 
-            entity.HasOne(d => d.Equipamiento).WithMany(p => p.PiscinaEquipamientos)
+            entity.HasOne(d => d.Equipamiento).WithMany(p => p.PiscinaEquipamiento)
                 .HasForeignKey(d => d.EquipamientoId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_PE_EQUIPAMIENTO");
 
-            entity.HasOne(d => d.Piscina).WithMany(p => p.PiscinaEquipamientos)
+            entity.HasOne(d => d.Piscina).WithMany(p => p.PiscinaEquipamiento)
                 .HasForeignKey(d => d.PiscinaId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_PE_PISCINA");
@@ -687,13 +687,13 @@ public partial class PiscinasYMultiserviciosContext : DbContext
                 .HasColumnName("precio");
             entity.Property(e => e.Stock).HasColumnName("stock");
 
-            entity.HasOne(d => d.Categoria).WithMany(p => p.Productos)
+            entity.HasOne(d => d.Categoria).WithMany(p => p.Producto)
                 .HasForeignKey(d => d.CategoriaId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_PRODUCTO_CATEGORIA");
         });
 
-        modelBuilder.Entity<Provincium>(entity =>
+        modelBuilder.Entity<Provincia>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__PROVINCI__3213E83F0AE981CD");
 
@@ -732,12 +732,12 @@ public partial class PiscinasYMultiserviciosContext : DbContext
                 .HasColumnType("decimal(12, 2)")
                 .HasColumnName("presupuesto");
 
-            entity.HasOne(d => d.Cliente).WithMany(p => p.ProyectoConstruccions)
+            entity.HasOne(d => d.Cliente).WithMany(p => p.ProyectoConstruccion)
                 .HasForeignKey(d => d.ClienteId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_PROYECTO_CLIENTE");
 
-            entity.HasOne(d => d.Piscina).WithMany(p => p.ProyectoConstruccions)
+            entity.HasOne(d => d.Piscina).WithMany(p => p.ProyectoConstruccion)
                 .HasForeignKey(d => d.PiscinaId)
                 .HasConstraintName("FK_PROYECTO_PISCINA");
         });
@@ -759,7 +759,7 @@ public partial class PiscinasYMultiserviciosContext : DbContext
                 .HasColumnName("nombre");
         });
 
-        modelBuilder.Entity<RutaOptimizadum>(entity =>
+        modelBuilder.Entity<RutaOptimizada>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__RUTA_OPT__3213E83FEFBA2F6B");
 
@@ -829,7 +829,7 @@ public partial class PiscinasYMultiserviciosContext : DbContext
             entity.Property(e => e.FechaCompletacion).HasColumnName("fecha_completacion");
             entity.Property(e => e.ServicioId).HasColumnName("servicio_id");
 
-            entity.HasOne(d => d.Servicio).WithMany(p => p.TareaServicios)
+            entity.HasOne(d => d.Servicio).WithMany(p => p.TareaServicio)
                 .HasForeignKey(d => d.ServicioId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_TAREA_SERVICIO");
@@ -853,7 +853,7 @@ public partial class PiscinasYMultiserviciosContext : DbContext
                 .IsUnicode(false)
                 .HasColumnName("tipo_telefono");
 
-            entity.HasOne(d => d.Cliente).WithMany(p => p.TelefonosClientes)
+            entity.HasOne(d => d.Cliente).WithMany(p => p.TelefonosCliente)
                 .HasForeignKey(d => d.ClienteId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_TELEFONOS_CLIENTE_CLIENTE");
@@ -894,7 +894,7 @@ public partial class PiscinasYMultiserviciosContext : DbContext
                 .HasColumnName("nombre");
             entity.Property(e => e.RolId).HasColumnName("rol_id");
 
-            entity.HasOne(d => d.Rol).WithMany(p => p.Usuarios)
+            entity.HasOne(d => d.Rol).WithMany(p => p.Usuario)
                 .HasForeignKey(d => d.RolId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_USUARIO_ROL");
@@ -927,13 +927,13 @@ public partial class PiscinasYMultiserviciosContext : DbContext
                 .HasColumnName("placa");
             entity.Property(e => e.TecnicoId).HasColumnName("tecnico_id");
 
-            entity.HasOne(d => d.Tecnico).WithMany(p => p.Vehiculos)
+            entity.HasOne(d => d.Tecnico).WithMany(p => p.Vehiculo)
                 .HasForeignKey(d => d.TecnicoId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_VEHICULO_TECNICO");
         });
 
-        modelBuilder.Entity<VisitaRutum>(entity =>
+        modelBuilder.Entity<VisitaRuta>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__VISITA_R__3213E83FF1F8B4BF");
 
@@ -948,8 +948,8 @@ public partial class PiscinasYMultiserviciosContext : DbContext
             entity.Property(e => e.OrdenVisita).HasColumnName("orden_visita");
             entity.Property(e => e.RutaId).HasColumnName("ruta_id");
 
-            entity.HasOne(d => d.Cita).WithOne(p => p.VisitaRutum)
-                .HasForeignKey<VisitaRutum>(d => d.CitaId)
+            entity.HasOne(d => d.Cita).WithOne(p => p.VisitaRuta)
+                .HasForeignKey<VisitaRuta>(d => d.CitaId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_VISITA_CITA");
 
@@ -961,8 +961,6 @@ public partial class PiscinasYMultiserviciosContext : DbContext
 
         OnModelCreatingPartial(modelBuilder);
     }
-
-
 
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
 }

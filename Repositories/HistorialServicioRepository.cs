@@ -20,7 +20,7 @@ namespace MultiserviciosPiscinas.Repositories
             DateTime? fechaHasta)
         {
             // Buscar por correo del usuario -> cliente -> piscina -> cita -> servicio
-            var query = _context.Servicios
+            var query = _context.Servicio
                 .Include(s => s.Cita)
                     .ThenInclude(c => c.Tecnico)
                 .Include(s => s.Cita)
@@ -56,15 +56,15 @@ namespace MultiserviciosPiscinas.Repositories
             int servicioId,
             string correoUsuario)
         {
-            var servicio = await _context.Servicios
+            var servicio = await _context.Servicio
                 .Include(s => s.Cita)
                     .ThenInclude(c => c.Tecnico)
                 .Include(s => s.Cita)
                     .ThenInclude(c => c.Piscina)
                         .ThenInclude(p => p.Cliente)
                             .ThenInclude(cl => cl.Usuario)
-                .Include(s => s.TareaServicios)
-                .Include(s => s.Inspeccions)
+                .Include(s => s.TareaServicio)
+                .Include(s => s.Inspeccion)
                 .Where(s => s.Id == servicioId
                          && s.Cita.Piscina.Cliente.Usuario.Correo == correoUsuario)
                 .FirstOrDefaultAsync();
@@ -72,7 +72,7 @@ namespace MultiserviciosPiscinas.Repositories
             if (servicio == null)
                 return null;
 
-            var inspeccion = servicio.Inspeccions.FirstOrDefault();
+            var inspeccion = servicio.Inspeccion.FirstOrDefault();
 
             return new DetalleServicioDto
             {
@@ -86,7 +86,7 @@ namespace MultiserviciosPiscinas.Repositories
                 EstadoServicio = servicio.Estado,
                 TrabajoRealizado = servicio.TrabajoRealizado,
                 NombreTecnico = servicio.Cita.Tecnico.Nombre + " " + servicio.Cita.Tecnico.ApellidoPaterno,
-                Tareas = servicio.TareaServicios.Select(t => new TareaDto
+                Tareas = servicio.TareaServicio.Select(t => new TareaDto
                 {
                     Descripcion = t.Descripcion,
                     Estado = t.Estado,

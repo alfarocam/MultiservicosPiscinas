@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace MultiserviciosPiscinas.Models;
 
-public partial class Encuestum
+public partial class Encuesta
 {
     public int Id { get; set; }
 

@@ -17,11 +17,11 @@ public partial class Servicio
 
     public string TrabajoRealizado { get; set; } = null!;
 
-    public virtual Citum Cita { get; set; } = null!;
+    public virtual Cita Cita { get; set; } = null!;
 
-    public virtual Encuestum? Encuestum { get; set; }
+    public virtual Encuesta? Encuesta { get; set; }
 
-    public virtual ICollection<Inspeccion> Inspeccions { get; set; } = new List<Inspeccion>();
+    public virtual ICollection<Inspeccion> Inspeccion { get; set; } = new List<Inspeccion>();
 
-    public virtual ICollection<TareaServicio> TareaServicios { get; set; } = new List<TareaServicio>();
+    public virtual ICollection<TareaServicio> TareaServicio { get; set; } = new List<TareaServicio>();
 }

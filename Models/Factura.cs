@@ -37,5 +37,5 @@ public partial class Factura
 
     public virtual Cotizacion? Cotizacion { get; set; }
 
-    public virtual ICollection<DetalleFactura> DetalleFacturas { get; set; } = new List<DetalleFactura>();
+    public virtual ICollection<DetalleFactura> DetalleFactura { get; set; } = new List<DetalleFactura>();
 }

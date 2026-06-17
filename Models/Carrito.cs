@@ -13,5 +13,5 @@ public partial class Carrito
 
     public virtual Cliente Cliente { get; set; } = null!;
 
-    public virtual ICollection<ItemCarrito> ItemCarritos { get; set; } = new List<ItemCarrito>();
+    public virtual ICollection<ItemCarrito> ItemCarrito { get; set; } = new List<ItemCarrito>();
 }

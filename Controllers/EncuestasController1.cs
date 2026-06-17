@@ -32,7 +32,7 @@ namespace MultiserviciosPiscinas.Controllers
                     new { id = servicioId });
             }
 
-            var encuesta = new Encuestum
+            var encuesta = new Encuesta
             {
                 ServicioId = servicioId
             };
@@ -42,7 +42,7 @@ namespace MultiserviciosPiscinas.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Crear(Encuestum encuesta)
+        public async Task<IActionResult> Crear(Encuesta encuesta)
         {
             if (encuesta.Calificacion < 1 || encuesta.Calificacion > 5)
             {

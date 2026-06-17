@@ -9,5 +9,5 @@ public partial class Equipamiento
 
     public string Nombre { get; set; } = null!;
 
-    public virtual ICollection<PiscinaEquipamiento> PiscinaEquipamientos { get; set; } = new List<PiscinaEquipamiento>();
+    public virtual ICollection<PiscinaEquipamiento> PiscinaEquipamiento { get; set; } = new List<PiscinaEquipamiento>();
 }

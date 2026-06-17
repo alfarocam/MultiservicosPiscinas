@@ -9,5 +9,5 @@ public partial class CategoriaGastoOperativo
 
     public string NombreCategoria { get; set; } = null!;
 
-    public virtual ICollection<GastoOperativo> GastoOperativos { get; set; } = new List<GastoOperativo>();
+    public virtual ICollection<GastoOperativo> GastoOperativo { get; set; } = new List<GastoOperativo>();
 }

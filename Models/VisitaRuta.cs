@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace MultiserviciosPiscinas.Models;
 
-public partial class VisitaRutum
+public partial class VisitaRuta
 {
     public int Id { get; set; }
 
@@ -17,7 +17,7 @@ public partial class VisitaRutum
 
     public int? DuracionTramoMin { get; set; }
 
-    public virtual Citum Cita { get; set; } = null!;
+    public virtual Cita Cita { get; set; } = null!;
 
-    public virtual RutaOptimizadum Ruta { get; set; } = null!;
+    public virtual RutaOptimizada Ruta { get; set; } = null!;
 }

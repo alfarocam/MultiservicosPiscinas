@@ -6,14 +6,8 @@ using MultiserviciosPiscinas.Models;
 namespace MultiserviciosPiscinas.Controllers
 {
     [Authorize]
-    public class PerfilesController : Controller
+    public class PerfilesController(PiscinasYMultiserviciosContext _context) : Controller
     {
-        private readonly PiscinasYMultiserviciosContext _context;
-
-        public PerfilesController(PiscinasYMultiserviciosContext context)
-        {
-            _context = context;
-        }
 
         //ver el perfil 
         //get
@@ -27,10 +21,10 @@ namespace MultiserviciosPiscinas.Controllers
                 return Challenge();
             }
 
-            var usuario = await _context.Usuarios
+            var usuario = await _context.Usuario
                 .Include(u => u.Rol)
                 .Include(u => u.Cliente)
-                    .ThenInclude(c => c.TelefonosClientes)
+                    .ThenInclude(c => c.TelefonosCliente)
                 .FirstOrDefaultAsync(u => u.Correo == correoLogueado);
 
             if (usuario == null)
@@ -52,9 +46,9 @@ namespace MultiserviciosPiscinas.Controllers
                 return Challenge();
             }
 
-            var usuario = await _context.Usuarios
+            var usuario = await _context.Usuario
                 .Include(u => u.Cliente)
-                    .ThenInclude(c => c.TelefonosClientes)
+                    .ThenInclude(c => c.TelefonosCliente)
                 .FirstOrDefaultAsync(u => u.Correo == correoLogueado);
 
             if (usuario == null)
@@ -78,9 +72,9 @@ namespace MultiserviciosPiscinas.Controllers
             string telefono,
             string? contrasena)
         {
-            var usuarioDb = await _context.Usuarios
+            var usuarioDb = await _context.Usuario
                 .Include(u => u.Cliente)
-                    .ThenInclude(c => c.TelefonosClientes)
+                    .ThenInclude(c => c.TelefonosCliente)
                 .FirstOrDefaultAsync(u => u.Id == id);
 
             if (usuarioDb == null)
@@ -122,7 +116,7 @@ namespace MultiserviciosPiscinas.Controllers
             //si no existe crea identidad
             if (usuarioDb.Cliente != null)
             {
-                var telefonoPrincipal = await _context.TelefonosClientes
+                var telefonoPrincipal = await _context.TelefonosCliente
                     .FirstOrDefaultAsync(t =>
                         t.ClienteId == usuarioDb.Cliente.Id &&
                         t.EsPrincipal == 1);
@@ -130,7 +124,7 @@ namespace MultiserviciosPiscinas.Controllers
                 if (telefonoPrincipal != null)
                 {
                     telefonoPrincipal.NumeroTelefono = telefono;
-                    _context.TelefonosClientes.Update(telefonoPrincipal);
+                    _context.TelefonosCliente.Update(telefonoPrincipal);
                 }
                 else
                 {
@@ -142,7 +136,7 @@ namespace MultiserviciosPiscinas.Controllers
                         EsPrincipal = 1
                     };
 
-                    await _context.TelefonosClientes.AddAsync(nuevoTelefono);
+                    await _context.TelefonosCliente.AddAsync(nuevoTelefono);
                 }
             }
 

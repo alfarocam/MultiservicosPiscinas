@@ -1,5 +1,6 @@
 ﻿@model MultiserviciosPiscinas.Models.Cliente
 
+
 @{
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
     ViewData["Title"] = "Detalle Cliente";
@@ -25,12 +26,12 @@
 
         <p>
             <strong>Teléfono:</strong>
-            @(Model.TelefonosClientes.FirstOrDefault()?.NumeroTelefono)
+            @(Model.TelefonosCliente.FirstOrDefault()?.NumeroTelefono)
         </p>
 
         <p>
             <strong>Dirección:</strong>
-            @(Model.DireccionClientes.FirstOrDefault()?.Detalles)
+            @(Model.DireccionCliente.FirstOrDefault()?.Detalles)
         </p>
 
         <p>
@@ -46,7 +47,7 @@
 
 <h4>Piscinas Registradas</h4>
 
-@if (Model.Piscinas.Any())
+@if (Model.Piscina.Any())
 {
     <table class="table table-bordered">
 
@@ -60,7 +61,7 @@
 
         <tbody>
 
-            @foreach (var piscina in Model.Piscinas)
+            @foreach (var piscina in Model.Piscina)
             {
                 <tr>
                     <td>@piscina.Id</td>
