@@ -152,7 +152,9 @@ public partial class PiscinasYMultiserviciosContext : DbContext
 
             entity.ToTable("CANTON", "geo");
 
-            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Id)
+                .ValueGeneratedNever()
+                .HasColumnName("id");
             entity.Property(e => e.Nombre)
                 .HasMaxLength(100)
                 .IsUnicode(false)
@@ -414,7 +416,9 @@ public partial class PiscinasYMultiserviciosContext : DbContext
 
             entity.ToTable("DISTRITO", "geo");
 
-            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Id)
+                .ValueGeneratedNever()
+                .HasColumnName("id");
             entity.Property(e => e.CantonId).HasColumnName("canton_id");
             entity.Property(e => e.Nombre)
                 .HasMaxLength(100)
@@ -699,7 +703,9 @@ public partial class PiscinasYMultiserviciosContext : DbContext
 
             entity.ToTable("PROVINCIA", "geo");
 
-            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Id)
+                .ValueGeneratedNever()
+                .HasColumnName("id");
             entity.Property(e => e.Nombre)
                 .HasMaxLength(100)
                 .IsUnicode(false)
