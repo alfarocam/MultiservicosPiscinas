@@ -1,8 +1,18 @@
-﻿@model MultiserviciosPiscinas.Models.Usuario
+@model MultiserviciosPiscinas.Models.Usuario
 
 @{
-    //Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
     ViewData["Title"] = "Mi perfil";
+    var direccionPrincipal = Model.Cliente?.DireccionCliente?.FirstOrDefault(d => d.EsPrincipal == 1);
+    string iniciales = "";
+    if (!string.IsNullOrEmpty(Model.Nombre))
+    {
+        iniciales += Model.Nombre[0];
+    }
+    if (!string.IsNullOrEmpty(Model.ApellidoPaterno))
+    {
+        iniciales += Model.ApellidoPaterno[0];
+    }
+    iniciales = iniciales.ToUpper();
 }
 
 @if (TempData["MensajeExito"] != null)
@@ -10,96 +20,139 @@
     <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
         <i class="bi bi-check-circle-fill me-2"></i>
         @TempData["MensajeExito"]
-
-        <button type="button"
-                class="btn-close"
-                data-bs-dismiss="alert">
-        </button>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
     </div>
 }
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h2 class="mb-0">Mi perfil</h2>
-
-    <a asp-action="Editar"
-       class="btn btn-warning">
-        Editar perfil
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0 fw-bold a-title">Mi perfil</h2>
+    <a asp-action="Editar" class="btn btn-warning">
+        <i class="bi bi-pencil-square me-2"></i>Editar perfil
     </a>
 </div>
 
-<div class="card border-0 shadow-sm">
-    <div class="card-body">
+<div class="row g-4">
+    <!-- Resumen del perfil (Izquierda) -->
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm text-center py-4">
+            <div class="card-body">
+                <!-- Avatar circular premium -->
+                <div class="d-inline-flex align-items-center justify-content-center bg-info text-white rounded-circle shadow-sm mb-3" 
+                     style="width: 100px; height: 100px; font-size: 2.2rem; font-weight: 700; background-color: var(--color-navbar-bg) !important;">
+                    @iniciales
+                </div>
+                
+                <h4 class="card-title fw-bold mb-1">@Model.Nombre @Model.ApellidoPaterno</h4>
+                <p class="text-muted small mb-3">@Model.Correo</p>
 
-        <table class="table table-borderless mb-0">
-
-            <tr>
-                <td class="text-muted" style="width:25%">
-                    Nombre
-                </td>
-                <td>
-                    <strong>
-                        @Model.Nombre
-                        @Model.ApellidoPaterno
-                        @Model.ApellidoMaterno
-                    </strong>
-                </td>
-            </tr>
-
-            <tr>
-                <td class="text-muted">
-                    Correo
-                </td>
-                <td>
-                    @Model.Correo
-                </td>
-            </tr>
-
-            <tr>
-                <td class="text-muted">
-                    Teléfono
-                </td>
-                <td>
-                    @(Model.Cliente?.TelefonosCliente?
-                                        .FirstOrDefault(t => t.EsPrincipal == 1)?
-                                        .NumeroTelefono
-                                        ?? "No registrado")
-                </td>
-            </tr>
-
-            <tr>
-                <td class="text-muted">
-                    Rol
-                </td>
-                <td>
-                    <span class="badge bg-primary">
-                        @(Model.Rol?.Nombre ?? "Sin rol")
+                <div class="d-flex justify-content-center gap-2 mb-3">
+                    <span class="badge bg-primary px-3 py-2">
+                        <i class="bi bi-shield-check me-1"></i>@(Model.Rol?.Nombre ?? "Sin rol")
                     </span>
-                </td>
-            </tr>
-
-            <tr>
-                <td class="text-muted">
-                    Permisos
-                </td>
-                <td>
-                    @(Model.Rol?.Descripcion
-                                        ?? "Sin permisos definidos")
-                </td>
-            </tr>
-
-            <tr>
-                <td class="text-muted">
-                    Estado
-                </td>
-
-                <td>
-                    <span class="badge @(Model.Activo ? "bg-success" : "bg-danger")">
-                        @(Model.Activo ? "Activo" : "Inactivo")
+                    <span class="badge px-3 py-2 @(Model.Activo ? "bg-success" : "bg-danger")">
+                        <i class="bi @(Model.Activo ? "bi-check-circle" : "bi-x-circle") me-1"></i>@(Model.Activo ? "Activo" : "Inactivo")
                     </span>
-                </td>
-            </tr>
+                </div>
+                
+                <hr class="border-light-subtle my-4" />
+                
+                <p class="text-muted small mb-0">
+                    <i class="bi bi-calendar3 me-1"></i> Registrado desde: <br/>
+                    <strong class="text-dark">@Model.FechaCreacion.ToString("dd MMMM, yyyy")</strong>
+                </p>
+            </div>
+        </div>
+    </div>
 
-        </table>
+    <!-- Detalles completos del perfil (Derecha) -->
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <h4 class="card-title fw-bold mb-4">Detalles de la cuenta</h4>
 
+                <div class="row g-4">
+                    <!-- Fila 1: Nombre y Correo -->
+                    <div class="col-md-6">
+                        <div class="p-3 border rounded-3 bg-light-subtle h-100">
+                            <label class="text-muted small fw-semibold d-block mb-1">
+                                <i class="bi bi-person me-1"></i>Nombre completo
+                            </label>
+                            <span class="fw-bold text-dark">@Model.Nombre @Model.ApellidoPaterno @Model.ApellidoMaterno</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3 border rounded-3 bg-light-subtle h-100">
+                            <label class="text-muted small fw-semibold d-block mb-1">
+                                <i class="bi bi-envelope me-1"></i>Correo electrónico
+                            </label>
+                            <span class="text-dark">@Model.Correo</span>
+                        </div>
+                    </div>
+
+                    <!-- Fila 2: Teléfono y Rol -->
+                    <div class="col-md-6">
+                        <div class="p-3 border rounded-3 bg-light-subtle h-100">
+                            <label class="text-muted small fw-semibold d-block mb-1">
+                                <i class="bi bi-telephone me-1"></i>Teléfono
+                            </label>
+                            <span class="text-dark">
+                                @(Model.Cliente?.TelefonosCliente?.FirstOrDefault(t => t.EsPrincipal == 1)?.NumeroTelefono ?? "No registrado")
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3 border rounded-3 bg-light-subtle h-100">
+                            <label class="text-muted small fw-semibold d-block mb-1">
+                                <i class="bi bi-shield me-1"></i>Rol en el sistema
+                            </label>
+                            <span class="text-dark">@(Model.Rol?.Nombre ?? "Sin rol")</span>
+                        </div>
+                    </div>
+
+                    <!-- Fila 3: Descripción de permisos -->
+                    <div class="col-12">
+                        <div class="p-3 border rounded-3 bg-light-subtle">
+                            <label class="text-muted small fw-semibold d-block mb-1">
+                                <i class="bi bi-info-circle me-1"></i>Descripción de permisos
+                            </label>
+                            <span class="text-muted">@(Model.Rol?.Descripcion ?? "Sin permisos definidos")</span>
+                        </div>
+                    </div>
+
+                    <!-- Fila 4: Dirección (solo si el usuario es cliente) -->
+                    @if (Model.Cliente != null)
+                    {
+                        <div class="col-12">
+                            <div class="p-3 border rounded-3 bg-light-subtle">
+                                <label class="text-muted small fw-semibold d-block mb-2">
+                                    <i class="bi bi-geo-alt me-1"></i>Dirección principal
+                                </label>
+                                @if (direccionPrincipal != null && direccionPrincipal.Distrito != null)
+                                {
+                                    <div class="mb-1">
+                                        <span class="badge bg-secondary-subtle text-secondary-emphasis me-1">
+                                            @direccionPrincipal.Distrito.Canton.Provincia.Nombre
+                                        </span>
+                                        <span class="badge bg-secondary-subtle text-secondary-emphasis me-1">
+                                            @direccionPrincipal.Distrito.Canton.Nombre
+                                        </span>
+                                        <span class="badge bg-secondary-subtle text-secondary-emphasis">
+                                            @direccionPrincipal.Distrito.Nombre
+                                        </span>
+                                    </div>
+                                    <div class="fw-semibold text-dark mt-2">
+                                        @direccionPrincipal.Detalles
+                                    </div>
+                                }
+                                else
+                                {
+                                    <span class="text-muted italic">Dirección no registrada</span>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
     </div>
 </div>
