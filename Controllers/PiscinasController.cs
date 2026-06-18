@@ -90,6 +90,22 @@ namespace MultiserviciosPiscinas.Controllers
         }
 
         [HttpGet]
+        public IActionResult Historial(int id)
+        {
+            var piscina = _contexto.Piscina
+                .Include(p => p.Cliente).ThenInclude(c => c.Usuario)
+                .Include(p => p.Cita).ThenInclude(c => c.Tecnico)
+                .Include(p => p.Cita).ThenInclude(c => c.Servicio).ThenInclude(s => s!.Inspeccion)
+                .Include(p => p.Cita).ThenInclude(c => c.Servicio).ThenInclude(s => s!.TareaServicio)
+                .FirstOrDefault(p => p.Id == id);
+
+            if (piscina == null)
+                return RedirectToAction("Index");
+
+            return View(piscina);
+        }
+
+        [HttpGet]
         public IActionResult Detalle()
         {
             return View();
