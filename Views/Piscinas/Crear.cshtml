@@ -1,49 +1,56 @@
-﻿<div class="container my-5" style="max-width: 600px;">
+<div class="container my-5" style="max-width: 600px;">
     <div class="mb-4">
         <h1 class="a-title">Registrar Nueva Piscina</h1>
         <p class="a-text-muted">Introduzca los datos correspondientes para dar de alta la estructura en el sistema.</p>
     </div>
 
     <div class="o-form-card">
-        <form action="/Piscina/Index" method="post">
+        <form asp-action="Crear" asp-controller="Piscinas" method="post">
 
             <div class="m-form-field">
-                <label for="ClienteId">ID del Cliente</label>
-                <input type="number" id="ClienteId" name="ClienteId" class="a-input" placeholder="Ej. 102" required />
+                <label>Cliente</label>
+                <input type="text" class="a-input" value="@ViewBag.NombreCliente" readonly />
+                <input type="hidden" name="ClienteId" value="@ViewBag.ClienteId" />
             </div>
 
             <div class="m-form-field">
-                <label for="DireccionId">ID de la Dirección</label>
-                <input type="number" id="DireccionId" name="DireccionId" class="a-input" placeholder="Ej. 540" required />
+                <label for="DireccionId">Dirección</label>
+                <select id="DireccionId" name="DireccionId" class="a-input" asp-items="@ViewBag.Direcciones" required>
+                    <option value="" disabled selected>Seleccione una dirección...</option>
+                </select>
             </div>
 
             <div class="m-form-field">
                 <label for="Tipo">Tipo de Piscina</label>
                 <select id="Tipo" name="Tipo" class="a-input" required>
                     <option value="" disabled selected>Seleccione una opción...</option>
-                    <option value="Fibra de Vidrio">Fibra de Vidrio</option>
-                    <option value="Concreto">Concreto</option>
-                    <option value="Paneles de Acero">Paneles de Acero</option>
-                    <option value="Infantil / Desmontable">Infantil / Desmontable</option>
+                    <option value="Residencial">Residencial</option>
+                    <option value="Comercial">Comercial</option>
+                    <option value="Semiolímpica">Semiolímpica</option>
+                    <option value="Olímpica">Olímpica</option>
+                    <option value="Jacuzzi">Jacuzzi</option>
+                    <option value="Otro">Otro</option>
                 </select>
             </div>
 
             <div class="m-form-field">
                 <label for="VolumenM3">Volumen (m³)</label>
-                <input type="number" step="0.01" id="VolumenM3" name="VolumenM3" class="a-input" placeholder="Ej. 45.50" required />
+                <input type="number" step="0.01" min="0" id="VolumenM3" name="VolumenM3" class="a-input" placeholder="Ej. 45.50" required />
             </div>
 
             <div class="m-form-field">
                 <label for="Estado">Estado Inicial</label>
                 <select id="Estado" name="Estado" class="a-input" required>
+                    <option value="" disabled selected>Seleccione un estado...</option>
                     <option value="Activa">Activa</option>
-                    <option value="Mantenimiento">Mantenimiento</option>
                     <option value="Inactiva">Inactiva</option>
+                    <option value="En mantenimiento">En mantenimiento</option>
+                    <option value="En construcción">En construcción</option>
                 </select>
             </div>
 
             <div class="d-flex justify-content-end gap-2 mt-4">
-                <a asp-action="Index" asp-controller="Piscinas" class="btn a-btn-outline d-flex align-items-center" style="color: var(--color-navbar-bg) !important; border-color: var(--color-navbar-bg) !important;">Cancelar</a>
+                <a asp-action="Index" asp-controller="Clientes" class="btn a-btn-outline" style="color: var(--color-navbar-bg) !important; border-color: var(--color-navbar-bg) !important;">Cancelar</a>
                 <button type="submit" class="a-btn">Guardar Registro</button>
             </div>
         </form>

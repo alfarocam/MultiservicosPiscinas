@@ -1,17 +1,26 @@
-﻿<div class="container my-4">
+@model IEnumerable<MultiserviciosPiscinas.Models.Piscina>
+
+@{
+    ViewData["Title"] = "Piscinas";
+}
+
+<div class="container my-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="a-title">Gestión de Piscinas</h1>
-        <a asp-action="Crear" asp-controller="Piscinas" class="a-btn text-decoration-none">⚡ Nueva Piscina</a>
+        <a asp-action="Index" asp-controller="Clientes" class="btn a-btn-outline text-decoration-none"
+           style="color: var(--color-navbar-bg) !important; border-color: var(--color-navbar-bg) !important;">
+            Nueva Piscina
+        </a>
     </div>
 
     <div class="o-form-card">
         <div class="table-responsive">
-            <table class="table align-middle" style="color: var(--color-text-dark); background: transparent;">
+            <table id="tablaPiscinas" class="table align-middle w-100" style="color: var(--color-text-dark);">
                 <thead>
                     <tr style="border-bottom: 2px solid #e1ecf4;">
-                        <th class="a-text-muted small text-uppercase">ID</th>
-                        <th class="a-text-muted small text-uppercase">Cliente ID</th>
-                        <th class="a-text-muted small text-uppercase">Dirección ID</th>
+                        <th class="a-text-muted small text-uppercase" hidden>ID</th>
+                        <th class="a-text-muted small text-uppercase">Cliente</th>
+                        <th class="a-text-muted small text-uppercase">Dirección</th>
                         <th class="a-text-muted small text-uppercase">Tipo</th>
                         <th class="a-text-muted small text-uppercase">Volumen (m³)</th>
                         <th class="a-text-muted small text-uppercase">Estado</th>
@@ -19,36 +28,50 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr style="border-bottom: 1px solid #e1ecf4;">
-                        <td class="fw-bold">1</td>
-                        <td>102</td>
-                        <td>540</td>
-                        <td>Fibra de Vidrio</td>
-                        <td>45.50</td>
-                        <td>
-                            <span class="badge" style="background-color: var(--color-success); padding: 0.4rem 0.6rem; border-radius: var(--border-radius-sm);">Activa</span>
-                        </td>
-                        <td class="text-end">
-                            <a asp-action="Detalle" asp-controller="Piscinas" class="btn btn-sm" style="background: transparent !important; color: var(--color-navbar-bg) !important; border: 1px solid var(--color-navbar-bg) !important; box-shadow: none;">Ver</a>
-                            <a asp-action="Editar" asp-controller="Piscinas" class="a-btn btn-sm text-decoration-none">Editar</a>
-                        </td>
-                    </tr>
-                    <tr style="border-bottom: 1px solid #e1ecf4;">
-                        <td class="fw-bold">2</td>
-                        <td>204</td>
-                        <td>312</td>
-                        <td>Concreto Premium</td>
-                        <td>120.00</td>
-                        <td>
-                            <span class="badge" style="background-color: var(--color-accent-orange); padding: 0.4rem 0.6rem; border-radius: var(--border-radius-sm);">Mantenimiento</span>
-                        </td>
-                        <td class="text-end">
-                            <a asp-action="Detalle" asp-controller="Piscinas" class="btn btn-sm" style="background: transparent !important; color: var(--color-navbar-bg) !important; border: 1px solid var(--color-navbar-bg) !important; box-shadow: none;">Ver</a>
-                            <a asp-action="Editar" asp-controller="Piscinas" class="a-btn btn-sm text-decoration-none">Editar</a>
-                        </td>
-                    </tr>
+                    @foreach (var piscina in Model)
+                    {
+                        <tr style="border-bottom: 1px solid #e1ecf4;">
+                            <td hidden>@piscina.Id</td>
+                            <td>@piscina.Cliente.Usuario.Nombre @piscina.Cliente.Usuario.ApellidoPaterno</td>
+                            <td>@piscina.Direccion.Detalles, @piscina.Direccion.Distrito.Nombre</td>
+                            <td>@piscina.Tipo</td>
+                            <td>@piscina.VolumenM3.ToString("0.##") m³</td>
+                            <td>
+                                @{
+                                    var colorEstado = piscina.Estado switch
+                                    {
+                                        "Activa"           => "var(--color-success)",
+                                        "En mantenimiento" => "var(--color-accent-orange)",
+                                        "En construcción"  => "var(--color-link)",
+                                        _                  => "var(--color-text-muted)"
+                                    };
+                                }
+                                <span class="badge"
+                                      style="background-color: @colorEstado; padding: 0.4rem 0.6rem; border-radius: var(--border-radius-sm);">
+                                    @piscina.Estado
+                                </span>
+                            </td>
+                            <td>
+                                <div class="d-flex gap-1 justify-content-end">
+                                    <a asp-action="Detalle" asp-controller="Piscinas" asp-route-id="@piscina.Id"
+                                       class="btn btn-sm"
+                                       style="background-color: transparent !important; color: var(--color-navbar-bg) !important; border: 1px solid var(--color-navbar-bg) !important; box-shadow: none !important;">
+                                        Ver
+                                    </a>
+                                    <a asp-action="Editar" asp-controller="Piscinas" asp-route-id="@piscina.Id"
+                                       class="btn btn-sm text-decoration-none">
+                                        Editar
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
                 </tbody>
             </table>
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script src="~/js/piscinas.js" asp-append-version="true"></script>
+}
