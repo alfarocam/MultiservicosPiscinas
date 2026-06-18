@@ -1,53 +1,63 @@
-﻿<div class="container my-5" style="max-width: 600px;">
+@model MultiserviciosPiscinas.Models.Piscina
+
+@{
+    ViewData["Title"] = "Editar Piscina";
+}
+
+<div class="container my-5" style="max-width: 600px;">
     <div class="mb-4">
-        <h1 class="a-title">Modificar Piscina #1</h1>
+        <h1 class="a-title">Modificar Piscina #@Model.Id</h1>
         <p class="a-text-muted">Actualice las especificaciones o el estado operativo del registro seleccionado.</p>
     </div>
 
     <div class="o-form-card">
-        <form action="/Piscina/Index" method="post">
+        <form asp-action="Editar" asp-controller="Piscinas" method="post">
+
+            <input type="hidden" name="Id" value="@Model.Id" />
+            <input type="hidden" name="ClienteId" value="@Model.ClienteId" />
 
             <div class="m-form-field">
-                <label for="Id">ID de Piscina (No editable)</label>
-                <input type="text" id="Id" name="Id" class="a-input" value="1" readonly style="background-color: #e9ecef !important; opacity: 0.8; cursor: not-allowed;" />
+                <label>Cliente</label>
+                <input type="text" class="a-input" value="@ViewBag.NombreCliente" readonly
+                       style="background-color: #e9ecef !important; cursor: not-allowed;" />
             </div>
 
             <div class="m-form-field">
-                <label for="ClienteId">ID del Cliente</label>
-                <input type="number" id="ClienteId" name="ClienteId" class="a-input" value="102" required />
-            </div>
-
-            <div class="m-form-field">
-                <label for="DireccionId">ID de la Dirección</label>
-                <input type="number" id="DireccionId" name="DireccionId" class="a-input" value="540" required />
+                <label for="DireccionId">Dirección</label>
+                <select id="DireccionId" name="DireccionId" class="a-input"
+                        asp-items="@ViewBag.Direcciones" required>
+                    <option value="" disabled>Seleccione una dirección...</option>
+                </select>
             </div>
 
             <div class="m-form-field">
                 <label for="Tipo">Tipo de Piscina</label>
-                <select id="Tipo" name="Tipo" class="a-input" required>
-                    <option value="Fibra de Vidrio" selected>Fibra de Vidrio</option>
-                    <option value="Concreto">Concreto</option>
-                    <option value="Paneles de Acero">Paneles de Acero</option>
-                    <option value="Infantil / Desmontable">Infantil / Desmontable</option>
+                <select id="Tipo" name="Tipo" class="a-input"
+                        asp-items="@ViewBag.Tipos" required>
+                    <option value="" disabled>Seleccione una opción...</option>
                 </select>
             </div>
 
             <div class="m-form-field">
                 <label for="VolumenM3">Volumen (m³)</label>
-                <input type="number" step="0.01" id="VolumenM3" name="VolumenM3" class="a-input" value="45.50" required />
+                <input type="number" step="0.01" min="0" id="VolumenM3" name="VolumenM3"
+                       class="a-input" value="@Model.VolumenM3" required />
             </div>
 
             <div class="m-form-field">
                 <label for="Estado">Estado</label>
-                <select id="Estado" name="Estado" class="a-input" required>
-                    <option value="Activa" selected>Activa</option>
-                    <option value="Mantenimiento">Mantenimiento</option>
-                    <option value="Inactiva">Inactiva</option>
+                <select id="Estado" name="Estado" class="a-input"
+                        asp-items="@ViewBag.Estados" required>
+                    <option value="" disabled>Seleccione un estado...</option>
                 </select>
             </div>
 
             <div class="d-flex justify-content-end gap-2 mt-4">
-                <a asp-action="Index" asp-controller="Piscinas" class="btn a-btn-outline d-flex align-items-center" style="color: var(--color-navbar-bg) !important; border-color: var(--color-navbar-bg) !important;">Cancelar</a>
+                <a asp-action="Index" asp-controller="Piscinas"
+                   class="btn a-btn-outline"
+                   style="color: var(--color-navbar-bg) !important; border-color: var(--color-navbar-bg) !important;">
+                    Cancelar
+                </a>
                 <button type="submit" class="a-btn">Actualizar Cambios</button>
             </div>
         </form>
