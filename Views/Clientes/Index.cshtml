@@ -1,72 +1,61 @@
-﻿@model IEnumerable<MultiserviciosPiscinas.Models.Cliente>
+@model IEnumerable<MultiserviciosPiscinas.Models.Cliente>
 
 @{
     ViewData["Title"] = "Clientes";
 }
 
-<h2>Clientes</h2>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="a-title mb-0">Clientes</h2>
+    <a asp-action="Crear" class="btn">
+        <i class="bi bi-person-plus-fill me-1"></i> Nuevo Cliente
+    </a>
+</div>
 
-<a asp-action="Crear" class="btn btn-primary mb-3">
-    Nuevo Cliente
-</a>
+<div class="card">
+    <div class="card-body">
+        <table id="tablaClientes" class="table table-bordered table-hover w-100">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Correo</th>
+                    <th>Teléfono</th>
+                    <th class="text-center">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var cliente in Model)
+                {
+                    <tr>
+                        <td>@cliente.Id</td>
+                        <td>@cliente.Usuario.Nombre @cliente.Usuario.ApellidoPaterno</td>
+                        <td>@cliente.Usuario.Correo</td>
+                        <td>@(cliente.TelefonosCliente.FirstOrDefault()?.NumeroTelefono)</td>
+                        <td class="text-center">
+                            <a asp-action="Detalle"
+                               asp-route-id="@cliente.Id"
+                               class="btn btn-sm" title="Ver detalle">
+                                <i class="bi bi-eye-fill me-1"></i> Ver
+                            </a>
+                            <a asp-action="Editar"
+                               asp-route-id="@cliente.Id"
+                               class="btn btn-sm" title="Editar cliente">
+                                <i class="bi bi-pencil-fill me-1"></i> Editar
+                            </a>
+                            <a asp-action="Crear"
+                               asp-controller="Piscinas"
+                               asp-route-clienteId="@cliente.Id"
+                               class="btn btn-sm" title="Crear piscina">
+                                <i class="bi bi-water me-1"></i> Piscina
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
 
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Nombre</th>
-            <th>Correo</th>
-            <th>Teléfono</th>
-            <th></th>
-        </tr>
-    </thead>
-
-    <tbody>
-
-        @foreach (var cliente in Model)
-        {
-            <tr>
-
-                <td>@cliente.Id</td>
-
-                <td>
-                    @cliente.Usuario.Nombre
-                    @cliente.Usuario.ApellidoPaterno
-                </td>
-
-                <td>
-                    @cliente.Usuario.Correo
-                </td>
-
-                <td>
-                    @(cliente.TelefonosCliente.FirstOrDefault()?.NumeroTelefono) 
-                </td>
-
-                <td>
-
-                    <a asp-action="Detalle"
-                       asp-route-id="@cliente.Id"
-                       class="btn btn-info btn-sm">
-                        Ver
-                    </a>
-
-                    <a asp-action="Editar"
-                       asp-route-id="@cliente.Id"
-                       class="btn btn-warning btn-sm">
-                        Editar
-                    </a>
-
-                    <a asp-action="Crear"
-                       asp-controller="Piscinas"
-                       asp-route-clienteId="@cliente.Id"
-                       class="btn btn-sm">
-                        Crear Piscina
-                    </a>
-
-                </td>
-
-            </tr>
-        }
-
-    </tbody>
-</table>
+@section Scripts {
+    <script src="~/js/clientes-tabla.js"></script>
+}

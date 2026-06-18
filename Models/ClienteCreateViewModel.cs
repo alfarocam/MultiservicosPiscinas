@@ -22,5 +22,9 @@ namespace MultiserviciosPiscinas.Models
 
         [Required]
         public string Direccion { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Debe seleccionar un distrito.")]
+        [Range(1, int.MaxValue, ErrorMessage = "Debe seleccionar un distrito válido.")]
+        public int DistritoId { get; set; }
     }
 }

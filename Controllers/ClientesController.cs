@@ -39,8 +39,16 @@ namespace MultiserviciosPiscinas.Controllers
             return View(cliente);
         }
 
-        public IActionResult Crear()
+        private async Task CargarProvinciasAsync()
         {
+            ViewBag.Provincias = await _context.Provincia.OrderBy(p => p.Nombre).ToListAsync();
+            ViewBag.Cantones = new List<Canton>();
+            ViewBag.Distritos = new List<Distrito>();
+        }
+
+        public async Task<IActionResult> Crear()
+        {
+            await CargarProvinciasAsync();
             return View();
         }
 
@@ -49,7 +57,10 @@ namespace MultiserviciosPiscinas.Controllers
         public async Task<IActionResult> Crear(ClienteCreateViewModel model)
         {
             if (!ModelState.IsValid)
+            {
+                await CargarProvinciasAsync();
                 return View(model);
+            }
 
             bool correoExiste = await _context.Usuario
                 .AnyAsync(u => u.Correo == model.Correo);
@@ -57,6 +68,7 @@ namespace MultiserviciosPiscinas.Controllers
             if (correoExiste)
             {
                 ModelState.AddModelError("", "Ya existe un cliente con ese correo.");
+                await CargarProvinciasAsync();
                 return View(model);
             }
 
@@ -97,7 +109,7 @@ namespace MultiserviciosPiscinas.Controllers
             var direccion = new DireccionCliente
             {
                 ClienteId = cliente.Id,
-                DistritoId = 1, // Cambiar por un distrito real
+                DistritoId = model.DistritoId,
                 TipoDireccion = "Principal",
                 Detalles = model.Direccion,
                 EsPrincipal = 1

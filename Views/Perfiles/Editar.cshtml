@@ -5,6 +5,8 @@
     Layout = "~/Views/Shared/_LayoutCliente.cshtml";
 }
 
+<input type="hidden" id="urlCantones" value="@Url.Action("GetCantones", "Perfiles")" />
+<input type="hidden" id="urlDistritos" value="@Url.Action("GetDistritos", "Perfiles")" />
 
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h2 class="mb-0">Editar perfil</h2>
