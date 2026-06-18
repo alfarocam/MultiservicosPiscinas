@@ -96,9 +96,74 @@ namespace MultiserviciosPiscinas.Controllers
         }
 
         [HttpGet]
-        public IActionResult Editar()
+        public IActionResult Editar(int id)
         {
-            return View();
+            var piscina = _contexto.Piscina
+                .Include(p => p.Cliente)
+                    .ThenInclude(c => c.Usuario)
+                .Include(p => p.Cliente)
+                    .ThenInclude(c => c.DireccionCliente)
+                        .ThenInclude(d => d.Distrito)
+                .FirstOrDefault(p => p.Id == id);
+
+            if (piscina == null)
+                return RedirectToAction("Index");
+
+            CargarViewBagEditar(piscina.Cliente, piscina.DireccionId, piscina.Tipo, piscina.Estado);
+            return View(piscina);
+        }
+
+        [HttpPost]
+        public IActionResult Editar(Piscina piscina)
+        {
+            ModelState.Remove("Cliente");
+            ModelState.Remove("Direccion");
+
+            if (ModelState.IsValid)
+            {
+                var piscinaExistente = _contexto.Piscina.Find(piscina.Id);
+                if (piscinaExistente == null)
+                    return RedirectToAction("Index");
+
+                piscinaExistente.DireccionId = piscina.DireccionId;
+                piscinaExistente.Tipo        = piscina.Tipo;
+                piscinaExistente.VolumenM3   = piscina.VolumenM3;
+                piscinaExistente.Estado      = piscina.Estado;
+
+                _contexto.SaveChanges();
+                return RedirectToAction("Index");
+            }
+
+            var clienteParaNavegacion = _contexto.Cliente
+                .Include(c => c.Usuario)
+                .Include(c => c.DireccionCliente)
+                    .ThenInclude(d => d.Distrito)
+                .FirstOrDefault(c => c.Id == piscina.ClienteId);
+
+            if (clienteParaNavegacion != null)
+                CargarViewBagEditar(clienteParaNavegacion, piscina.DireccionId, piscina.Tipo, piscina.Estado);
+
+            return View(piscina);
+        }
+
+        private static readonly List<string> TiposPermitidos  = ["Residencial", "Comercial", "Semiolímpica", "Olímpica", "Jacuzzi", "Otro"];
+        private static readonly List<string> EstadosPermitidos = ["Activa", "Inactiva", "En mantenimiento", "En construcción"];
+
+        private void CargarViewBagEditar(Cliente clienteConNavegacion, int direccionId, string tipo, string estado)
+        {
+            ViewBag.NombreCliente = $"{clienteConNavegacion.Usuario.Nombre} {clienteConNavegacion.Usuario.ApellidoPaterno}";
+
+            ViewBag.Direcciones = new SelectList(
+                clienteConNavegacion.DireccionCliente.Select(d => new
+                {
+                    d.Id,
+                    Texto = $"{d.TipoDireccion} — {d.Detalles}, {d.Distrito.Nombre}"
+                }),
+                "Id", "Texto", direccionId
+            );
+
+            ViewBag.Tipos   = new SelectList(TiposPermitidos.Select(t  => new { Valor = t, Texto = t  }), "Valor", "Texto", tipo);
+            ViewBag.Estados = new SelectList(EstadosPermitidos.Select(e => new { Valor = e, Texto = e }), "Valor", "Texto", estado);
         }
 
         
