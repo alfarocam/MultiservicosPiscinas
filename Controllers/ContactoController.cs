@@ -7,7 +7,7 @@ using System.Security.Claims;
 namespace MultiserviciosPiscinas.Controllers
 {
     [Authorize]
-    public class ContactoController(PiscinasYMultiserviciosContext _contexto, Generales _generales, IWebHostEnvironment _entornoWeb, IConfiguration _configuracion) : Controller
+    public class ContactoController(Generales _generales, IWebHostEnvironment _entornoWeb, IConfiguration _configuracion) : Controller
     {
 
         [HttpGet]
@@ -47,7 +47,8 @@ namespace MultiserviciosPiscinas.Controllers
                 .Replace("{{NOMBRE_USUARIO}}", nombreUsuario)
                 .Replace("{{MENSAJE}}", model.Mensaje);
 
-            var emailEmpresa = _configuracion["EmailSettings:Account"];
+            var emailEmpresa = _configuracion["EmailSettings:Account"]
+                ?? throw new InvalidOperationException("EmailSettings:Account no está configurado en appsettings.json");
             _generales.EnviarCorreo(
                 emailEmpresa,
                 $"[Soporte Web] {model.Asunto}",

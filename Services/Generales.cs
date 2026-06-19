@@ -7,14 +7,17 @@ namespace MultiserviciosPiscinas.Services
 {
     public class Generales(IConfiguration configuration)
     {
+        #region Enviar Correo
         public void EnviarCorreo(string destinatario, string asunto, string cuerpo, string? replyTo = null)
         {
             //leemos desde appsettings.json
-            var emailAccount = configuration["EmailSettings:Account"];
-            var emailPassword = configuration["EmailSettings:Password"];
+            var emailAccount = configuration["EmailSettings:Account"]
+                ?? throw new InvalidOperationException("EmailSettings:Account no está configurado en appsettings.json");
+            var emailPassword = configuration["EmailSettings:Password"]
+                ?? throw new InvalidOperationException("EmailSettings:Password no está configurado en appsettings.json");
 
             using var mail = new MailMessage();
-            mail.From = new MailAddress(emailAccount);//siempre sale de la empresa, no del cliente
+            mail.From = new MailAddress(emailAccount);
             mail.To.Add(destinatario);
             mail.Subject = asunto;
             mail.Body = cuerpo;
@@ -31,7 +34,10 @@ namespace MultiserviciosPiscinas.Services
             smtp.EnableSsl = true;
             smtp.Send(mail);
         }
+        #endregion
 
+
+        #region Generar Contraseña
         public string GenerarContrasena()
         {
             int longitud = 8;
@@ -48,5 +54,6 @@ namespace MultiserviciosPiscinas.Services
             }
             return resultado.ToString();
         }
+        #endregion
     }
 }

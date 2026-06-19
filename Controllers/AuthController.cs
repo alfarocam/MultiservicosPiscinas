@@ -10,6 +10,7 @@ namespace MultiserviciosPiscinas.Controllers
 {
     public class AuthController(PiscinasYMultiserviciosContext _contexto, Generales _generales, IWebHostEnvironment _entornoWeb) : Controller
     {
+        #region Iniciar Sesión
         // =========================
         // LOGIN
         // =========================
@@ -69,7 +70,9 @@ namespace MultiserviciosPiscinas.Controllers
             ViewBag.Mensaje = "Correo o contraseña incorrectos.";
             return View();
         }
+        #endregion
 
+        #region Registro
         // =========================
         // REGISTRO
         // =========================
@@ -140,7 +143,9 @@ namespace MultiserviciosPiscinas.Controllers
                 return View();
             }
         }
+        #endregion
 
+        #region Recuperar Contraseña
         // =========================
         // RECUPERAR CONTRASEÑA
         // =========================
@@ -204,7 +209,9 @@ namespace MultiserviciosPiscinas.Controllers
 
             return RedirectToAction("InicioSesion", "Auth");
         }
+        #endregion
 
+        #region Cerrar Sesion
         // =========================
         // CERRAR SESIÓN
         // =========================
@@ -217,6 +224,7 @@ namespace MultiserviciosPiscinas.Controllers
 
             return RedirectToAction("InicioSesion", "Auth");
         }
+        #endregion
 
         // =========================
         // DTO
