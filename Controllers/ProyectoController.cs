@@ -111,9 +111,106 @@ namespace MultiserviciosPiscinas.Controllers
         }
         #endregion
 
-        public IActionResult Editar(int id)
+        #region Detalle
+        [HttpGet]
+        public async Task<IActionResult> Detalle(int id)
         {
-            return View();
+            var proyecto = await _contexto.ProyectoConstruccion
+                .Include(p => p.Cliente)
+                    .ThenInclude(c => c.Usuario)
+                .Include(p => p.Cliente)
+                    .ThenInclude(c => c.DireccionCliente)
+                        .ThenInclude(d => d.Distrito)
+                            .ThenInclude(d => d.Canton)
+                                .ThenInclude(c => c.Provincia)
+                .Include(p => p.Piscina)
+                .FirstOrDefaultAsync(p => p.Id == id);
+
+            if (proyecto == null)
+                return RedirectToAction(nameof(Index));
+
+            return View(proyecto);
         }
+        #endregion
+
+        #region Editar Proyecto
+        [HttpGet]
+        public async Task<IActionResult> Editar(int id)
+        {
+            var proyecto = await _contexto.ProyectoConstruccion
+                .Include(p => p.Cliente).ThenInclude(c => c.Usuario)
+                .Include(p => p.Piscina)
+                .FirstOrDefaultAsync(p => p.Id == id);
+
+            if (proyecto == null)
+                return RedirectToAction(nameof(Index));
+
+            await CargarViewBagEditarAsync(proyecto);
+
+            var model = new ProyectoEditViewModel
+            {
+                Id               = proyecto.Id,
+                ClienteId        = proyecto.ClienteId,
+                PiscinaId        = proyecto.PiscinaId,
+                Nombre           = proyecto.Nombre ?? string.Empty,
+                Descripcion      = proyecto.Descripcion,
+                FechaInicio      = proyecto.FechaInicio,
+                FechaFinEstimada = proyecto.FechaFinEstimada,
+                Estado           = proyecto.Estado ?? string.Empty,
+                Presupuesto      = proyecto.Presupuesto
+            };
+
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Editar(ProyectoEditViewModel model)
+        {
+            if (model.FechaFinEstimada.HasValue && model.FechaFinEstimada <= model.FechaInicio)
+                ModelState.AddModelError(nameof(model.FechaFinEstimada),
+                    "La fecha de fin estimada debe ser posterior a la fecha de inicio.");
+
+            if (!ModelState.IsValid)
+            {
+                var proyectoParaViewBag = await _contexto.ProyectoConstruccion
+                    .Include(p => p.Cliente).ThenInclude(c => c.Usuario)
+                    .FirstOrDefaultAsync(p => p.Id == model.Id);
+
+                if (proyectoParaViewBag != null)
+                    await CargarViewBagEditarAsync(proyectoParaViewBag);
+
+                return View(model);
+            }
+
+            var proyecto = await _contexto.ProyectoConstruccion.FindAsync(model.Id);
+            if (proyecto == null)
+                return RedirectToAction(nameof(Index));
+
+            proyecto.PiscinaId        = model.PiscinaId;
+            proyecto.Nombre           = model.Nombre;
+            proyecto.Descripcion      = model.Descripcion;
+            proyecto.FechaInicio      = model.FechaInicio;
+            proyecto.FechaFinEstimada = model.FechaFinEstimada;
+            proyecto.Estado           = model.Estado;
+            proyecto.Presupuesto      = model.Presupuesto;
+
+            await _contexto.SaveChangesAsync();
+
+            TempData["MensajeExito"] = "Proyecto actualizado correctamente.";
+            return RedirectToAction(nameof(Detalle), new { id = model.Id });
+        }
+
+        private async Task CargarViewBagEditarAsync(ProyectoConstruccion proyecto)
+        {
+            ViewBag.NombreCliente = $"{proyecto.Cliente.Usuario.Nombre} {proyecto.Cliente.Usuario.ApellidoPaterno} {proyecto.Cliente.Usuario.ApellidoMaterno}".Trim();
+            ViewBag.Estados = EstadosPermitidos;
+            ViewBag.Piscinas = await _contexto.Piscina
+                .Where(p => p.ClienteId == proyecto.ClienteId)
+                .OrderBy(p => p.Tipo)
+                .Select(p => new { id = p.Id, texto = $"{p.Tipo} — {p.VolumenM3} m³ ({p.Estado})" })
+                .ToListAsync<object>();
+        }
+        #endregion
     }
 }
