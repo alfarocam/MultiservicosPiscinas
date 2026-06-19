@@ -1,0 +1,76 @@
+﻿@{
+    ViewData["Title"] = "Proyectos";
+}
+
+@if (TempData["MensajeExito"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i> @TempData["MensajeExito"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+@if (TempData["MensajeError"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["MensajeError"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="a-title mb-0">Proyectos</h2>
+    <a asp-action="Crear" asp-controller="Proyecto" class="btn btn-primary">
+         Nuevo Proyecto
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <table id="tablaProyectos" class="table align-middle w-100" style="color: var(--color-text-dark);">
+            <thead>
+                <tr>
+                    <th class="a-text-muted small text-uppercase" hidden>ID</th>
+                    <th class="a-text-muted small text-uppercase">Nombre del Cliente</th>
+                    <th class="a-text-muted small text-uppercase">Nombre del Proyecto</th>
+                    <th class="a-text-muted small text-uppercase">Fecha Inicio</th>
+                    <th class="a-text-muted small text-uppercase">Fecha Fin Estimada</th>
+                    <th class="a-text-muted small text-uppercase">Estado</th>
+                    <th class="a-text-muted small text-uppercase">Presupuesto</th>
+                    <th class="a-text-muted small text-uppercase text-center">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var proyecto in Model)
+                {
+                    <tr style="border-bottom: 1px solid #e1ecf4;">
+                        <td hidden>@proyecto.Id</td>
+                        <td>@proyecto.Cliente.Usuario.Nombre @proyecto.Cliente.Usuario.ApellidoPaterno @proyecto.Cliente.Usuario.ApellidoMaterno</td>
+                        <td>@proyecto.Nombre</td>
+                        <td>@proyecto.FechaInicio</td>
+                        <td>@proyecto.FechaFinEstimada</td>
+                        <td>@proyecto.Estado</td>
+                        <td>@proyecto.Presupuesto.ToString("C")</td>
+                        <td>
+                            <div class="d-flex gap-1 justify-content-end">
+                                    <a asp-action="Detalle" asp-controller="Piscinas" asp-route-id="@proyecto.Id"
+                                       class="btn btn-sm"
+                                       style="background-color: transparent !important; color: var(--color-navbar-bg) !important; border: 1px solid var(--color-navbar-bg) !important; box-shadow: none !important;">
+                                        Ver
+                                    </a>
+                                    <a asp-action="Editar" asp-controller="Piscinas" asp-route-id="@proyecto.Id"
+                                       class="btn btn-sm text-decoration-none">
+                                        Editar
+                                    </a>
+                                </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/proyecto-tabla.js" asp-append-version="true"></script>
+}
