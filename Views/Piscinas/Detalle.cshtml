@@ -1,52 +1,132 @@
-﻿<div class="container my-5" style="max-width: 600px;">
-    <div class="mb-4">
-        <h1 class="a-title">Ficha de Información</h1>
-        <p class="a-text-muted">Detalles completos y parámetros técnicos asociados a la piscina.</p>
-    </div>
+@model MultiserviciosPiscinas.Models.Piscina
 
-    <div class="o-form-card">
-        <div class="m-form-field mb-2">
-            <span class="a-text-muted small text-uppercase">Identificador Único (ID)</span>
-            <span class="a-text-dark fw-bold fs-5">1</span>
-        </div>
+@{
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    ViewData["Title"] = "Detalle Piscina";
 
-        <hr style="border-top: 1px solid #e1ecf4; margin: 1.5rem 0;" />
+    var nombreCliente = $"{Model.Cliente.Usuario.Nombre} {Model.Cliente.Usuario.ApellidoPaterno}".Trim();
+    var distrito = Model.Direccion?.Distrito?.Nombre ?? "—";
+    var canton = Model.Direccion?.Distrito?.Canton?.Nombre ?? "—";
+    var provincia = Model.Direccion?.Distrito?.Canton?.Provincia?.Nombre ?? "—";
+    var detallesDireccion = Model.Direccion?.Detalles ?? "—";
 
-        <div class="row">
-            <div class="col-6 mb-3">
-                <div class="m-form-field">
-                    <span class="a-text-muted small text-uppercase">ID Cliente Asociado</span>
-                    <strong class="a-text-dark">102</strong>
+    var colorEstado = Model.Estado switch
+    {
+        "Activa"              => "var(--color-success)",
+        "Inactiva"            => "var(--color-text-muted)",
+        "En mantenimiento"    => "var(--color-accent-orange)",
+        "En construcción"     => "var(--color-link)",
+        _                     => "var(--color-text-muted)"
+    };
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="a-title mb-0">
+        <i class="bi bi-water me-2"></i>Detalle de Piscina
+    </h2>
+    <a asp-action="Index" asp-controller="Piscinas" class="btn btn-sm">
+        <i class="bi bi-arrow-left me-1"></i> Volver
+    </a>
+</div>
+
+<div class="row g-4">
+
+    @* Tarjeta: Datos de la piscina *@
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="fw-bold mb-3" style="color: var(--color-btn-bg);">
+                    <i class="bi bi-clipboard-data me-2"></i>Ficha Técnica
+                </h5>
+                <hr style="border-color: var(--color-accent);" />
+
+                <div class="mb-3">
+                    <div class="a-text-muted small mb-1">ID Piscina</div>
+                    <div class="fw-bold fs-5">#@Model.Id</div>
+                </div>
+
+                <div class="mb-3">
+                    <div class="a-text-muted small mb-1">
+                        <i class="bi bi-person-fill me-1"></i>Cliente
+                    </div>
+                    <div class="fw-semibold">@nombreCliente</div>
+                </div>
+
+                <div class="mb-3">
+                    <div class="a-text-muted small mb-1">
+                        <i class="bi bi-tools me-1"></i>Tipo estructural
+                    </div>
+                    <div>@Model.Tipo</div>
+                </div>
+
+                <div class="mb-3">
+                    <div class="a-text-muted small mb-1">
+                        <i class="bi bi-droplet-half me-1"></i>Volumen
+                    </div>
+                    <div>@Model.VolumenM3.ToString("F2") m³</div>
+                </div>
+
+                <div>
+                    <div class="a-text-muted small mb-1">Condición operativa</div>
+                    <span class="badge px-3 py-2"
+                          style="background-color: @colorEstado; font-size: 13px; border-radius: var(--border-radius-sm);">
+                        @Model.Estado
+                    </span>
                 </div>
             </div>
-            <div class="col-6 mb-3">
-                <div class="m-form-field">
-                    <span class="a-text-muted small text-uppercase">ID Ubicación geográfica</span>
-                    <strong class="a-text-dark">540</strong>
-                </div>
+
+            <div class="card-footer d-flex gap-2 justify-content-end bg-transparent border-0">
+                <a asp-action="Historial" asp-controller="Piscinas"
+                   asp-route-id="@Model.Id" class="btn btn-sm">
+                    <i class="bi bi-clock-history me-1"></i> Historial
+                </a>
+                <a asp-action="Editar" asp-controller="Piscinas"
+                   asp-route-id="@Model.Id" class="btn btn-sm">
+                    <i class="bi bi-pencil-fill me-1"></i> Editar
+                </a>
             </div>
-        </div>
-
-        <div class="m-form-field mb-3">
-            <span class="a-text-muted small text-uppercase">Tipo Estructural y Construcción</span>
-            <strong class="a-text-dark">Fibra de Vidrio Premium</strong>
-        </div>
-
-        <div class="m-form-field mb-3">
-            <span class="a-text-muted small text-uppercase">Caudal / Volumen Métrico</span>
-            <strong class="a-text-dark">45.50 m³</strong>
-        </div>
-
-        <div class="m-form-field mb-4">
-            <span class="a-text-muted small text-uppercase mb-1 d-block">Condición Operativa actual</span>
-            <div>
-                <span class="badge" style="background-color: var(--color-success); padding: 0.5rem 0.8rem; font-size: 13px; border-radius: var(--border-radius-sm);">Activa / Operacional</span>
-            </div>
-        </div>
-
-        <div class="d-flex justify-content-between align-items-center mt-4 pt-2" style="border-top: 1px solid #e1ecf4;">
-            <a asp-action="Index" asp-controller="Piscinas" class="btn a-btn-outline d-flex align-items-center" style="color: var(--color-navbar-bg) !important; border-color: var(--color-navbar-bg) !important;">Volver a la Lista</a>
-            <a asp-action="Editar" asp-controller="Piscinas" class="a-btn text-decoration-none">Editar Datos</a>
         </div>
     </div>
+
+    @* Tarjeta: Ubicación *@
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="fw-bold mb-3" style="color: var(--color-btn-bg);">
+                    <i class="bi bi-geo-alt-fill me-2"></i>Ubicación
+                </h5>
+                <hr style="border-color: var(--color-accent);" />
+
+                <div class="mb-3">
+                    <div class="a-text-muted small mb-1">Provincia</div>
+                    <div class="fw-semibold">@provincia</div>
+                </div>
+
+                <div class="mb-3">
+                    <div class="a-text-muted small mb-1">Cantón</div>
+                    <div>@canton</div>
+                </div>
+
+                <div class="mb-3">
+                    <div class="a-text-muted small mb-1">Distrito</div>
+                    <div>@distrito</div>
+                </div>
+
+                <div>
+                    <div class="a-text-muted small mb-1">Señas exactas</div>
+                    <div class="p-2 rounded" style="background: var(--color-body-bg); border: 1px solid #e1ecf4;">
+                        @detallesDireccion
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-footer d-flex justify-content-end bg-transparent border-0">
+                <a asp-action="Detalle" asp-controller="Clientes"
+                   asp-route-id="@Model.ClienteId" class="btn btn-sm">
+                    <i class="bi bi-person-circle me-1"></i> Ver Cliente
+                </a>
+            </div>
+        </div>
+    </div>
+
 </div>
