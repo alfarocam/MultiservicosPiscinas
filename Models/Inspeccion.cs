@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MultiserviciosPiscinas.Models;
 
@@ -20,6 +21,9 @@ public partial class Inspeccion
     public double? Calcio { get; set; }
 
     public double? AcidoCianurico { get; set; }
+
+    [Column("temperatura_c")]
+    public double? TemperaturaC { get; set; }
 
     public string? Observaciones { get; set; }
 

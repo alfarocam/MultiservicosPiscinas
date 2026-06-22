@@ -1,0 +1,136 @@
+﻿@model MultiserviciosPiscinas.Models.RegistroParametrosListaViewModel
+
+@{
+    Layout = "~/Views/Shared/_LayoutTecnico.cshtml";
+    ViewData["Title"] = "Registro de Parámetros";
+}
+
+<div class="container my-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="a-title mb-1">
+                <i class="bi bi-droplet-half me-2"></i>Registro de Parámetros
+            </h1>
+            <p class="a-text-muted mb-0">
+                Selecciona una visita de mantenimiento o inspección para registrar la calidad del agua.
+            </p>
+        </div>
+    </div>
+
+    @if (TempData["Exito"] != null)
+    {
+        <div class="alert alert-success shadow-sm">
+            <i class="bi bi-check-circle me-1"></i>
+            @TempData["Exito"]
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger shadow-sm">
+            <i class="bi bi-exclamation-triangle me-1"></i>
+            @TempData["Error"]
+        </div>
+    }
+
+    @if (!Model.Visitas.Any())
+    {
+        <div class="o-form-card text-center py-5">
+            <i class="bi bi-calendar-x" style="font-size: 3rem; color: var(--color-text-muted);"></i>
+
+            <h4 class="mt-3 mb-2" style="color: var(--color-text-dark);">
+                No hay visitas disponibles
+            </h4>
+
+            <p class="a-text-muted mb-0">
+                Actualmente no tienes visitas de mantenimiento o inspección pendientes para registrar parámetros.
+            </p>
+        </div>
+    }
+    else
+    {
+        <div class="o-form-card">
+            <div class="table-responsive">
+                <table class="table align-middle w-100" style="color: var(--color-text-dark);">
+                    <thead>
+                        <tr style="border-bottom: 2px solid #e1ecf4;">
+                            <th class="a-text-muted small text-uppercase">Fecha</th>
+                            <th class="a-text-muted small text-uppercase">Cliente</th>
+                            <th class="a-text-muted small text-uppercase">Piscina</th>
+                            <th class="a-text-muted small text-uppercase">Dirección</th>
+                            <th class="a-text-muted small text-uppercase">Estado</th>
+                            <th class="a-text-muted small text-uppercase">Mediciones</th>
+                            <th class="a-text-muted small text-uppercase text-end">Acción</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach (var visita in Model.Visitas)
+                        {
+                            var colorEstado = visita.EstadoCita switch
+                            {
+                                "Pendiente" => "var(--color-text-muted)",
+                                "Confirmada" => "var(--color-link)",
+                                "En camino" => "var(--color-link)",
+                                "En progreso" => "var(--color-accent-orange)",
+                                _ => "var(--color-text-muted)"
+                            };
+
+                            <tr style="border-bottom: 1px solid #e1ecf4;">
+                                <td>
+                                    <strong>@visita.FechaHora.ToString("dd/MM/yyyy")</strong>
+                                    <div class="a-text-muted small">
+                                        @visita.FechaHora.ToString("HH:mm")
+                                    </div>
+                                </td>
+
+                                <td>@visita.Cliente</td>
+
+                                <td>
+                                    <strong>@visita.Piscina</strong>
+                                    <div class="a-text-muted small">@visita.TipoCita</div>
+                                </td>
+
+                                <td class="small">@visita.Direccion</td>
+
+                                <td>
+                                    <span class="badge"
+                                          style="background-color: @colorEstado; padding: 0.4rem 0.6rem; border-radius: var(--border-radius-sm);">
+                                        @visita.EstadoCita
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <strong>@visita.CantidadMediciones</strong>
+                                    @if (visita.UltimaMedicion.HasValue)
+                                    {
+                                        <div class="a-text-muted small">
+                                            Última: @visita.UltimaMedicion.Value.ToString("dd/MM/yyyy")
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="a-text-muted small">Sin registros</div>
+                                    }
+                                </td>
+
+                                <td>
+                                    <div class="d-flex justify-content-end">
+                                        <a asp-action="RegistrarParametro"
+                                           asp-controller="Piscinas"
+                                           asp-route-citaId="@visita.CitaId"
+                                           class="btn btn-sm text-decoration-none">
+                                            Registrar parámetros
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+
+                </table>
+            </div>
+        </div>
+    }
+</div>

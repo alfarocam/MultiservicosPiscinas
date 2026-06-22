@@ -1,0 +1,187 @@
+﻿@model MultiserviciosPiscinas.Models.RegistrarParametroAguaViewModel
+
+@{
+    Layout = "~/Views/Shared/_LayoutTecnico.cshtml";
+    ViewData["Title"] = "Registrar Parámetros del Agua";
+}
+
+<div class="container my-4" style="max-width: 960px;">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="a-title mb-1">
+                <i class="bi bi-droplet-half me-2"></i>Registrar Parámetros del Agua
+            </h1>
+            <p class="a-text-muted mb-0">
+                Ingrese los valores obtenidos durante la visita técnica.
+            </p>
+        </div>
+
+        <a asp-action="RegistroParametros"
+           asp-controller="Piscinas"
+           class="btn a-btn-outline"
+           style="color: var(--color-navbar-bg) !important; border-color: var(--color-navbar-bg) !important;">
+            <i class="bi bi-arrow-left me-1"></i> Volver
+        </a>
+    </div>
+
+    <div class="row g-4">
+
+        <div class="col-lg-4">
+            <div class="o-form-card h-100">
+                <h5 class="fw-bold mb-3" style="color: var(--color-btn-bg);">
+                    <i class="bi bi-info-circle me-2"></i>Información de la visita
+                </h5>
+
+                <hr style="border-color: var(--color-accent);" />
+
+                <div class="mb-3">
+                    <div class="a-text-muted small mb-1">Cliente</div>
+                    <div class="fw-semibold" style="color: var(--color-text-dark);">
+                        @Model.Cliente
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <div class="a-text-muted small mb-1">Piscina</div>
+                    <div style="color: var(--color-text-dark);">
+                        @Model.Piscina
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <div class="a-text-muted small mb-1">Dirección</div>
+                    <div class="small" style="color: var(--color-text-dark);">
+                        @Model.Direccion
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <div class="a-text-muted small mb-1">Fecha de visita</div>
+                    <div style="color: var(--color-text-dark);">
+                        @Model.FechaHoraCita.ToString("dd/MM/yyyy HH:mm")
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <div class="a-text-muted small mb-1">Tipo</div>
+                    <span class="badge"
+                          style="background-color: var(--color-link); padding: 0.4rem 0.6rem; border-radius: var(--border-radius-sm);">
+                        @Model.TipoCita
+                    </span>
+                </div>
+
+                <div>
+                    <div class="a-text-muted small mb-1">Mediciones registradas</div>
+                    <div class="fw-bold fs-5" style="color: var(--color-btn-bg);">
+                        @Model.MedicionesRegistradas
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <div class="o-form-card">
+
+                <form asp-action="RegistrarParametro" asp-controller="Piscinas" method="post">
+                    @Html.AntiForgeryToken()
+
+                    <input type="hidden" asp-for="CitaId" />
+
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                    <h5 class="fw-bold mb-3" style="color: var(--color-btn-bg);">
+                        <i class="bi bi-clipboard-pulse me-2"></i>Valores de medición
+                    </h5>
+
+                    <hr style="border-color: var(--color-accent);" />
+
+                    <div class="row g-3">
+
+                        <div class="col-md-6">
+                            <div class="m-form-field">
+                                <label asp-for="FechaInspeccion">Fecha de inspección</label>
+                                <input asp-for="FechaInspeccion" type="date" class="a-input" />
+                                <span asp-validation-for="FechaInspeccion" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="m-form-field">
+                                <label asp-for="Ph">pH</label>
+                                <input asp-for="Ph" type="number" step="0.01" min="0" max="14" class="a-input" placeholder="Ej. 7.20" />
+                                <span asp-validation-for="Ph" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="m-form-field">
+                                <label asp-for="CloroPpm">Cloro ppm</label>
+                                <input asp-for="CloroPpm" type="number" step="0.01" min="0" max="10" class="a-input" placeholder="Ej. 2.00" />
+                                <span asp-validation-for="CloroPpm" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="m-form-field">
+                                <label asp-for="Alcalinidad">Alcalinidad ppm</label>
+                                <input asp-for="Alcalinidad" type="number" step="0.01" min="0" max="300" class="a-input" placeholder="Ej. 100" />
+                                <span asp-validation-for="Alcalinidad" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="m-form-field">
+                                <label asp-for="TemperaturaC">Temperatura °C</label>
+                                <input asp-for="TemperaturaC" type="number" step="0.01" min="0" max="50" class="a-input" placeholder="Ej. 28" />
+                                <span asp-validation-for="TemperaturaC" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="m-form-field">
+                                <label asp-for="Calcio">Calcio ppm</label>
+                                <input asp-for="Calcio" type="number" step="0.01" min="0" max="1000" class="a-input" placeholder="Opcional" />
+                                <span asp-validation-for="Calcio" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="m-form-field">
+                                <label asp-for="AcidoCianurico">Ácido cianúrico ppm</label>
+                                <input asp-for="AcidoCianurico" type="number" step="0.01" min="0" max="200" class="a-input" placeholder="Opcional" />
+                                <span asp-validation-for="AcidoCianurico" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="m-form-field">
+                                <label asp-for="Observaciones">Observaciones</label>
+                                <textarea asp-for="Observaciones" class="a-input" rows="4"
+                                          placeholder="Anote observaciones sobre el estado del agua, color, olor, turbidez o recomendaciones."></textarea>
+                                <span asp-validation-for="Observaciones" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        <a asp-action="RegistroParametros"
+                           asp-controller="Piscinas"
+                           class="btn a-btn-outline"
+                           style="color: var(--color-navbar-bg) !important; border-color: var(--color-navbar-bg) !important;">
+                            Cancelar
+                        </a>
+
+                        <button type="submit" class="a-btn">
+                            <i class="bi bi-save me-1"></i> Guardar Registro
+                        </button>
+                    </div>
+
+                </form>
+
+            </div>
+        </div>
+
+    </div>
+</div>

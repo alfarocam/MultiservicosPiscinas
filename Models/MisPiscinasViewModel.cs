@@ -67,6 +67,8 @@ public class ParametrosPiscinaViewModel
 
     public double? AcidoCianurico { get; set; }
 
+    public double? TemperaturaC { get; set; }
+
     public string? Observaciones { get; set; }
 }
 

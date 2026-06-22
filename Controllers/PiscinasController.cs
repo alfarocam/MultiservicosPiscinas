@@ -13,6 +13,12 @@ namespace MultiserviciosPiscinas.Controllers
         [HttpGet]
         public IActionResult Index()
         {
+            if (User.IsInRole("2"))
+                return RedirectToAction(nameof(RegistroParametros));
+
+            if (User.IsInRole("3"))
+                return RedirectToAction(nameof(MisPiscinas));
+
             var piscinas = _contexto.Piscina
                 .Include(p => p.Cliente)
                     .ThenInclude(c => c.Usuario)
@@ -175,6 +181,197 @@ namespace MultiserviciosPiscinas.Controllers
         }
 
         // ======================================================
+        // HU-4.3 - Registrar parámetros del agua
+        // Técnico
+        // ======================================================
+
+        [HttpGet]
+        [Authorize(Roles = "2")]
+        public async Task<IActionResult> RegistroParametros()
+        {
+            var tecnicoId = await ObtenerUsuarioAutenticadoIdAsync();
+
+            if (tecnicoId == null)
+                return RedirectToAction("InicioSesion", "Auth");
+
+            var citas = await _contexto.Cita
+                .Include(c => c.Piscina)
+                    .ThenInclude(p => p.Cliente)
+                        .ThenInclude(cl => cl.Usuario)
+                .Include(c => c.Piscina)
+                    .ThenInclude(p => p.Direccion)
+                        .ThenInclude(d => d.Distrito)
+                .Include(c => c.Servicio)
+                    .ThenInclude(s => s!.Inspeccion)
+                .Where(c =>
+                    c.TecnicoId == tecnicoId.Value &&
+                    c.Estado != "Cancelada" &&
+                    c.Estado != "Completada" &&
+                    (c.Tipo == "Mantenimiento" || c.Tipo == "Inspección"))
+                .OrderBy(c => c.FechaHora)
+                .AsNoTracking()
+                .ToListAsync();
+
+            var modelo = new RegistroParametrosListaViewModel
+            {
+                Visitas = citas.Select(c => new RegistroParametroItemViewModel
+                {
+                    CitaId = c.Id,
+                    PiscinaId = c.PiscinaId,
+                    Cliente = $"{c.Piscina.Cliente.Usuario.Nombre} {c.Piscina.Cliente.Usuario.ApellidoPaterno}",
+                    Piscina = $"Piscina #{c.Piscina.Id} - {c.Piscina.Tipo}",
+                    Direccion = ConstruirDireccionCorta(c.Piscina.Direccion),
+                    FechaHora = c.FechaHora,
+                    TipoCita = c.Tipo,
+                    EstadoCita = c.Estado,
+                    CantidadMediciones = c.Servicio?.Inspeccion.Count ?? 0,
+                    UltimaMedicion = c.Servicio?.Inspeccion
+                        .OrderByDescending(i => i.FechaInspeccion)
+                        .Select(i => (DateOnly?)i.FechaInspeccion)
+                        .FirstOrDefault()
+                }).ToList()
+            };
+
+            return View(modelo);
+        }
+
+        [HttpGet]
+        [Authorize(Roles = "2")]
+        public async Task<IActionResult> RegistrarParametro(int citaId)
+        {
+            var tecnicoId = await ObtenerUsuarioAutenticadoIdAsync();
+
+            if (tecnicoId == null)
+                return RedirectToAction("InicioSesion", "Auth");
+
+            var cita = await _contexto.Cita
+                .Include(c => c.Piscina)
+                    .ThenInclude(p => p.Cliente)
+                        .ThenInclude(cl => cl.Usuario)
+                .Include(c => c.Piscina)
+                    .ThenInclude(p => p.Direccion)
+                        .ThenInclude(d => d.Distrito)
+                .Include(c => c.Servicio)
+                    .ThenInclude(s => s!.Inspeccion)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(c => c.Id == citaId && c.TecnicoId == tecnicoId.Value);
+
+            if (cita == null)
+                return RedirectToAction(nameof(RegistroParametros));
+
+            var modelo = new RegistrarParametroAguaViewModel
+            {
+                CitaId = cita.Id,
+                FechaInspeccion = DateOnly.FromDateTime(DateTime.Now)
+            };
+
+            CargarDatosFormularioParametro(modelo, cita);
+
+            return View(modelo);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "2")]
+        public async Task<IActionResult> RegistrarParametro(RegistrarParametroAguaViewModel modelo)
+        {
+            var tecnicoId = await ObtenerUsuarioAutenticadoIdAsync();
+
+            if (tecnicoId == null)
+                return RedirectToAction("InicioSesion", "Auth");
+
+            var cita = await _contexto.Cita
+                .Include(c => c.Piscina)
+                    .ThenInclude(p => p.Cliente)
+                        .ThenInclude(cl => cl.Usuario)
+                .Include(c => c.Piscina)
+                    .ThenInclude(p => p.Direccion)
+                        .ThenInclude(d => d.Distrito)
+                .Include(c => c.Servicio)
+                    .ThenInclude(s => s!.Inspeccion)
+                .FirstOrDefaultAsync(c => c.Id == modelo.CitaId && c.TecnicoId == tecnicoId.Value);
+
+            if (cita == null)
+            {
+                TempData["Error"] = "No se encontró la visita asignada.";
+                return RedirectToAction(nameof(RegistroParametros));
+            }
+
+            CargarDatosFormularioParametro(modelo, cita);
+
+            if (cita.Estado == "Cancelada" || cita.Estado == "Completada")
+            {
+                ModelState.AddModelError("", "No se pueden registrar parámetros en una cita cancelada o completada.");
+            }
+
+            if (cita.Tipo != "Mantenimiento" && cita.Tipo != "Inspección")
+            {
+                ModelState.AddModelError("", "Solo se pueden registrar parámetros en visitas de mantenimiento o inspección.");
+            }
+
+            if (!ModelState.IsValid)
+                return View(modelo);
+
+            await using var transaccion = await _contexto.Database.BeginTransactionAsync();
+
+            try
+            {
+                Servicio servicio;
+
+                if (cita.Servicio == null)
+                {
+                    servicio = new Servicio
+                    {
+                        CitaId = cita.Id,
+                        FechaApertura = DateOnly.FromDateTime(DateTime.Now),
+                        Estado = "En progreso",
+                        TrabajoRealizado = "Registro de parámetros del agua."
+                    };
+
+                    _contexto.Servicio.Add(servicio);
+                    await _contexto.SaveChangesAsync();
+                }
+                else
+                {
+                    servicio = cita.Servicio;
+
+                    if (servicio.Estado == "Abierto")
+                        servicio.Estado = "En progreso";
+                }
+
+                var inspeccion = new Inspeccion
+                {
+                    ServicioId = servicio.Id,
+                    FechaInspeccion = modelo.FechaInspeccion,
+                    Ph = modelo.Ph,
+                    CloroPpm = modelo.CloroPpm,
+                    Alcalinidad = modelo.Alcalinidad,
+                    TemperaturaC = modelo.TemperaturaC,
+                    Calcio = modelo.Calcio,
+                    AcidoCianurico = modelo.AcidoCianurico,
+                    Observaciones = modelo.Observaciones
+                };
+
+                _contexto.Inspeccion.Add(inspeccion);
+
+                if (cita.Estado == "Pendiente" || cita.Estado == "Confirmada" || cita.Estado == "En camino")
+                    cita.Estado = "En progreso";
+
+                await _contexto.SaveChangesAsync();
+                await transaccion.CommitAsync();
+
+                TempData["Exito"] = "La medición del agua se registró correctamente y el historial fue actualizado.";
+                return RedirectToAction(nameof(RegistroParametros));
+            }
+            catch
+            {
+                await transaccion.RollbackAsync();
+                ModelState.AddModelError("", "Ocurrió un error al guardar la medición. Intenta nuevamente.");
+                return View(modelo);
+            }
+        }
+
+        // ======================================================
         // HU-4.2 - Consultar mis piscinas como cliente
         // ======================================================
 
@@ -320,6 +517,7 @@ namespace MultiserviciosPiscinas.Controllers
                     Ph = ultimaInspeccion.Ph,
                     Calcio = ultimaInspeccion.Calcio,
                     AcidoCianurico = ultimaInspeccion.AcidoCianurico,
+                    TemperaturaC = ultimaInspeccion.TemperaturaC,
                     Observaciones = ultimaInspeccion.Observaciones
                 },
 
@@ -327,6 +525,20 @@ namespace MultiserviciosPiscinas.Controllers
             };
 
             return View(modelo);
+        }
+
+        private async Task<int?> ObtenerUsuarioAutenticadoIdAsync()
+        {
+            var correo = User.FindFirstValue(ClaimTypes.Email)
+                ?? User.FindFirstValue(ClaimTypes.Name);
+
+            if (string.IsNullOrWhiteSpace(correo))
+                return null;
+
+            return await _contexto.Usuario
+                .Where(u => u.Correo == correo && u.Activo)
+                .Select(u => (int?)u.Id)
+                .FirstOrDefaultAsync();
         }
 
         private async Task<int?> ObtenerClienteIdAutenticadoAsync()
@@ -341,6 +553,19 @@ namespace MultiserviciosPiscinas.Controllers
                 .Where(c => c.Usuario.Correo == correo && c.Usuario.Activo)
                 .Select(c => (int?)c.Id)
                 .FirstOrDefaultAsync();
+        }
+
+        private static void CargarDatosFormularioParametro(RegistrarParametroAguaViewModel modelo, Cita cita)
+        {
+            modelo.CitaId = cita.Id;
+            modelo.PiscinaId = cita.PiscinaId;
+            modelo.Cliente = $"{cita.Piscina.Cliente.Usuario.Nombre} {cita.Piscina.Cliente.Usuario.ApellidoPaterno}";
+            modelo.Piscina = $"Piscina #{cita.Piscina.Id} - {cita.Piscina.Tipo}";
+            modelo.Direccion = ConstruirDireccionCorta(cita.Piscina.Direccion);
+            modelo.FechaHoraCita = cita.FechaHora;
+            modelo.TipoCita = cita.Tipo;
+            modelo.EstadoCita = cita.Estado;
+            modelo.MedicionesRegistradas = cita.Servicio?.Inspeccion.Count ?? 0;
         }
 
         private static string ConstruirDireccionCorta(DireccionCliente? direccion)
@@ -365,23 +590,23 @@ namespace MultiserviciosPiscinas.Controllers
             return $"{direccion.TipoDireccion} — {direccion.Detalles}, {distrito}, {canton}, {provincia}";
         }
 
-        private static readonly List<string> TiposPermitidos =
-        [
+        private static readonly List<string> TiposPermitidos = new()
+        {
             "Residencial",
             "Comercial",
             "Semiolímpica",
             "Olímpica",
             "Jacuzzi",
             "Otro"
-        ];
+        };
 
-        private static readonly List<string> EstadosPermitidos =
-        [
+        private static readonly List<string> EstadosPermitidos = new()
+        {
             "Activa",
             "Inactiva",
             "En mantenimiento",
             "En construcción"
-        ];
+        };
 
         private void CargarViewBagEditar(Cliente clienteConNavegacion, int direccionId, string tipo, string estado)
         {
