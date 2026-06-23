@@ -1,37 +1,124 @@
-﻿@{
-    ViewData["Title"] = "Bitácora";
+﻿@model IEnumerable<MultiserviciosPiscinas.Models.BitacoraAuditoria>
+
+@{
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    ViewData["Title"] = "Bitacora del Sistema :) ";
 }
 
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h2 class="mb-0">Bitácora de servicios</h2>
-    <a asp-action="Registrar" class="btn btn-primary">+ Registrar bitácora</a>
+    <h2 class="mb-0"><i class="bi bi-shield-fill-check me-2"></i>HU-7.2 – Bitacora de Auditoria</h2>
+</div>
+
+<div class="card border-0 shadow-sm mb-4 bg-light">
+    <div class="card-body">
+        <form method="get" asp-action="Index" class="row g-3 align-items-end">
+            
+            <div class="col-md-3">
+                <label class="form-label small fw-bold text-muted">Filtrar por Acción</label>
+                <select name="accionFiltro" class="form-select form-select-sm">
+                    <option value="">-- Todas las acciones --</option>
+                    @foreach (var acc in ViewBag.AccionesDisponibles)
+                    {
+                        if (acc == ViewBag.AccionActual)
+                        {
+                            <option value="@acc" selected>@acc</option>
+                        }
+                        else
+                        {
+                            <option value="@acc">@acc</option>
+                        }
+                    }
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label small fw-bold text-muted">Buscar por Tabla SQL</label>
+                <input type="text" name="tablaFiltro" class="form-control form-control-sm"
+                       placeholder="Ej: Usuario, Cita" value="@ViewBag.TablaActual" />
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label small fw-bold text-muted">Ordenar por Fecha</label>
+                <select name="ordenFecha" class="form-select form-select-sm">
+                    @if (ViewBag.OrdenActual == "asc")
+                    {
+                        <option value="desc">Mas recientes primero</option>
+                        <option value="asc" selected>Mas antiguos primero</option>
+                    }
+                    else
+                    {
+                        <option value="desc" selected>Mas recientes primero</option>
+                        <option value="asc">Mas antiguos primero</option>
+                    }
+                </select>
+            </div>
+
+            <div class="col-md-3 d-flex gap-2">
+                <button type="submit" class="btn btn-primary btn-sm w-100">
+                    <i class="bi bi-funnel-fill me-1"></i> Aplicar
+                </button>
+                <a asp-action="Index" class="btn btn-secondary btn-sm w-100">
+                    <i class="bi bi-arrow-counterclockwise"></i> Limpiar
+                </a>
+            </div>
+
+        </form>
+    </div>
 </div>
 
 <div class="card border-0 shadow-sm">
     <div class="card-body p-0">
-        <table class="table table-bordered table-hover mb-0">
-            <thead class="table-dark">
-                <tr>
-                    <th>#</th>
-                    <th>Cliente</th>
-                    <th>Piscina</th>
-                    <th>Fecha</th>
-                    <th>Estado general</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>1</td>
-                    <td>Taylor Swift</td>
-                    <td>Piscina principal</td>
-                    <td>14/04/2026</td>
-                    <td><span class="badge bg-success">Estable</span></td>
-                    <td>
-                        <a asp-action="Detalle" asp-route-id="1" class="btn btn-info btn-sm text-white">Ver</a>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Fecha y Hora</th>
+                        <th>Colaborador</th>
+                        <th>Operacion</th>
+                        <th>Tabla SQL</th>
+                        <th class="text-center">ID Reg.</th>
+                        <th>Historial de Cambio</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!Model.Any())
+                    {
+                        <tr>
+                            <td colspan="6" class="text-center p-4 text-muted">
+                                <i class="bi bi-info-circle me-1"></i> No se encontraron registros con los filtros seleccionados.
+                            </td>
+                        </tr>
+                    }
+                    @foreach (var log in Model)
+                    {
+                        <tr>
+                            <td class="text-nowrap small font-monospace">@log.FechaHora.ToString("dd/MM/yyyy hh:mm tt")</td>
+                            <td>
+                                <strong>@log.Usuario.Nombre @log.Usuario.ApellidoPaterno</strong><br />
+                                <small class="text-muted">@log.Usuario.Correo</small>
+                            </td>
+                            <td>
+                                <span class="badge @(log.Accion == "INSERT" ? "bg-success" : log.Accion == "UPDATE" ? "bg-warning text-dark" : "bg-danger")">
+                                    @log.Accion
+                                </span>
+                            </td>
+                            <td><code>@log.TablaAfectada</code></td>
+                            <td class="text-center font-monospace">@log.RegistroId</td>
+                            <td>
+                                <div class="small">
+                                    @if (!string.IsNullOrEmpty(log.ValorAnterior))
+                                    {
+                                        <span class="text-danger"><strong>Antes:</strong> @log.ValorAnterior</span>
+                                    
+                                        <br />
+                                    }
+                                    <span class="text-success"><strong>Ahora:</strong> @log.ValorNuevo</span>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
