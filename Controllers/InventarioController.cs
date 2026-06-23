@@ -1,232 +1,149 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using MultiserviciosPiscinas.Models;
+using MultiserviciosPiscinas.Services;
 
 namespace MultiserviciosPiscinas.Controllers
 {
     [Authorize(Roles = "1,2")]
-    public class InventarioController : Controller
+    public class InventarioController(
+        PiscinasYMultiserviciosContext context,
+        BitacoraService bitacora) : Controller
     {
-        private readonly PiscinasYMultiserviciosContext _contexto;
+        private readonly PiscinasYMultiserviciosContext _context = context;
+        private readonly BitacoraService _bitacora = bitacora;
 
-        public InventarioController(PiscinasYMultiserviciosContext contexto)
+        // GET: /Inventario
+        public async Task<IActionResult> Index(string? busqueda)
         {
-            _contexto = contexto;
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> Index()
-        {
-            await AsegurarCategoriasBasicasAsync();
-
-            var productos = await _contexto.Producto
+            var query = _context.Producto
                 .Include(p => p.Categoria)
-                .OrderBy(p => p.Id)
-                .AsNoTracking()
-                .Select(p => new InventarioItemViewModel
-                {
-                    Id = p.Id,
-                    Categoria = p.Categoria.NombreCategoria,
-                    Nombre = p.Nombre,
-                    Descripcion = p.Descripcion,
-                    Precio = p.Precio,
-                    Stock = p.Stock,
-                    Activo = p.Activo
-                })
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(busqueda))
+                query = query.Where(p => p.Nombre.Contains(busqueda));
+
+            var productos = await query
+                .OrderBy(p => p.Nombre)
                 .ToListAsync();
 
-            var modelo = new InventarioIndexViewModel
-            {
-                Productos = productos
-            };
-
-            return View(modelo);
+            ViewBag.Busqueda = busqueda;
+            return View(productos);
         }
 
-        [HttpGet]
-        public async Task<IActionResult> Crear()
+        // GET: /Inventario/Detalle/5
+        public async Task<IActionResult> Detalle(int id)
         {
-            var modelo = new InventarioFormularioViewModel();
-            await CargarCategoriasAsync(modelo);
-
-            return View(modelo);
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Crear(InventarioFormularioViewModel modelo)
-        {
-            await CargarCategoriasAsync(modelo);
-
-            if (!ModelState.IsValid)
-                return View(modelo);
-
-            var categoriaExiste = await _contexto.CategoriaProducto
-                .AnyAsync(c => c.Id == modelo.CategoriaId!.Value);
-
-            if (!categoriaExiste)
-            {
-                ModelState.AddModelError(nameof(modelo.CategoriaId), "La categoría seleccionada no existe.");
-                return View(modelo);
-            }
-
-            var nombreNormalizado = modelo.Nombre.Trim();
-
-            var productoDuplicado = await _contexto.Producto
-                .AnyAsync(p =>
-                    p.Nombre == nombreNormalizado &&
-                    p.CategoriaId == modelo.CategoriaId!.Value &&
-                    p.Activo);
-
-            if (productoDuplicado)
-            {
-                ModelState.AddModelError(nameof(modelo.Nombre), "Ya existe un producto activo con ese nombre en la categoría seleccionada.");
-                return View(modelo);
-            }
-
-            var producto = new Producto
-            {
-                CategoriaId = modelo.CategoriaId.Value,
-                Nombre = nombreNormalizado,
-                Precio = modelo.Precio!.Value,
-                Stock = modelo.Stock!.Value,
-                Descripcion = string.IsNullOrWhiteSpace(modelo.Descripcion)
-                    ? null
-                    : modelo.Descripcion.Trim(),
-                Activo = true
-            };
-
-            _contexto.Producto.Add(producto);
-            await _contexto.SaveChangesAsync();
-
-            TempData["Exito"] = "El producto fue registrado correctamente en el inventario.";
-
-            return RedirectToAction(nameof(Index));
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> Editar(int id)
-        {
-            var producto = await _contexto.Producto
-                .AsNoTracking()
+            var producto = await _context.Producto
+                .Include(p => p.Categoria)
                 .FirstOrDefaultAsync(p => p.Id == id);
 
             if (producto == null)
-                return RedirectToAction(nameof(Index));
+                return NotFound();
 
-            var modelo = new InventarioFormularioViewModel
-            {
-                Id = producto.Id,
-                CategoriaId = producto.CategoriaId,
-                Nombre = producto.Nombre,
-                Precio = producto.Precio,
-                Stock = producto.Stock,
-                Descripcion = producto.Descripcion,
-                Activo = producto.Activo
-            };
-
-            await CargarCategoriasAsync(modelo);
-
-            return View(modelo);
+            return View(producto);
         }
 
+        // GET: /Inventario/Crear
+        public async Task<IActionResult> Crear()
+        {
+            await CargarCategoriasAsync();
+            return View();
+        }
+
+        // POST: /Inventario/Crear
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Editar(InventarioFormularioViewModel modelo)
+        public async Task<IActionResult> Crear(Producto producto)
         {
-            await CargarCategoriasAsync(modelo);
+            ModelState.Remove(nameof(Producto.Categoria));
+            ModelState.Remove(nameof(Producto.DetalleCotizacion));
+            ModelState.Remove(nameof(Producto.DetalleFactura));
+            ModelState.Remove(nameof(Producto.ItemCarrito));
 
             if (!ModelState.IsValid)
-                return View(modelo);
-
-            var producto = await _contexto.Producto
-                .FirstOrDefaultAsync(p => p.Id == modelo.Id);
-
-            if (producto == null)
-                return RedirectToAction(nameof(Index));
-
-            var categoriaExiste = await _contexto.CategoriaProducto
-                .AnyAsync(c => c.Id == modelo.CategoriaId!.Value);
-
-            if (!categoriaExiste)
             {
-                ModelState.AddModelError(nameof(modelo.CategoriaId), "La categoría seleccionada no existe.");
-                return View(modelo);
+                await CargarCategoriasAsync();
+                return View(producto);
             }
 
-            var nombreNormalizado = modelo.Nombre.Trim();
+            producto.Activo = true;
 
-            var productoDuplicado = await _contexto.Producto
-                .AnyAsync(p =>
-                    p.Id != modelo.Id &&
-                    p.Nombre == nombreNormalizado &&
-                    p.CategoriaId == modelo.CategoriaId!.Value &&
-                    p.Activo);
+            _context.Producto.Add(producto);
+            await _context.SaveChangesAsync();
 
-            if (productoDuplicado)
-            {
-                ModelState.AddModelError(nameof(modelo.Nombre), "Ya existe otro producto activo con ese nombre en la categoría seleccionada.");
-                return View(modelo);
-            }
+            await _bitacora.RegistrarAsync(
+                userClaims: User,
+                accion: "INSERT",
+                tablaAfectada: "inv.PRODUCTO",
+                registroId: producto.Id,
+                valorNuevo: $"Nombre: {producto.Nombre} | Stock: {producto.Stock} | Precio: {producto.Precio}"
+            );
 
-            producto.CategoriaId = modelo.CategoriaId.Value;
-            producto.Nombre = nombreNormalizado;
-            producto.Precio = modelo.Precio!.Value;
-            producto.Stock = modelo.Stock!.Value;
-            producto.Descripcion = string.IsNullOrWhiteSpace(modelo.Descripcion)
-                ? null
-                : modelo.Descripcion.Trim();
-            producto.Activo = modelo.Activo;
-
-            await _contexto.SaveChangesAsync();
-
-            TempData["Exito"] = "El producto fue actualizado correctamente.";
-
+            TempData["MensajeExito"] = "Producto registrado correctamente.";
             return RedirectToAction(nameof(Index));
         }
 
-        private async Task CargarCategoriasAsync(InventarioFormularioViewModel modelo)
+        // GET: /Inventario/Editar/5
+        public async Task<IActionResult> Editar(int id)
         {
-            await AsegurarCategoriasBasicasAsync();
+            var producto = await _context.Producto.FindAsync(id);
 
-            modelo.Categorias = await _contexto.CategoriaProducto
-                .OrderBy(c => c.NombreCategoria)
-                .Select(c => new SelectListItem
-                {
-                    Value = c.Id.ToString(),
-                    Text = c.NombreCategoria
-                })
-                .ToListAsync();
+            if (producto == null)
+                return NotFound();
+
+            await CargarCategoriasAsync(producto.CategoriaId);
+            return View(producto);
         }
 
-        private async Task AsegurarCategoriasBasicasAsync()
+        // POST: /Inventario/Editar/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Editar(int id, Producto producto)
         {
-            var existeInsumos = await _contexto.CategoriaProducto
-                .AnyAsync(c => c.NombreCategoria == "Insumos");
+            if (id != producto.Id)
+                return BadRequest();
 
-            var existeHerramientas = await _contexto.CategoriaProducto
-                .AnyAsync(c => c.NombreCategoria == "Herramientas");
+            ModelState.Remove(nameof(Producto.Categoria));
+            ModelState.Remove(nameof(Producto.DetalleCotizacion));
+            ModelState.Remove(nameof(Producto.DetalleFactura));
+            ModelState.Remove(nameof(Producto.ItemCarrito));
 
-            if (!existeInsumos)
+            if (!ModelState.IsValid)
             {
-                _contexto.CategoriaProducto.Add(new CategoriaProducto
-                {
-                    NombreCategoria = "Insumos"
-                });
+                await CargarCategoriasAsync(producto.CategoriaId);
+                return View(producto);
             }
 
-            if (!existeHerramientas)
-            {
-                _contexto.CategoriaProducto.Add(new CategoriaProducto
-                {
-                    NombreCategoria = "Herramientas"
-                });
-            }
+            var anterior = await _context.Producto.AsNoTracking()
+                .FirstOrDefaultAsync(p => p.Id == id);
 
-            if (!existeInsumos || !existeHerramientas)
-                await _contexto.SaveChangesAsync();
+            _context.Producto.Update(producto);
+            await _context.SaveChangesAsync();
+
+            await _bitacora.RegistrarAsync(
+                userClaims: User,
+                accion: "UPDATE",
+                tablaAfectada: "inv.PRODUCTO",
+                registroId: producto.Id,
+                valorNuevo: $"Nombre: {producto.Nombre} | Stock: {producto.Stock} | Precio: {producto.Precio}",
+                valorAnterior: anterior != null
+                    ? $"Nombre: {anterior.Nombre} | Stock: {anterior.Stock} | Precio: {anterior.Precio}"
+                    : null
+            );
+
+            TempData["MensajeExito"] = "Producto actualizado correctamente.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        private async Task CargarCategoriasAsync(int categoriaSeleccionada = 0)
+        {
+            ViewBag.Categorias = await _context.CategoriaProducto
+                .OrderBy(c => c.NombreCategoria)
+                .ToListAsync();
+
+            ViewBag.CategoriaSeleccionada = categoriaSeleccionada;
         }
     }
 }

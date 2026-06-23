@@ -1,56 +1,77 @@
-﻿@{
+﻿@model MultiserviciosPiscinas.Models.BitacoraAuditoria
+@{
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
-    ViewData["Title"] = "Detalle de bitácora";
+    ViewData["Title"] = "Detalle de actividad";
+
+    string TraducirTabla(string tabla) => tabla switch
+    {
+        "inv.PRODUCTO"        => "Inventario — Producto",
+        "fin.GASTO_OPERATIVO" => "Finanzas — Gasto operativo",
+        _                     => tabla
+    };
+    string TraducirAccion(string accion) => accion switch
+    {
+        "INSERT" => "Registro nuevo",
+        "UPDATE" => "Modificación",
+        "DELETE" => "Eliminación",
+        _        => accion
+    };
+
+    string badgeClass = Model.Accion == "INSERT" ? "c-badge-green"
+                      : Model.Accion == "UPDATE" ? "c-badge-amber"
+                      : "c-badge-red";
 }
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h2 class="mb-0">Detalle de bitácora</h2>
-    <div>
-        <a asp-action="Registrar" class="btn btn-warning">Editar</a>
-        <a asp-action="Index" class="btn btn-secondary ms-2">Volver</a>
-    </div>
+<div class="c-page-header">
+    <h2><i class="bi bi-journal-text me-2"></i>Detalle de actividad</h2>
+    <span class="c-badge @badgeClass" style="font-size:0.85rem;padding:6px 16px">
+        @TraducirAccion(Model.Accion)
+    </span>
 </div>
 
-<div class="row g-3">
-    <div class="col-md-6">
-        <div class="card border-0 shadow-sm">
-            <div class="card-header bg-dark text-white">
-                Datos del servicio
-            </div>
-            <div class="card-body">
-                <table class="table table-borderless mb-0">
-                    <tr><td class="text-muted" style="width:35%">Cliente</td><td><strong>Taylor Swift</strong></td></tr>
-                    <tr><td class="text-muted">Piscina</td><td>Piscina principal</td></tr>
-                    <tr><td class="text-muted">Fecha</td><td>14/04/2026</td></tr>
-                    <tr><td class="text-muted">Estado</td><td><span class="badge bg-success">Estable</span></td></tr>
-                </table>
+<div class="c-detail-card">
+    <div class="row g-3 mb-4">
+        <div class="col-md-6">
+            <div class="c-detail-field">
+                <label>Fecha y hora</label>
+                <p>@Model.FechaHora.ToString("dd/MM/yyyy HH:mm:ss")</p>
             </div>
         </div>
-    </div>
-
-    <div class="col-md-6">
-        <div class="card border-0 shadow-sm">
-            <div class="card-header bg-dark text-white">
-                Parámetros
-            </div>
-            <div class="card-body">
-                <table class="table table-bordered mb-0">
-                    <tr><th>pH</th><td>7.2</td></tr>
-                    <tr><th>Cloro</th><td>1.5</td></tr>
-                    <tr><th>Temperatura</th><td>28°C</td></tr>
-                </table>
+        <div class="col-md-6">
+            <div class="c-detail-field c-field-blue">
+                <label>Usuario</label>
+                <p>@Model.Usuario.Nombre @Model.Usuario.ApellidoPaterno @Model.Usuario.ApellidoMaterno</p>
             </div>
         </div>
-    </div>
-
-    <div class="col-12">
-        <div class="card border-0 shadow-sm">
-            <div class="card-header bg-dark text-white">
-                Observaciones
-            </div>
-            <div class="card-body">
-                <p class="mb-0">Se realizó revisión general, limpieza de superficie y verificación de químicos. No se detectaron anomalías.</p>
+        <div class="col-md-6">
+            <div class="c-detail-field c-field-gray">
+                <label>Módulo afectado</label>
+                <p style="font-weight:400">@TraducirTabla(Model.TablaAfectada)</p>
             </div>
         </div>
+        <div class="col-md-6">
+            <div class="c-detail-field c-field-amber">
+                <label>Tipo de acción</label>
+                <p>@TraducirAccion(Model.Accion)</p>
+            </div>
+        </div>
+        <div class="col-12">
+            <div class="c-detail-field">
+                <label>@(Model.Accion == "UPDATE" ? "Valores nuevos (después del cambio)" : "Datos registrados")</label>
+                <p style="font-weight:400">@Model.ValorNuevo</p>
+            </div>
+        </div>
+        @if (!string.IsNullOrEmpty(Model.ValorAnterior))
+        {
+            <div class="col-12">
+                <div class="c-detail-field c-field-red">
+                    <label>Valores anteriores (antes del cambio)</label>
+                    <p style="font-weight:400">@Model.ValorAnterior</p>
+                </div>
+            </div>
+        }
     </div>
+    <a asp-action="Index" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-1"></i>Volver al listado
+    </a>
 </div>

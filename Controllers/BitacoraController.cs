@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace MultiserviciosPiscinas.Controllers
 {
     [Authorize(Roles = "1")]
-    public class BitacoraController : Controller
+    public class BitacoraController(PiscinasYMultiserviciosContext context) : Controller
     {
         private readonly PiscinasYMultiserviciosContext _context;
 
