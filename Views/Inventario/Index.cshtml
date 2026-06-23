@@ -1,39 +1,87 @@
-﻿@{
+﻿@model List<MultiserviciosPiscinas.Models.Producto>
+@{
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
     ViewData["Title"] = "Inventario";
 }
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h2 class="mb-0">Inventario</h2>
-    <a asp-action="Crear" class="btn btn-primary">+ Nuevo producto</a>
+<div class="c-page-header">
+    <h2><i class="bi bi-box-seam me-2"></i>Inventario</h2>
+    <a asp-action="Crear" class="btn">+ Nuevo producto</a>
 </div>
 
-<div class="card border-0 shadow-sm">
-    <div class="card-body p-0">
-        <table class="table table-bordered table-hover mb-0">
-            <thead class="table-dark">
-                <tr>
-                    <th>#</th>
-                    <th>Producto</th>
-                    <th>Cantidad</th>
-                    <th>Unidad</th>
-                    <th>Proveedor</th>
-                    <th>Estado</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>1</td>
-                    <td>Cloro granulado</td>
-                    <td>25</td>
-                    <td>Kg</td>
-                    <td>Químicos del Pacífico</td>
-                    <td><span class="badge bg-success">Disponible</span></td>
-                    <td>
-                        <a asp-action="Editar" asp-route-id="1" class="btn btn-warning btn-sm">Editar</a>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+@if (TempData["MensajeExito"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show mb-3" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>@TempData["MensajeExito"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
+}
+
+<div class="c-filter-bar mb-3">
+    <form method="get" asp-action="Index" class="d-flex gap-2 align-items-center flex-wrap w-100">
+        <input type="text" name="busqueda" value="@ViewBag.Busqueda"
+               class="form-control" style="max-width:300px" placeholder="Buscar por nombre..." />
+        <button type="submit" class="btn">
+            <i class="bi bi-search me-1"></i>Buscar
+        </button>
+        @if (!string.IsNullOrWhiteSpace(ViewBag.Busqueda as string))
+        {
+            <a asp-action="Index" class="btn btn-outline-secondary">Limpiar</a>
+        }
+    </form>
+</div>
+
+<div class="c-data-card">
+    <table class="c-data-table">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Producto</th>
+                <th>Categoría</th>
+                <th>Stock</th>
+                <th>Precio</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (!Model.Any())
+            {
+                <tr><td colspan="7" class="text-center text-muted py-4">No se encontraron productos.</td></tr>
+            }
+            else
+            {
+                int c = 1;
+                foreach (var p in Model)
+                {
+                    <tr>
+                        <td class="c-num">@c</td>
+                        <td class="fw-semibold">@p.Nombre</td>
+                        <td>@p.Categoria.NombreCategoria</td>
+                        <td>@p.Stock</td>
+                        <td class="c-price">₡@p.Precio.ToString("N2")</td>
+                        <td>
+                            @if (p.Activo)
+                            {
+                                <span class="c-badge c-badge-green">Disponible</span>
+                            }
+                            else
+                            {
+                                <span class="c-badge c-badge-gray">Inactivo</span>
+                            }
+                        </td>
+                        <td class="d-flex gap-2">
+                            <a asp-action="Detalle" asp-route-id="@p.Id" class="c-btn-sm c-btn-sm-primary">
+                                <i class="bi bi-eye me-1"></i>Ver
+                            </a>
+                            <a asp-action="Editar" asp-route-id="@p.Id" class="c-btn-sm c-btn-sm-outline">
+                                <i class="bi bi-pencil me-1"></i>Editar
+                            </a>
+                        </td>
+                    </tr>
+                    c++;
+                }
+            }
+        </tbody>
+    </table>
 </div>

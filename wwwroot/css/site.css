@@ -7,437 +7,685 @@
 
 /* --- TOKENS DE DISEÑO (Variables CSS) --- */
 :root {
-  /* Colores - Dedicados a una empresa premium de piscinas y construcción */
-  --color-body-bg: #f4f8fb;
-  --color-navbar-bg: #005f73;
-  --color-footer-bg: #002d38;
-  --color-form-bg: #ffffff;
-  --color-input-bg: #ffffff;
-  --color-btn-bg: #0a9396;
-  --color-btn-hover: #005f73;
-  --color-btn-text: #ffffff;
-
-  --color-text-dark: #1a2f3b;
-  --color-text-light: #ffffff;
-  --color-text-muted: #627b87;
-
-  --color-logo-text: #ffffff;
-  --color-navbar-text: #ffffff;
-  --color-accent: #e9d8a6;
-  --color-accent-orange: #ca6702;
-
-
-  --color-link: #0077b6;
-  --color-link-hover: #0096c7;
-
-
-  --color-danger: #ae2012;
-  --color-success: #2a9d8f;
-
-  /* Familias Tipográficas */
-  --font-family-body: "Plus Jakarta Sans", sans-serif;
-  --font-family-logo: "Sora", sans-serif;
-  --font-family-navbar: "Sora", sans-serif;
-  --font-family-btn: "Plus Jakarta Sans", sans-serif;
-  --font-family-heading: "Sora", sans-serif;
-
-  /* Tamaños y Pesos de Fuente */
-  --font-size-logo: 19px;
-  --font-size-navbar: 15px;
-  --font-size-base: 15px;
-
-  /* Diseño Premium de Sombras y Bordes */
-  --shadow-sm: 0 2px 8px rgba(0, 95, 115, 0.04);
-  --shadow-md: 0 8px 30px rgba(0, 95, 115, 0.08);
-  --shadow-lg: 0 16px 40px rgba(0, 95, 115, 0.12);
-  --transition-smooth: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  --border-radius-sm: 6px;
-  --border-radius-md: 12px;
-  --border-radius-lg: 20px;
+    /* Colores - Dedicados a una empresa premium de piscinas y construcción */
+    --color-body-bg: #f4f8fb;
+    --color-navbar-bg: #005f73;
+    --color-footer-bg: #002d38;
+    --color-form-bg: #ffffff;
+    --color-input-bg: #ffffff;
+    --color-btn-bg: #0a9396;
+    --color-btn-hover: #005f73;
+    --color-btn-text: #ffffff;
+    --color-text-dark: #1a2f3b;
+    --color-text-light: #ffffff;
+    --color-text-muted: #627b87;
+    --color-logo-text: #ffffff;
+    --color-navbar-text: #ffffff;
+    --color-accent: #e9d8a6;
+    --color-accent-orange: #ca6702;
+    --color-link: #0077b6;
+    --color-link-hover: #0096c7;
+    --color-danger: #ae2012;
+    --color-success: #2a9d8f;
+    /* Familias Tipográficas */
+    --font-family-body: "Plus Jakarta Sans", sans-serif;
+    --font-family-logo: "Sora", sans-serif;
+    --font-family-navbar: "Sora", sans-serif;
+    --font-family-btn: "Plus Jakarta Sans", sans-serif;
+    --font-family-heading: "Sora", sans-serif;
+    /* Tamaños y Pesos de Fuente */
+    --font-size-logo: 19px;
+    --font-size-navbar: 15px;
+    --font-size-base: 15px;
+    /* Diseño Premium de Sombras y Bordes */
+    --shadow-sm: 0 2px 8px rgba(0, 95, 115, 0.04);
+    --shadow-md: 0 8px 30px rgba(0, 95, 115, 0.08);
+    --shadow-lg: 0 16px 40px rgba(0, 95, 115, 0.12);
+    --transition-smooth: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    --border-radius-sm: 6px;
+    --border-radius-md: 12px;
+    --border-radius-lg: 20px;
 }
 
 /* --- ÁTOMO: Documento Base y Tipografía --- */
 html {
-  font-size: 15px;
-  position: relative;
-  min-height: 100%;
+    font-size: 15px;
+    position: relative;
+    min-height: 100%;
 }
 
 @media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
+    html {
+        font-size: 16px;
+    }
 }
 
 body {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  background-color: var(--color-body-bg);
-  font-family: var(--font-family-body);
-  font-style: normal;
-  font-weight: 400;
-  color: var(--color-text-dark);
-  line-height: 1.6;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background-color: var(--color-body-bg);
+    font-family: var(--font-family-body);
+    font-style: normal;
+    font-weight: 400;
+    color: var(--color-text-dark);
+    line-height: 1.6;
 }
 
 /* --- ÁTOMO: Títulos --- */
 .a-title {
-  font-family: var(--font-family-heading);
-  font-size: clamp(1.4rem, 4vw, 2.2rem);
-  font-weight: 700;
-  color: var(--color-text-dark);
-  letter-spacing: -0.5px;
+    font-family: var(--font-family-heading);
+    font-size: clamp(1.4rem, 4vw, 2.2rem);
+    font-weight: 700;
+    color: var(--color-text-dark);
+    letter-spacing: -0.5px;
 }
 
 .a-title-light {
-  font-family: var(--font-family-heading);
-  font-size: clamp(1.4rem, 4vw, 2.2rem);
-  font-weight: 700;
-  color: var(--color-text-light);
-  letter-spacing: -0.5px;
+    font-family: var(--font-family-heading);
+    font-size: clamp(1.4rem, 4vw, 2.2rem);
+    font-weight: 700;
+    color: var(--color-text-light);
+    letter-spacing: -0.5px;
 }
 
 /* --- ÁTOMO: Párrafos y Texto General --- */
-p,
-.a-text-dark {
-  font-family: var(--font-family-body);
-  font-weight: 400;
-  color: var(--color-text-dark);
+p, .a-text-dark {
+    font-family: var(--font-family-body);
+    font-weight: 400;
+    color: var(--color-text-dark);
 }
 
 .a-text-light {
-  font-family: var(--font-family-body);
-  font-weight: 400;
-  color: var(--color-text-light);
+    font-family: var(--font-family-body);
+    font-weight: 400;
+    color: var(--color-text-light);
 }
 
 .a-text-muted {
-  font-family: var(--font-family-body);
-  color: var(--color-text-muted);
+    font-family: var(--font-family-body);
+    color: var(--color-text-muted);
 }
 
 /* --- ÁTOMO: Enlaces de Formulario / Hipervínculos --- */
-.a-form-link,
-.o-form-card a,
-.p-login-view a {
-  color: var(--color-link);
-  font-weight: 600 !important;
-  text-decoration: none !important;
-  transition: var(--transition-smooth);
+.a-form-link, .o-form-card a, .p-login-view a {
+    color: var(--color-link);
+    font-weight: 600 !important;
+    text-decoration: none !important;
+    transition: var(--transition-smooth);
 }
 
-.a-form-link:hover,
-.o-form-card a:hover,
-.p-login-view a:hover {
-  color: var(--color-link-hover) !important;
-  text-decoration: underline !important;
-}
+    .a-form-link:hover, .o-form-card a:hover, .p-login-view a:hover {
+        color: var(--color-link-hover) !important;
+        text-decoration: underline !important;
+    }
 
 /* --- ÁTOMO: Botones --- */
-.a-btn,
-button,
-.btn {
-  font-family: var(--font-family-btn);
-  background-color: var(--color-btn-bg) !important;
-  color: var(--color-btn-text) !important;
-  font-weight: 600;
-  border: none;
-  border-radius: var(--border-radius-sm);
-  padding: 0.5rem 1.25rem;
-  box-shadow: 0 4px 10px rgba(10, 147, 150, 0.2);
-  transition: var(--transition-smooth);
+.a-btn, button, .btn {
+    font-family: var(--font-family-btn);
+    background-color: var(--color-btn-bg) !important;
+    color: var(--color-btn-text) !important;
+    font-weight: 600;
+    border: none;
+    border-radius: var(--border-radius-sm);
+    padding: 0.5rem 1.25rem;
+    box-shadow: 0 4px 10px rgba(10, 147, 150, 0.2);
+    transition: var(--transition-smooth);
 }
 
-.a-btn:hover,
-button:hover,
-.btn:hover {
-  background-color: var(--color-btn-hover) !important;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 15px rgba(0, 95, 115, 0.3);
+    .a-btn:hover, button:hover, .btn:hover {
+        background-color: var(--color-btn-hover) !important;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(0, 95, 115, 0.3);
+    }
+
+    .a-btn:active, button:active, .btn:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 5px rgba(0, 95, 115, 0.2);
+    }
+
+.a-btn-outline, .btn-outline-light {
+    font-family: var(--font-family-btn);
+    background-color: transparent !important;
+    color: var(--color-text-light) !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.6) !important;
+    box-shadow: none;
+    transition: var(--transition-smooth);
 }
 
-.a-btn:active,
-button:active,
-.btn:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 5px rgba(0, 95, 115, 0.2);
-}
+    .a-btn-outline:hover, .btn-outline-light:hover {
+        background-color: var(--color-text-light) !important;
+        color: var(--color-navbar-bg) !important;
+        border-color: var(--color-text-light) !important;
+        transform: translateY(-2px);
+    }
 
-/* Botones con estilo de contorno (ej. Cerrar Sesión) */
-.a-btn-outline,
-.btn-outline-light {
-  font-family: var(--font-family-btn);
-  background-color: transparent !important;
-  color: var(--color-text-light) !important;
-  border: 1.5px solid rgba(255, 255, 255, 0.6) !important;
-  box-shadow: none;
-  transition: var(--transition-smooth);
-}
-
-.a-btn-outline:hover,
-.btn-outline-light:hover {
-  background-color: var(--color-text-light) !important;
-  color: var(--color-navbar-bg) !important;
-  border-color: var(--color-text-light) !important;
-  transform: translateY(-2px);
-}
-
-.btn:focus,
-.btn:active:focus,
-.btn-link.nav-link:focus,
-.form-control:focus,
-.form-check-input:focus {
-  box-shadow: 0 0 0 2px white, 0 0 0 4px var(--color-btn-bg) !important;
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus,
+.form-control:focus, .form-check-input:focus {
+    box-shadow: 0 0 0 2px white, 0 0 0 4px var(--color-btn-bg) !important;
 }
 
 /* --- ÁTOMO: Inputs / Campos de Entrada --- */
-.a-input,
-input,
-select,
-textarea,
-.form-control {
-  background-color: var(--color-input-bg) !important;
-  color: var(--color-text-dark) !important;
-  font-family: var(--font-family-body);
-  border: 1.5px solid #d0dfeb !important;
-  border-radius: var(--border-radius-sm) !important;
-  padding: 0.5rem 0.85rem;
-  transition: var(--transition-smooth);
+.a-input, input, select, textarea, .form-control {
+    background-color: var(--color-input-bg) !important;
+    color: var(--color-text-dark) !important;
+    font-family: var(--font-family-body);
+    border: 1.5px solid #d0dfeb !important;
+    border-radius: var(--border-radius-sm) !important;
+    padding: 0.5rem 0.85rem;
+    transition: var(--transition-smooth);
 }
 
-.a-input:focus,
-input:focus,
-select:focus,
-textarea:focus,
-.form-control:focus {
-  border-color: var(--color-btn-bg) !important;
-  box-shadow: 0 0 0 4px rgba(10, 147, 150, 0.15) !important;
-}
+    .a-input:focus, input:focus, select:focus, textarea:focus, .form-control:focus {
+        border-color: var(--color-btn-bg) !important;
+        box-shadow: 0 0 0 4px rgba(10, 147, 150, 0.15) !important;
+    }
 
 /* --- ÁTOMO: Marca / Logo --- */
-.a-logo,
-.navbar-brand {
-  font-family: var(--font-family-logo) !important;
-  font-style: normal;
-  font-size: var(--font-size-logo) !important;
-  font-weight: 700 !important;
-  color: var(--color-logo-text) !important;
-  text-decoration: none;
-  letter-spacing: -0.5px;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+.a-logo, .navbar-brand {
+    font-family: var(--font-family-logo) !important;
+    font-style: normal;
+    font-size: var(--font-size-logo) !important;
+    font-weight: 700 !important;
+    color: var(--color-logo-text) !important;
+    text-decoration: none;
+    letter-spacing: -0.5px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
-/* Añadir un indicador gráfico tipo burbuja de piscina en CSS */
-.a-logo::before,
-.navbar-brand::before {
-  content: "";
-  display: inline-block;
-  width: 10px;
-  height: 10px;
-  background-color: var(--color-accent);
-  border-radius: 50%;
-  box-shadow: 0 0 0 4px rgba(233, 216, 166, 0.3);
-}
+    .a-logo::before, .navbar-brand::before {
+        content: "";
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        background-color: var(--color-accent);
+        border-radius: 50%;
+        box-shadow: 0 0 0 4px rgba(233, 216, 166, 0.3);
+    }
 
 /* --- ÁTOMO: Enlaces de Navegación --- */
-.a-nav-link,
-.nav-link {
-  font-family: var(--font-family-navbar) !important;
-  color: rgba(255, 255, 255, 0.85) !important;
-  font-weight: 600 !important;
-  font-size: var(--font-size-navbar) !important;
-  transition: var(--transition-smooth);
+.a-nav-link, .nav-link {
+    font-family: var(--font-family-navbar) !important;
+    color: rgba(255, 255, 255, 0.85) !important;
+    font-weight: 600 !important;
+    font-size: var(--font-size-navbar) !important;
+    transition: var(--transition-smooth);
 }
 
-.a-nav-link:hover,
-.nav-link:hover {
-  color: var(--color-accent) !important;
-  transform: translateX(4px);
-}
+    .a-nav-link:hover, .nav-link:hover {
+        color: var(--color-accent) !important;
+        transform: translateX(4px);
+    }
 
-.nav-link.active,
-.a-nav-link.active {
-  color: var(--color-accent) !important;
-  font-weight: 700 !important;
-}
-
-/* --- ÁTOMO: Título Responsivo --- */
-.a-title {
-  font-family: var(--font-family-heading);
-  font-weight: 700;
-}
-
+    .nav-link.active, .a-nav-link.active {
+        color: var(--color-accent) !important;
+        font-weight: 700 !important;
+    }
 
 /* ==========================================================================
-   2. MOLÉCULAS / MOLECULES (Átomos combinados, ej. campo de formulario con etiqueta)
+   2. MOLÉCULAS / MOLECULES
    ========================================================================== */
 
-/* --- MOLÉCULA: Grupo de Campo de Formulario --- */
 .m-form-field {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-  margin-bottom: 1.2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin-bottom: 1.2rem;
 }
 
-.m-form-field label,
-.m-form-field .col-form-label {
-  font-family: var(--font-family-body);
-  font-weight: 600;
-  color: var(--color-text-dark);
-}
+    .m-form-field label, .m-form-field .col-form-label {
+        font-family: var(--font-family-body);
+        font-weight: 600;
+        color: var(--color-text-dark);
+    }
 
-/* --- MOLÉCULA: Enlace Interactivo de Barra Lateral --- */
 .m-sidebar-link {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.6rem 0.85rem;
-  border-radius: var(--border-radius-sm);
-  transition: var(--transition-smooth);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.6rem 0.85rem;
+    border-radius: var(--border-radius-sm);
+    transition: var(--transition-smooth);
 }
 
-.m-sidebar-link:hover {
-  background-color: rgba(255, 255, 255, 0.05);
-}
-
+    .m-sidebar-link:hover {
+        background-color: rgba(255, 255, 255, 0.05);
+    }
 
 /* ==========================================================================
-   3. ORGANISMOS / ORGANISMS (Componentes complejos como paneles, formularios, layouts)
+   3. ORGANISMOS / ORGANISMS
    ========================================================================== */
 
-/* --- ORGANISMO: Barra de Navegación (Navbar) --- */
-.o-navbar,
-.navbar {
-  background-color: var(--color-navbar-bg) !important;
-  border-bottom: 2px solid rgba(255, 255, 255, 0.05);
-  box-shadow: 0 4px 20px rgba(0, 95, 115, 0.15);
-  padding: 0.85rem 1.5rem;
+.o-navbar, .navbar {
+    background-color: var(--color-navbar-bg) !important;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 4px 20px rgba(0, 95, 115, 0.15);
+    padding: 0.85rem 1.5rem;
 }
 
-/* --- ORGANISMO: Pie de Página (Footer) --- */
-.o-footer,
-footer,
-.footer {
-  background-color: var(--color-footer-bg) !important;
-  color: rgba(255, 255, 255, 0.7) !important;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
-  font-family: var(--font-family-body);
-  padding: 1rem 0;
-  flex-shrink: 0;
+.o-footer, footer, .footer {
+    background-color: var(--color-footer-bg) !important;
+    color: rgba(255, 255, 255, 0.7) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    font-family: var(--font-family-body);
+    padding: 1rem 0;
+    flex-shrink: 0;
 }
 
-/* --- ORGANISMO: Tarjeta de Formulario --- */
-.o-form-card,
-form.card,
-.card {
-  background-color: var(--color-form-bg) !important;
-  border: 1px solid #e1ecf4 !important;
-  border-radius: var(--border-radius-md) !important;
-  padding: 2.2rem;
-  box-shadow: var(--shadow-md) !important;
-  transition: var(--transition-smooth);
+.o-form-card, form.card, .card {
+    background-color: var(--color-form-bg) !important;
+    border: 1px solid #e1ecf4 !important;
+    border-radius: var(--border-radius-md) !important;
+    padding: 2.2rem;
+    box-shadow: var(--shadow-md) !important;
+    transition: var(--transition-smooth);
 }
 
-.o-form-card:hover,
-form.card:hover,
-.card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-lg) !important;
-}
-
+    .o-form-card:hover, form.card:hover, .card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-lg) !important;
+    }
 
 /* ==========================================================================
-   4. PLANTILLAS / TEMPLATES (Grillas de diseño y envolturas de página)
+   4. PLANTILLAS / TEMPLATES
    ========================================================================== */
 
-/* --- PLANTILLA: Diseño de Vista Maestra --- */
 .t-app-container {
-  display: flex;
-  flex: 1;
-  min-height: 0;
+    display: flex;
+    flex: 1;
+    min-height: 0;
 }
 
 .t-sidebar {
-  width: 230px;
-  min-height: 100%;
-  background-color: #002d38 !important;
-  border-right: 1px solid rgba(255, 255, 255, 0.05);
-  flex-shrink: 0;
-  box-shadow: 4px 0 20px rgba(0, 45, 56, 0.05);
-  transition: var(--transition-smooth);
-  overflow: hidden;
+    width: 230px;
+    min-height: 100%;
+    background-color: #002d38 !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+    flex-shrink: 0;
+    box-shadow: 4px 0 20px rgba(0, 45, 56, 0.05);
+    transition: var(--transition-smooth);
+    overflow: hidden;
 }
 
-/* Transición para colapsar */
 .t-sidebar-collapsed .t-sidebar {
-  width: 0 !important;
-  padding-left: 0 !important;
-  padding-right: 0 !important;
-  border-right: none !important;
+    width: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    border-right: none !important;
 }
 
 .t-main-content {
-  flex-grow: 1;
-  padding: 2rem;
-  background-color: var(--color-body-bg);
+    flex-grow: 1;
+    padding: 2rem;
+    background-color: var(--color-body-bg);
 }
 
-
 /* ==========================================================================
-   5. PÁGINAS / PAGES (Vistas específicas de contexto y sobreescrituras)
+   5. PÁGINAS / PAGES
    ========================================================================== */
 
-/* --- PÁGINA: Vista de Inicio de Sesión (Diseño Externo) --- */
 .p-login-view {
-  background: radial-gradient(circle at 10% 20%, #e0f2fe 0%, #f4f8fb 90%);
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+    background: radial-gradient(circle at 10% 20%, #e0f2fe 0%, #f4f8fb 90%);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
-/* --- PÁGINA: Panel de Control (Dashboard) --- */
 .p-dashboard-view {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1.5rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
 }
+
 /* ==========================================================================
-   6. FONDOS GLOBALES Y ESTILOS ESPECÍFICOS DE VISTAS (ej. Reportes)
+   6. FONDOS GLOBALES
    ========================================================================== */
 
-/* Fondo global con la imagen de la piscina para todas las vistas */
 main {
     background: transparent !important;
     position: relative !important;
     overflow: hidden !important;
 }
 
-main::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background-image: url('/images/pool-bg.jpg');
-    background-size: cover;
-    background-position: center;
-    filter: blur(2px) brightness(0.90) saturate(1.1);
-    transform: scale(1.04);
-    z-index: 0;
+    main::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background-image: url('/images/pool-bg.jpg');
+        background-size: cover;
+        background-position: center;
+        filter: blur(2px) brightness(0.90) saturate(1.1);
+        transform: scale(1.04);
+        z-index: 0;
+    }
+
+    main::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: rgba(236, 254, 255, 0.80);
+        z-index: 1;
+    }
+
+    main > * {
+        position: relative;
+        z-index: 2;
+    }
+
+/* ==========================================================================
+   7. MÓDULOS DE CAMILA — HU-6.2 / HU-6.3 / HU-7.1
+   Clases reutilizables para Inventario, Gastos Operativos y Bitácora
+   ========================================================================== */
+
+/* --- Page Header --- */
+.c-page-header {
+    background-color: var(--color-navbar-bg);
+    border-radius: var(--border-radius-md);
+    padding: 24px 32px;
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: var(--shadow-md);
 }
 
-main::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: rgba(236, 254, 255, 0.80);
-    z-index: 1;
+    .c-page-header h2 {
+        font-family: var(--font-family-heading);
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: var(--color-text-light);
+        margin: 0;
+        letter-spacing: -0.3px;
+    }
+
+/* --- Data Table Card --- */
+.c-data-card {
+    background-color: var(--color-form-bg);
+    border: 1px solid #e1ecf4;
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
 }
 
-/* Todos los elementos dentro del main deben quedar por encima de los fondos */
-main > * {
-    position: relative;
-    z-index: 2;
+    .c-data-card:hover {
+        transform: none;
+        box-shadow: var(--shadow-md);
+    }
+
+.c-data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--font-family-body);
+}
+
+    .c-data-table thead tr {
+        background-color: #f0f7fa;
+        border-bottom: 2px solid #d0e8f0;
+    }
+
+    .c-data-table thead th {
+        padding: 12px 20px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--color-navbar-bg);
+        font-family: var(--font-family-heading);
+    }
+
+    .c-data-table tbody tr {
+        border-bottom: 1px solid #edf4f8;
+        transition: background-color 0.15s;
+    }
+
+        .c-data-table tbody tr:last-child {
+            border-bottom: none;
+        }
+
+        .c-data-table tbody tr:hover {
+            background-color: #f7fbfd;
+        }
+
+    .c-data-table tbody td {
+        padding: 13px 20px;
+        font-size: 0.9rem;
+        color: var(--color-text-dark);
+        vertical-align: middle;
+    }
+
+    .c-data-table td.c-num {
+        color: var(--color-text-muted);
+        font-size: 0.85rem;
+    }
+
+    .c-data-table td.c-price {
+        font-weight: 700;
+        color: var(--color-btn-bg);
+    }
+
+    .c-data-table td.c-muted {
+        color: var(--color-text-muted);
+        font-size: 0.85rem;
+    }
+
+/* --- Filter Bar --- */
+.c-filter-bar {
+    background-color: var(--color-form-bg);
+    border: 1px solid #e1ecf4;
+    border-radius: var(--border-radius-md);
+    padding: 16px 20px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+/* --- Detail Card --- */
+.c-detail-card {
+    background-color: var(--color-form-bg);
+    border: 1px solid #e1ecf4;
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--shadow-sm);
+    padding: 28px;
+}
+
+    .c-detail-card:hover {
+        transform: none;
+        box-shadow: var(--shadow-md);
+    }
+
+.c-detail-field {
+    padding: 14px 18px;
+    border-radius: var(--border-radius-sm);
+    background-color: #f7fbfd;
+    border-left: 4px solid var(--color-btn-bg);
+}
+
+    .c-detail-field.c-field-blue {
+        border-left-color: #0891b2;
+    }
+
+    .c-detail-field.c-field-amber {
+        border-left-color: #f59e0b;
+    }
+
+    .c-detail-field.c-field-gray {
+        border-left-color: #94a3b8;
+    }
+
+    .c-detail-field.c-field-red {
+        border-left-color: #ef4444;
+        background-color: #fff8f8;
+    }
+
+    .c-detail-field label {
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--color-btn-bg);
+        margin-bottom: 4px;
+        display: block;
+        font-family: var(--font-family-heading);
+    }
+
+    .c-detail-field.c-field-blue label {
+        color: #0891b2;
+    }
+
+    .c-detail-field.c-field-amber label {
+        color: #b45309;
+    }
+
+    .c-detail-field.c-field-gray label {
+        color: #64748b;
+    }
+
+    .c-detail-field.c-field-red label {
+        color: #dc2626;
+    }
+
+    .c-detail-field p {
+        margin: 0;
+        font-size: 0.95rem;
+        color: var(--color-text-dark);
+        font-weight: 600;
+    }
+
+/* --- Badges de estado --- */
+.c-badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    font-family: var(--font-family-body);
+    display: inline-block;
+}
+
+.c-badge-green {
+    background-color: #d1fae5;
+    color: #065f46;
+}
+
+.c-badge-gray {
+    background-color: #f1f5f9;
+    color: #475569;
+}
+
+.c-badge-blue {
+    background-color: #dbeafe;
+    color: #1e40af;
+}
+
+.c-badge-amber {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+
+.c-badge-red {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+
+/* --- Botones pequeños de acción en tablas --- */
+.c-btn-sm {
+    padding: 5px 14px;
+    border-radius: var(--border-radius-sm);
+    font-size: 0.8rem;
+    font-weight: 600;
+    font-family: var(--font-family-btn);
+    text-decoration: none;
+    display: inline-block;
+    transition: var(--transition-smooth);
+    border: none;
+    cursor: pointer;
+}
+
+.c-btn-sm-primary {
+    background-color: var(--color-btn-bg) !important;
+    color: var(--color-text-light) !important;
+}
+
+    .c-btn-sm-primary:hover {
+        background-color: var(--color-btn-hover) !important;
+        color: var(--color-text-light) !important;
+    }
+
+.c-btn-sm-outline {
+    background-color: transparent !important;
+    color: var(--color-btn-bg) !important;
+    border: 1.5px solid var(--color-btn-bg) !important;
+}
+
+    .c-btn-sm-outline:hover {
+        background-color: #f0fdfa !important;
+        color: var(--color-btn-bg) !important;
+    }
+
+/* --- Stat cards (Reporte Satisfacción) --- */
+.c-stat-card {
+    background-color: var(--color-form-bg);
+    border: 1px solid #e1ecf4;
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--shadow-sm);
+    padding: 28px 24px;
+    text-align: center;
+    transition: var(--transition-smooth);
+}
+
+    .c-stat-card:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-md);
+    }
+
+.c-stat-num {
+    font-family: var(--font-family-heading);
+    font-size: 3rem;
+    font-weight: 800;
+    line-height: 1;
+    margin-bottom: 4px;
+    color: var(--color-btn-bg);
+}
+
+.c-stat-num-blue {
+    color: #0891b2;
+}
+
+.c-stat-num-red {
+    color: #ef4444;
+}
+
+.c-stat-num-teal {
+    color: var(--color-btn-bg);
+}
+
+.c-stat-sub {
+    font-size: 1rem;
+    color: var(--color-text-muted);
+    font-weight: 400;
+}
+
+.c-stat-label {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-top: 6px;
+    font-family: var(--font-family-heading);
+}
+
+.c-stat-icon {
+    font-size: 1.1rem;
+    margin-top: 10px;
+    opacity: 0.4;
+}
+
+.c-stat-stars {
+    margin-top: 8px;
+    font-size: 1rem;
 }

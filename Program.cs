@@ -40,9 +40,10 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 // Inyección de dependencias (Servicios y Repositorios)
 builder.Services.AddTransient<Generales>();
 
-// Repositorios Camila — HU-2.5 y HU-3.4
+// Repositorios  HU-2.5 - HU-3.4 - HU-7.1
 builder.Services.AddScoped<IHistorialServicioRepository, HistorialServicioRepository>();
 builder.Services.AddScoped<IReporteSatisfaccionRepository, ReporteSatisfaccionRepository>();
+builder.Services.AddScoped<BitacoraService>();
 
 var app = builder.Build();
 
