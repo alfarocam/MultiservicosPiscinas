@@ -1,0 +1,153 @@
+﻿@model IEnumerable<MultiserviciosPiscinas.Models.GastoOperativo>
+@{
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml"; 
+    ViewData["Title"] = "Mis Gastos de Campo";
+}
+
+<div class="container mt-4">
+    <h2><i class="bi bi-wallet2 me-2"></i>Modulo de Gastos – Tecnico en Campo</h2>
+    <hr />
+
+    @if (TempData["Exito"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Exito"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-primary text-whitefw-bold">
+                    <span id="form-title">Registrar Nuevo Gasto</span>
+                </div>
+                <div class="card-body">
+                    <form asp-action="RegistrarGasto" method="post">
+                        @Html.AntiForgeryToken()
+                        
+                        <input type="hidden" id="gastoId" name="gastoId" value="" />
+
+                        <div class="mb-3">
+                            <label class="form-label">Categoría del Gasto</label>
+                            <select id="categoria" name="categoria" class="form-select" required>
+                                <option value="Viáticos">Viáticos (Alimentacion/Peajes/Combustible)</option>
+                                <option value="Materiales">Materiales de Emergencia</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Monto (₡)</label>
+                            <input type="number" id="monto" name="monto" class="form-control" placeholder="Ej: 15000" min="1" required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Descripción / Justificación</label>
+                            <textarea id="descripcion" name="descripcion" class="form-control" rows="3" placeholder="Detalle el motivo del gasto en campo" required></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-success w-100" id="btn-submit">
+                            <i class="bi bi-send-fill me-1"></i> Enviar Gasto
+                        </button>
+                        <button type="button" class="btn btn-secondary w-100 mt-2 d-none" id="btn-cancelar" onclick="cancelarEdicion()">
+                            Cancelar Corrección
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-dark text-white fw-bold">
+                    Historial de Solicitudes y Estatus
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-hover mb-0 align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Detalle</th>
+                                <th>Monto</th>
+                                <th>Estado</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (!Model.Any())
+                            {
+                                <tr>
+                                    <td colspan="5" class="text-center p-4 text-muted">No has reportado gastos en tus visitas aun.</td>
+                                </tr>
+                            }
+                            @foreach (var gasto in Model)
+                            {
+                                <tr>
+                                    <td class="small">@gasto.Fecha.ToString("dd/MM/yyyy")</td>
+                                    <td>
+                                        <span class="badge bg-secondary mb-1">Categoría ID: @gasto.CategoriaId</span><br />
+                                        <small class="text-wrap">@gasto.Descripcion</small>
+                                        @if (gasto.Estado == "Rechazado")
+                                        {
+                                            <div class="mt-1 p-2 bg-danger-subtle text-danger rounded border border-danger-subtle small">
+                                                <strong>Motivo del Rechazo:</strong> @gasto.MotivoRechazo
+                                            </div>
+                                        }
+                                    </td>
+                                    <td class="fw-bold">₡@gasto.Monto.ToString("N2")</td>
+                                    <td>
+                                        <span class="badge @(gasto.Estado == "Aprobado" ? "bg-success" : gasto.Estado == "Pendiente" ? "bg-warning text-dark" : "bg-danger")">
+                                            @gasto.Estado
+                                        </span>
+                                    </td>
+                                    <td>
+                                        @if (gasto.Estado == "Rechazado")
+                                        {
+                                            <button type="button" class="btn btn-outline-danger btn-sm" 
+                                                    onclick="cargarCorreccion('@gasto.Id', '@gasto.Monto', '@gasto.Descripcion')">
+                                                <i class="bi bi-pencil-square"></i> Corregir
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted small">-</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function cargarCorreccion(id, monto, desc) {
+        document.getElementById('gastoId').value = id;
+        document.getElementById('monto').value = parseFloat(monto);
+        document.getElementById('descripcion').value = desc;
+        document.getElementById('form-title').innerText = "Corregir Gasto Rechazado #" + id;
+        document.getElementById('btn-submit').className = "btn btn-warning w-100";
+        document.getElementById('btn-submit').innerHTML = "<i class='bi bi-arrow-repeat'></i> Enviar Corrección";
+        document.getElementById('btn-cancelar').classList.remove('d-none');
+    }
+
+    function cancelarEdicion() {
+        document.getElementById('gastoId').value = "";
+        document.getElementById('monto').value = "";
+        document.getElementById('descripcion').value = "";
+        document.getElementById('form-title').innerText = "Registrar Nuevo Gasto";
+        document.getElementById('btn-submit').className = "btn btn-success w-100";
+        document.getElementById('btn-submit').innerHTML = "<i class='bi bi-send-fill'></i> Enviar Gasto";
+        document.getElementById('btn-cancelar').classList.add('d-none');
+    }
+</script>

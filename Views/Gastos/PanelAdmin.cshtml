@@ -1,0 +1,90 @@
+﻿@model IEnumerable<MultiserviciosPiscinas.Models.GastoOperativo>
+@{
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    ViewData["Title"] = "Gastos Pendientes de Aprobacion";
+}
+
+<div class="container mt-4">
+    <h2><i class="bi bi-shield-lock me-2"></i>Aprobacion de Gastos Operativos (Admin)</h2>
+    <p class="text-muted">Revision de costos .</p>
+    <hr />
+
+    @if (TempData["ExitoAdmin"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["ExitoAdmin"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["ErrorAdmin"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["ErrorAdmin"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-warning text-dark fw-bold">
+            Solicitudes Pendientes de Validacion
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0 align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Técnico</th>
+                            <th>Fecha</th>
+                            <th>Monto</th>
+                            <th>Detalle Técnico</th>
+                            <th style="width: 35%;">Accion / Justificación si Rechaza</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!Model.Any())
+                        {
+                            <tr>
+                                <td colspan="5" class="text-center p-4 text-muted">
+                                    <i class="bi bi-check-circle-fill text-success me-1"></i> Super bien ,, No hay gastos pendientes de aprobacion :) .
+                                </td>
+                            </tr>
+                        }
+                        @foreach (var gasto in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <strong>@gasto.Usuario?.Nombre @gasto.Usuario?.ApellidoPaterno</strong><br />
+                                    <small class="text-muted">@gasto.Usuario?.Correo</small>
+                                </td>
+                                <td class="small">@gasto.Fecha.ToString("dd/MM/yyyy")</td>
+                                <td class="fw-bold text-success">₡@gasto.Monto.ToString("N2")</td>
+                                <td>
+                                    <span class="badge bg-outline-secondary text-dark border">Cat: @gasto.CategoriaId</span><br />
+                                    <small>@gasto.Descripcion</small>
+                                </td>
+                                <td>
+                                    <form asp-action="ProcesarGasto" method="post" class="d-flex flex-column gap-2">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@gasto.Id" />
+                                        
+                                        <input type="text" name="motivoRechazo" class="form-control form-control-sm"
+                                               placeholder="Escriba el motivo si decide rechazar" />
+                                               
+                                        <div class="d-flex gap-2">
+                                            <button type="submit" name="accion" value="Aprobar" class="btn btn-success btn-sm w-100">
+                                                <i class="bi bi-check-lg"></i> Aprobar
+                                            </button>
+                                            <button type="submit" name="accion" value="Rechazar" class="btn btn-danger btn-sm w-100">
+                                                <i class="bi bi-x-lg"></i> Rechazar
+                                            </button>
+                                        </div>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,4 +1,7 @@
-﻿@{
+﻿@model IEnumerable<MultiserviciosPiscinas.Models.ProyectoConstruccion>
+
+@{
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
     ViewData["Title"] = "Proyectos";
 }
 
@@ -19,55 +22,130 @@
 }
 
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="a-title mb-0">Proyectos</h2>
+    <h2 class="a-title mb-0">
+        <i class="bi bi-hammer me-2"></i>Proyectos
+    </h2>
+
     <a asp-action="Crear" asp-controller="Proyecto" class="btn btn-primary">
-         Nuevo Proyecto
+        <i class="bi bi-plus-circle me-1"></i> Nuevo Proyecto
     </a>
 </div>
 
 <div class="card">
     <div class="card-body">
-        <table id="tablaProyectos" class="table align-middle w-100" style="color: var(--color-text-dark);">
-            <thead>
-                <tr>
-                    <th class="a-text-muted small text-uppercase" hidden>ID</th>
-                    <th class="a-text-muted small text-uppercase">Nombre del Cliente</th>
-                    <th class="a-text-muted small text-uppercase">Nombre del Proyecto</th>
-                    <th class="a-text-muted small text-uppercase">Fecha Inicio</th>
-                    <th class="a-text-muted small text-uppercase">Fecha Fin Estimada</th>
-                    <th class="a-text-muted small text-uppercase">Estado</th>
-                    <th class="a-text-muted small text-uppercase">Presupuesto</th>
-                    <th class="a-text-muted small text-uppercase text-center">Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var proyecto in Model)
-                {
-                    <tr style="border-bottom: 1px solid #e1ecf4;">
-                        <td hidden>@proyecto.Id</td>
-                        <td>@proyecto.Cliente.Usuario.Nombre @proyecto.Cliente.Usuario.ApellidoPaterno @proyecto.Cliente.Usuario.ApellidoMaterno</td>
-                        <td>@proyecto.Nombre</td>
-                        <td>@proyecto.FechaInicio</td>
-                        <td>@proyecto.FechaFinEstimada</td>
-                        <td>@proyecto.Estado</td>
-                        <td>@proyecto.Presupuesto.ToString("C")</td>
+        @if (!Model.Any())
+        {
+            <div class="text-center py-5">
+                <i class="bi bi-folder-x" style="font-size: 3rem; color: var(--color-text-muted);"></i>
+                <h4 class="mt-3">No hay proyectos registrados</h4>
+                <p class="a-text-muted">Cree un nuevo proyecto para comenzar a controlar su progreso.</p>
+            </div>
+        }
+        else
+        {
+            <table id="tablaProyectos" class="table align-middle w-100" style="color: var(--color-text-dark);">
+                <thead>
+                    <tr>
+                        <th class="a-text-muted small text-uppercase" hidden>ID</th>
+                        <th class="a-text-muted small text-uppercase">Nombre del Cliente</th>
+                        <th class="a-text-muted small text-uppercase">Nombre del Proyecto</th>
+                        <th class="a-text-muted small text-uppercase">Fecha Inicio</th>
+                        <th class="a-text-muted small text-uppercase">Fecha Fin Estimada</th>
+                        <th class="a-text-muted small text-uppercase">Estado</th>
+                        <th class="a-text-muted small text-uppercase">Presupuesto</th>
+                        <th class="a-text-muted small text-uppercase text-center">Acciones</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach (var proyecto in Model)
+                    {
+                        var esEditable = proyecto.Estado != "Completado" && proyecto.Estado != "Cancelado";
+
+                        var colorEstado = proyecto.Estado switch
+                        {
+                            "En Planificación" => "var(--color-link)",
+                            "En ejecución" => "var(--color-success)",
+                            "Pausado" => "var(--color-accent-orange)",
+                            "Completado" => "var(--color-btn-bg)",
+                            "Cancelado" => "var(--color-text-muted)",
+                            _ => "var(--color-text-muted)"
+                        };
+
+                        <tr style="border-bottom: 1px solid #e1ecf4;">
+                            <td hidden>@proyecto.Id</td>
+
+                            <td>
+                                @proyecto.Cliente.Usuario.Nombre
+                                @proyecto.Cliente.Usuario.ApellidoPaterno
+                                @proyecto.Cliente.Usuario.ApellidoMaterno
+                            </td>
+
+                            <td>
+                                <strong>@proyecto.Nombre</strong>
+
+                                @if (proyecto.Piscina != null)
+                                {
+                                    <div class="small a-text-muted">
+                                        Piscina: @proyecto.Piscina.Tipo
+                                    </div>
+                                }
+                        </td>
+
+                        <td>@proyecto.FechaInicio.ToString("dd/MM/yyyy")</td>
+
                         <td>
-                            <div class="d-flex gap-1 justify-content-end">
-                                    <a asp-action="Detalle" asp-controller="Proyecto" asp-route-id="@proyecto.Id"
+                            @(proyecto.FechaFinEstimada.HasValue
+                                                    ? proyecto.FechaFinEstimada.Value.ToString("dd/MM/yyyy")
+                                                    : "—")
+                    </td>
+
+                            <td>
+                                <span class="badge px-3 py-2"
+                                      style="background-color: @colorEstado; font-size: 13px; border-radius: var(--border-radius-sm);">
+                                    @proyecto.Estado
+                                </span>
+                            </td>
+
+                            <td>@proyecto.Presupuesto.ToString("C")</td>
+
+                            <td>
+                                <div class="d-flex gap-1 justify-content-end">
+                                    <a asp-action="Detalle"
+                                       asp-controller="Proyecto"
+                                       asp-route-id="@proyecto.Id"
                                        class="btn btn-sm"
                                        style="background-color: transparent !important; color: var(--color-navbar-bg) !important; border: 1px solid var(--color-navbar-bg) !important; box-shadow: none !important;">
                                         Ver
                                     </a>
-                                    <a asp-action="Editar" asp-controller="Proyecto" asp-route-id="@proyecto.Id"
-                                       class="btn btn-sm text-decoration-none">
-                                        Editar
-                                    </a>
+
+                            @if (esEditable)
+                                    {
+                                        <a asp-action="Editar"
+                                           asp-controller="Proyecto"
+                                           asp-route-id="@proyecto.Id"
+                                           class="btn btn-sm text-decoration-none"
+                                           title="Editar proyecto">
+                                            <i class="bi bi-pencil-fill me-1"></i> Editar
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <button type="button"
+                                                class="btn btn-sm"
+                                                disabled
+                                                title="Este proyecto no se puede editar porque está completado o cancelado"
+                                                style="background-color: var(--color-text-muted) !important;">
+                                            <i class="bi bi-lock-fill me-1"></i> Cerrado
+                                        </button>
+                                    }
                                 </div>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
     </div>
 </div>
 

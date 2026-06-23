@@ -9,6 +9,7 @@
     <h2 class="a-title mb-0">
         <i class="bi bi-pencil-square me-2"></i>Editar Proyecto
     </h2>
+
     <a asp-action="Detalle" asp-controller="Proyecto" asp-route-id="@Model.Id" class="btn btn-sm">
         <i class="bi bi-arrow-left me-1"></i> Volver
     </a>
@@ -19,21 +20,25 @@
 
         <form asp-action="Editar" method="post">
             @Html.AntiForgeryToken()
+
             <input type="hidden" asp-for="Id" />
             <input type="hidden" asp-for="ClienteId" />
 
             <div asp-validation-summary="All" class="text-danger mb-3"></div>
 
-            @* Sección: Cliente (solo lectura) y piscina *@
             <h5 class="fw-bold mb-3" style="color: var(--color-btn-bg);">
                 <i class="bi bi-person-fill me-2"></i>Cliente y piscina
             </h5>
+
             <hr style="border-color: var(--color-accent);" />
 
             <div class="row g-3 mb-4">
                 <div class="col-md-6">
                     <label class="form-label fw-semibold">Cliente</label>
-                    <input type="text" class="form-control" value="@ViewBag.NombreCliente" readonly
+                    <input type="text"
+                           class="form-control"
+                           value="@ViewBag.NombreCliente"
+                           readonly
                            style="background-color: #e9ecef; cursor: not-allowed;" />
                 </div>
 
@@ -41,19 +46,27 @@
                     <label asp-for="PiscinaId" class="form-label fw-semibold"></label>
                     <select asp-for="PiscinaId" class="form-select">
                         <option value="">Sin piscina asociada (opcional)</option>
+
                         @foreach (var p in ViewBag.Piscinas)
                         {
-                            <option value="@p.id">@p.texto</option>
+                            if (Model.PiscinaId == p.id)
+                            {
+                                <option value="@p.id" selected>@p.texto</option>
+                            }
+                            else
+                            {
+                                <option value="@p.id">@p.texto</option>
+                            }
                         }
                     </select>
                     <span asp-validation-for="PiscinaId" class="text-danger small"></span>
                 </div>
             </div>
 
-            @* Sección: Información del proyecto *@
             <h5 class="fw-bold mb-3" style="color: var(--color-btn-bg);">
                 <i class="bi bi-clipboard-fill me-2"></i>Información del proyecto
             </h5>
+
             <hr style="border-color: var(--color-accent);" />
 
             <div class="row g-3 mb-4">
@@ -67,9 +80,17 @@
                     <label asp-for="Estado" class="form-label fw-semibold"></label>
                     <select asp-for="Estado" class="form-select" required>
                         <option value="">Seleccione un estado...</option>
+
                         @foreach (var estado in ViewBag.Estados)
                         {
-                            <option value="@estado">@estado</option>
+                            if (Model.Estado == estado)
+                            {
+                                <option value="@estado" selected>@estado</option>
+                            }
+                            else
+                            {
+                                <option value="@estado">@estado</option>
+                            }
                         }
                     </select>
                     <span asp-validation-for="Estado" class="text-danger small"></span>
@@ -77,16 +98,18 @@
 
                 <div class="col-12">
                     <label asp-for="Descripcion" class="form-label fw-semibold"></label>
-                    <textarea asp-for="Descripcion" class="form-control" rows="3"
+                    <textarea asp-for="Descripcion"
+                              class="form-control"
+                              rows="3"
                               placeholder="Descripción general del proyecto, alcance, materiales, etc."></textarea>
                     <span asp-validation-for="Descripcion" class="text-danger small"></span>
                 </div>
             </div>
 
-            @* Sección: Fechas y presupuesto *@
             <h5 class="fw-bold mb-3" style="color: var(--color-btn-bg);">
                 <i class="bi bi-calendar-event-fill me-2"></i>Fechas y presupuesto
             </h5>
+
             <hr style="border-color: var(--color-accent);" />
 
             <div class="row g-3 mb-4">
@@ -106,8 +129,12 @@
                     <label asp-for="Presupuesto" class="form-label fw-semibold"></label>
                     <div class="input-group">
                         <span class="input-group-text">₡</span>
-                        <input asp-for="Presupuesto" type="number" step="0.01" min="0.01"
-                               class="form-control" required />
+                        <input asp-for="Presupuesto"
+                               type="number"
+                               step="0.01"
+                               min="0.01"
+                               class="form-control"
+                               required />
                     </div>
                     <span asp-validation-for="Presupuesto" class="text-danger small"></span>
                 </div>
@@ -117,8 +144,12 @@
                 <button type="submit" class="btn">
                     <i class="bi bi-check-circle-fill me-1"></i> Guardar Cambios
                 </button>
-                <a asp-action="Detalle" asp-controller="Proyecto" asp-route-id="@Model.Id"
-                   class="btn btn-sm" style="background-color: var(--color-text-muted) !important;">
+
+                <a asp-action="Detalle"
+                   asp-controller="Proyecto"
+                   asp-route-id="@Model.Id"
+                   class="btn btn-sm"
+                   style="background-color: var(--color-text-muted) !important;">
                     Cancelar
                 </a>
             </div>
