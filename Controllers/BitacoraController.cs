@@ -12,17 +12,11 @@ namespace MultiserviciosPiscinas.Controllers
     [Authorize(Roles = "1")]
     public class BitacoraController(PiscinasYMultiserviciosContext context) : Controller
     {
-        private readonly PiscinasYMultiserviciosContext _context;
-
-        public BitacoraController(PiscinasYMultiserviciosContext context)
-        {
-            _context = context;
-        }
 
         public async Task<IActionResult> Index(string accionFiltro, string tablaFiltro, string ordenFecha)
         {
             // mostrar si existen registros
-            var consulta = _context.BitacoraAuditoria.Include(b => b.Usuario).AsQueryable();
+            var consulta = context.BitacoraAuditoria.Include(b => b.Usuario).AsQueryable();
 
             // filtro de registros
 
