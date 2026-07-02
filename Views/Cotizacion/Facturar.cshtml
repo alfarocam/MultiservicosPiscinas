@@ -1,0 +1,117 @@
+@model MultiserviciosPiscinas.DTOs.Factura.FacturarCotizacionViewModel
+
+@{
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    ViewData["Title"] = "Facturar cotización";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h2 class="mb-0">Facturar cotización</h2>
+        <small class="text-muted">@Model.NumeroCotizacion - @Model.NombreCliente</small>
+    </div>
+    <a asp-action="Index" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Volver
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">Información de la cotización</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <p><strong>Cliente:</strong></p>
+                        <p>@Model.NombreCliente</p>
+                    </div>
+                    <div class="col-md-6 text-md-end">
+                        <p><strong>Fecha:</strong></p>
+                        <p>@Model.FechaEmision.ToString("dd/MM/yyyy")</p>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Descripción</th>
+                                <th class="text-end">P. Unitario</th>
+                                <th class="text-end">Cantidad</th>
+                                <th class="text-end">Subtotal</th>
+                                <th class="text-end">IVA</th>
+                                <th class="text-end">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var linea in Model.Lineas)
+                            {
+                                <tr>
+                                    <td>
+                                        <strong>@linea.Nombre</strong>
+                                        <br><small class="text-muted">@(linea.Descripcion ?? "Sin descripción")</small>
+                                    </td>
+                                    <td class="text-end">₡@linea.PrecioUnitario.ToString("N2")</td>
+                                    <td class="text-end">@linea.Cantidad.ToString("N2")</td>
+                                    <td class="text-end">₡@linea.LineaSubtotal.ToString("N2")</td>
+                                    <td class="text-end">₡@linea.LineaImpuesto.ToString("N2")</td>
+                                    <td class="text-end fw-bold">₡@linea.LineaTotal.ToString("N2")</td>
+                                </tr>
+                            }
+                        </tbody>
+                        <tfoot>
+                            <tr class="table-light">
+                                <th colspan="3" class="text-end">Subtotal:</th>
+                                <th class="text-end">₡@Model.Subtotal.ToString("N2")</th>
+                                <th class="text-end">₡@Model.ImpuestoTotal.ToString("N2")</th>
+                                <th class="text-end fw-bold">₡@Model.Total.ToString("N2")</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">Comprobante SINPE</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    @Html.AntiForgeryToken()
+
+                    <input type="hidden" name="cotizacionId" value="@Model.CotizacionId" />
+
+                    <div class="mb-3">
+                        <label class="form-label">Subir comprobante de pago *</label>
+                        <input type="file"
+                               name="Comprobante"
+                               class="form-control"
+                               accept="image/jpeg,image/png"
+                               required />
+                        <small class="text-muted">Formatos: JPG o PNG</small>
+                        <span asp-validation-for="Comprobante" class="text-danger d-block mt-1"></span>
+                    </div>
+
+                    @if (!ViewData.ModelState.IsValid && ViewData.ModelState.ContainsKey(string.Empty))
+                    {
+                        <div class="alert alert-danger" role="alert">
+                            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                            {
+                                <p class="mb-0">@error.ErrorMessage</p>
+                            }
+                        </div>
+                    }
+
+                    <button type="submit" class="btn btn-success w-100">
+                        <i class="bi bi-receipt"></i> Facturar
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
