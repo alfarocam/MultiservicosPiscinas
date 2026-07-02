@@ -92,6 +92,7 @@ namespace MultiserviciosPiscinas.Controllers
             if (correoExiste)
             {
                 ViewBag.Mensaje = "El correo ya está registrado. Por favor, elige otro.";
+                ViewBag.TipoMensaje = "danger";
                 return View(usuario);
             }
 
@@ -102,7 +103,7 @@ namespace MultiserviciosPiscinas.Controllers
             {
                 var usuarioIdResult = await _contexto.Database
                     .SqlQueryRaw<int>(
-                        "EXEC seg.InsertUserAndClient @p0, @p1, @p2, @p3, @p4, @p5, @p6",
+                        "EXEC seg.InsertarUsuarioYCliente @p0, @p1, @p2, @p3, @p4, @p5, @p6",
                         usuario.RolId,
                         usuario.Nombre,
                         usuario.ApellidoPaterno,
@@ -118,6 +119,7 @@ namespace MultiserviciosPiscinas.Controllers
                 if (nuevoUsuarioId <= 0)
                 {
                     ViewBag.Mensaje = "Error al registrar el usuario.";
+                    ViewBag.TipoMensaje = "danger";
                     return View();
                 }
 
@@ -132,14 +134,18 @@ namespace MultiserviciosPiscinas.Controllers
                 if (clienteResult <= 0)
                 {
                     ViewBag.Mensaje = "Usuario creado, pero hubo un error al crear el perfil de cliente.";
+                    ViewBag.TipoMensaje = "warning";
                     return View();
                 }
-
-                return RedirectToAction("InicioSesion", "Auth");
+                
+                ViewBag.Mensaje = "Usuario creado correctamente.";
+                ViewBag.TipoMensaje = "success";
+                return View();
             }
             catch (Exception)
             {
                 ViewBag.Mensaje = "Ocurrió un error inesperado en el servidor.";
+                ViewBag.TipoMensaje = "danger";
                 return View();
             }
         }
