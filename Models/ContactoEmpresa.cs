@@ -10,5 +10,7 @@
         public string Direccion { get; set; } = null!;
 
         public string? HorarioAtencion { get; set; }
+
+        public string? NumeroSinpe { get; set; }
     }
 }
