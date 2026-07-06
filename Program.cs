@@ -50,6 +50,10 @@ builder.Services.AddScoped<BitacoraService>();
 builder.Services.AddScoped<ICotizacionRepository, CotizacionRepository>();
 builder.Services.AddScoped<CotizacionPdfService>();
 
+// Facturación
+builder.Services.AddScoped<IFacturaRepository, FacturaRepository>();
+builder.Services.AddScoped<FacturaPdfService>();
+
 var app = builder.Build();
 
 // Configuracion del pipeline HTTP (Middlewares)
