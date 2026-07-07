@@ -1,59 +1,63 @@
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using MultiserviciosPiscinas.Models;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace MultiserviciosPiscinas.Controllers
 {
-    [Authorize(Roles = "1")]
-    public class BitacoraController(PiscinasYMultiserviciosContext context) : Controller
+    public class BitacoraController : Controller
     {
+        private readonly PiscinasYMultiserviciosContext _context;
 
-        public async Task<IActionResult> Index(string accionFiltro, string tablaFiltro, string ordenFecha)
+        public BitacoraController(PiscinasYMultiserviciosContext context)
         {
-            // mostrar si existen registros
-            var consulta = context.BitacoraAuditoria.Include(b => b.Usuario).AsQueryable();
+            _context = context;
+        }
 
-            // filtro de registros
+        public async Task<IActionResult> Index(string accion, string tabla, string orden)
+        {
+            ViewBag.FiltroAccion = accion;
+            ViewBag.FiltroTabla = tabla;
+            ViewBag.FiltroOrden = orden;
 
-            if (!string.IsNullOrEmpty(accionFiltro))
+            var consulta = _context.BitacoraAuditoria.Include(b => b.Usuario).AsQueryable();
+
+            if (!string.IsNullOrEmpty(accion))
             {
-                consulta = consulta.Where(b => b.Accion == accionFiltro);
+                consulta = consulta.Where(b => b.Accion == accion);
             }
 
-            if (!string.IsNullOrEmpty(tablaFiltro))
+            if (!string.IsNullOrEmpty(tabla))
             {
-                consulta = consulta.Where(b => b.TablaAfectada.Contains(tablaFiltro));
+                consulta = consulta.Where(b => b.TablaAfectada.Contains(tabla));
             }
 
-            // ordenar registros
-
-            if (ordenFecha == "asc")
+            if (orden == "antiguos")
             {
                 consulta = consulta.OrderBy(b => b.FechaHora);
             }
             else
             {
+
                 consulta = consulta.OrderByDescending(b => b.FechaHora);
             }
 
-
-            ViewBag.AccionActual = accionFiltro;
-            ViewBag.TablaActual = tablaFiltro;
-            ViewBag.OrdenActual = ordenFecha;
-
-
-            ViewBag.AccionesDisponibles = new List<string> { "INSERT", "UPDATE", "DELETE" };
-
-            var resultado = await consulta.ToListAsync();
-            return View(resultado);
+            var listaBitacora = await consulta.ToListAsync();
+            return View(listaBitacora);
         }
 
-        public IActionResult Registrar() => RedirectToAction(nameof(Index));
-        public IActionResult Detalle(int id) => RedirectToAction(nameof(Index));
+        // Detalle para ver el JSON de ValorAnterior y ValorNuevo (hacer la vista xd)
+        public async Task<IActionResult> Detalle(int id)
+        {
+            var registro = await _context.BitacoraAuditoria
+                .Include(b => b.Usuario)
+                .FirstOrDefaultAsync(m => m.Id == id);
+
+            if (registro == null)
+            {
+                return NotFound();
+            }
+
+            return View(registro);
+        }
     }
 }

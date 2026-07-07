@@ -1,0 +1,81 @@
+﻿@model IEnumerable<MultiserviciosPiscinas.Models.Servicio>
+
+@{
+    ViewData["Title"] = "Registro de Servicios";
+}
+
+<div class="container mt-4" style="max-width: 900px;">
+    
+    <div class="mb-4">
+        <h2 class="fw-bold text-dark"><i class="bi bi-file-earmark-text text-primary"></i> HU-5.6 – Consultar Registro de Servicios</h2>
+        <p class="text-muted">Historial oficial de los servicios técnicos, mantenimientos y reparaciones contratados por el cliente.</p>
+    </div>
+
+    <div class="row g-3">
+        @if (!Model.Any())
+        {
+            <div class="col-12 text-center p-5 bg-white border rounded shadow-sm">
+                <i class="bi bi-folder-x display-4 text-muted d-block mb-2"></i>
+                <p class="text-secondary fs-5 mb-0">No se encontraron registros de servicios asociados a su cuenta.</p>
+            </div>
+        }
+        else
+        {
+            @foreach (var item in Model)
+            {
+                <div class="col-12">
+                    <div class="card shadow-sm border-0 border-start border-4 @(item.Estado == "Finalizado" ? "border-success" : "border-warning") bg-white">
+                        <div class="card-body p-4">
+                            
+                            <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+                                <div>
+                                    <h5 class="fw-bold text-dark mb-1">
+                                        Servicio: @item.Cita.Tipo
+                                    </h5>
+                                    <span class="text-muted small">Código de Registro: #SRV-@item.Id</span>
+                                </div>
+
+                                <div class="text-end">
+                                    @if (item.Estado == "Finalizado")
+                                    {
+                                        <span class="badge bg-success-subtle text-success border px-3 py-1 rounded-pill fw-bold">Finalizado</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning-subtle text-warning-emphasis border px-3 py-1 rounded-pill fw-bold">En Progreso</span>
+                                    }
+                                </div>
+                            </div>
+
+                            <hr class="my-2 text-black-50" />
+
+                            <div class="row pt-2 text-secondary">
+                                <div class="col-sm-6 mb-2">
+                                    <small class="d-block text-muted fw-bold text-uppercase">Fecha de Apertura</small>
+                                    <span class="text-dark fw-medium"><i class="bi bi-calendar-check"></i> @item.FechaApertura.ToString("dd/MM/yyyy")</span>
+                                    @if (item.FechaCierre.HasValue)
+                                    {
+                                        <small class="d-block text-muted mt-1">Fecha de Cierre: @item.FechaCierre.Value.ToString("dd/MM/yyyy")</small>
+                                    }
+                                </div>
+                                <div class="col-sm-6 mb-2">
+                                    <small class="d-block text-muted fw-bold text-uppercase">Técnico Asignado</small>
+                                    <span class="text-dark fw-medium"><i class="bi bi-person-badge"></i> @item.Cita.Tecnico.Nombre @item.Cita.Tecnico.ApellidoPaterno</span>
+                                </div>
+                                
+                                <div class="col-sm-12 mt-2">
+                                    <small class="d-block text-muted fw-bold text-uppercase">Detalle del Trabajo Realizado</small>
+                                    <div class="p-3 bg-light rounded text-dark mt-1 border border-light-subtle">
+                                        <i class="bi bi-info-circle text-muted me-2"></i>
+                                        @(string.IsNullOrEmpty(item.TrabajoRealizado) ? "El servicio se encuentra en proceso de documentacion." : item.TrabajoRealizado)
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>
