@@ -48,9 +48,16 @@ namespace MultiserviciosPiscinas.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> BuscarProductos(string filtro)
+        public async Task<IActionResult> ObtenerCategorias()
         {
-            var productos = await _cotizacionRepositorio.BuscarProductosAsync(filtro ?? "");
+            var categorias = await _cotizacionRepositorio.ObtenerCategoriasAsync();
+            return Json(categorias);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ObtenerProductosPorCategoria(int categoriaId)
+        {
+            var productos = await _cotizacionRepositorio.ObtenerProductosPorCategoriaAsync(categoriaId);
             return Json(productos);
         }
 
@@ -63,8 +70,7 @@ namespace MultiserviciosPiscinas.Controllers
                 if (cantidad <= 0)
                     return Json(new { success = false, mensaje = "La cantidad debe ser mayor a 0." });
 
-                var productos = await _cotizacionRepositorio.BuscarProductosAsync("");
-                var producto = productos.FirstOrDefault(p => p.Id == productoId);
+                var producto = await _cotizacionRepositorio.ObtenerProductoPorIdAsync(productoId);
 
                 if (producto == null)
                     return Json(new { success = false, mensaje = "Producto no encontrado." });
@@ -145,16 +151,10 @@ namespace MultiserviciosPiscinas.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> BuscarCliente(string valor)
+        public async Task<IActionResult> BuscarClientes(string filtro)
         {
-            if (string.IsNullOrWhiteSpace(valor))
-                return Json(new { encontrado = false });
-
-            var cliente = await _cotizacionRepositorio.BuscarClientePorCorreoOTelefonoAsync(valor);
-            if (cliente != null)
-                return Json(cliente);
-
-            return Json(new { encontrado = false });
+            var clientes = await _cotizacionRepositorio.BuscarClientesAsync(filtro ?? "");
+            return Json(clientes);
         }
 
         [HttpPost]

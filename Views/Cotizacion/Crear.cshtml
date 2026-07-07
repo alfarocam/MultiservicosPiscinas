@@ -17,16 +17,15 @@
                 <h5 class="mb-0">Buscar productos o servicios</h5>
             </div>
             <div class="card-body">
-                <form id="formBusqueda" method="get">
-                    @Html.AntiForgeryToken()
+                <div class="mb-3">
+                    <label class="form-label">Categoría</label>
+                    <select id="categoriaProducto" class="form-select">
+                        <option value="">Selecciona una categoría...</option>
+                    </select>
+                </div>
 
-                    <div class="mb-3">
-                        <input type="text" id="filtroProducto" class="form-control" placeholder="Nombre, descripción o categoría..." />
-                    </div>
-                </form>
-
-                <div id="resultadosProductos" class="mt-3" style="min-height: 200px;">
-                    <p class="text-muted">Comienza a escribir para buscar productos...</p>
+                <div id="productosGrid" class="row g-3">
+                    <p class="text-muted">Selecciona una categoría para ver los productos disponibles.</p>
                 </div>
             </div>
         </div>
@@ -41,10 +40,11 @@
                 <form id="formCliente" method="post" action="@Url.Action("GenerarCotizacion")">
                     @Html.AntiForgeryToken()
 
-                    <div class="mb-3">
-                        <label class="form-label">Correo o Teléfono</label>
-                        <input type="text" id="busquedaCliente" class="form-control" placeholder="Buscar cliente existente..." />
-                        <small class="text-muted">Presiona Tab o espera para buscar</small>
+                    <div class="mb-3 position-relative">
+                        <label class="form-label">Buscar cliente existente</label>
+                        <input type="text" id="busquedaCliente" class="form-control" placeholder="Nombre, correo o teléfono..." autocomplete="off" />
+                        <div id="resultadosClientes" class="list-group position-absolute w-100 shadow-sm" style="z-index: 1000; display:none; max-height: 220px; overflow-y: auto;"></div>
+                        <small class="text-muted">Escribe para buscar, o completa los campos si es un cliente nuevo</small>
                     </div>
 
                     <div class="mb-3">
