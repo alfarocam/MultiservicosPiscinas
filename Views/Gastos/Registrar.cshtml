@@ -1,0 +1,80 @@
+﻿@model MultiserviciosPiscinas.Models.GastoOperativo
+
+@{
+    ViewData["Title"] = "Registrar Gasto Operativo";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-info text-white">
+                    <h3 class="card-title mb-0"><i class="bi bi-receipt"></i> HU-6.4 – Registrar Gasto (Viáticos / Materiales)</h3>
+                </div>
+                <div class="card-body p-4">
+
+                    @if (TempData["MensajeExito"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            @TempData["MensajeExito"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+
+                    <form asp-action="Registrar" method="post" enctype="multipart/form-data">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                        <div class="mb-3">
+                            <label asp-for="CategoriaId" class="form-label font-weight-bold">Tipo de Gasto / Categoría</label>
+                            <select asp-for="CategoriaId" class="form-select" asp-items="ViewBag.Categorias">
+                                <option value="">-- Seleccione una categoría --</option>
+                            </select>
+                            <span asp-validation-for="CategoriaId" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Monto" class="form-label">Monto del Gasto (₡)</label>
+                            <div class="input-group">
+                                <span class="input-group-text">₡</span>
+                                <input asp-for="Monto" type="number" step="0.01" class="form-control" placeholder="0.00" required />
+                            </div>
+                            <span asp-validation-for="Monto" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="CitaId" class="form-label">Número de Cita Asociada (Opcional)</label>
+                            <input asp-for="CitaId" type="number" class="form-control" placeholder="Ej: 1002" />
+                            <span asp-validation-for="CitaId" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Descripcion" class="form-label">Descripción / Detalles del Gasto</label>
+                            <textarea asp-for="Descripcion" class="form-control" rows="3" placeholder="Detalle qué compró o el motivo del viático..."></textarea>
+                            <span asp-validation-for="Descripcion" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">Subir Foto del Comprobante / Recibo</label>
+                            <input type="file" name="comprobanteArchivo" class="form-control" accept="image/*,application/pdf" />
+                            <div class="form-text">Formatos permitidos: Imágenes o PDF.</div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="bi bi-check-circle"></i> Registrar Gasto
+                            </button>
+                            <a href="/" class="btn btn-light">Volver al Inicio</a>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

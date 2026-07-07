@@ -1,129 +1,80 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using MultiserviciosPiscinas.Models;
-using System;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
 
 namespace MultiserviciosPiscinas.Controllers
 {
-    [Authorize]
     public class GastosController : Controller
     {
-        private readonly PiscinasYMultiserviciosContext _context;
 
-        public GastosController(PiscinasYMultiserviciosContext context)
+        private readonly PiscinasYMultiserviciosContext _context;
+        private readonly IWebHostEnvironment _env;
+
+        public GastosController(PiscinasYMultiserviciosContext context, IWebHostEnvironment env)
         {
             _context = context;
+            _env = env;
         }
 
-        public async Task<IActionResult> PanelTecnico()
+        [HttpGet]
+        public async Task<IActionResult> Registrar()
         {
+            //carga categorias
+            ViewBag.Categorias = new SelectList(await _context.CategoriaGastoOperativo.ToListAsync(), "Id", "NombreCategoria");
 
-            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (!int.TryParse(userIdString, out int tecnicoId)) return RedirectToAction("Login", "Account");
-
-            var historial = await _context.GastoOperativo
-                .Where(g => g.UsuarioId == tecnicoId)
-                .OrderByDescending(g => g.Fecha)
-                .ToListAsync();
-
-            return View(historial);
+            return View();
         }
 
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> RegistrarGasto(decimal monto, string categoria, string descripcion, int? gastoId)
+        public async Task<IActionResult> Registrar(GastoOperativo gasto, IFormFile? comprobanteArchivo)
         {
-            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (!int.TryParse(userIdString, out int tecnicoId)) return Unauthorized();
-
-            if (monto <= 0 || string.IsNullOrEmpty(categoria) || string.IsNullOrEmpty(descripcion))
-            {
-                TempData["Error"] = "Todos los campos son obligatorios y el monto debe ser mayor a 0.";
-                return RedirectToAction(nameof(PanelTecnico));
-            }
-
-            if (gastoId.HasValue && gastoId.Value > 0)
+            try
             {
 
-                var gastoExistente = await _context.GastoOperativo.FindAsync(gastoId.Value);
-                if (gastoExistente != null && gastoExistente.UsuarioId == tecnicoId)
+                gasto.Estado = "Pendiente";
+                gasto.Fecha = DateOnly.FromDateTime(DateTime.Now);
+
+
+                // uso usuario 1 
+                gasto.UsuarioId = 1;
+
+
+                if (comprobanteArchivo != null && comprobanteArchivo.Length > 0)
                 {
-                    gastoExistente.Monto = monto;
-                    gastoExistente.CategoriaId = categoria == "Viáticos" ? 1 : 2;
-                    gastoExistente.Descripcion = descripcion;
-                    gastoExistente.Estado = "Pendiente";
-                    gastoExistente.MotivoRechazo = null;
-                    _context.GastoOperativo.Update(gastoExistente);
-                    TempData["Exito"] = "Gasto corregido y enviado a aprobación nuevamente.";
+                    string carpetaSubidas = Path.Combine(_env.WebRootPath, "comprobantes");
+                    if (!Directory.Exists(carpetaSubidas))
+                    {
+                        Directory.CreateDirectory(carpetaSubidas);
+                    }
+
+                    string nombreArchivoUnique = Guid.NewGuid().ToString() + Path.GetExtension(comprobanteArchivo.FileName);
+                    string rutaFisica = Path.Combine(carpetaSubidas, nombreArchivoUnique);
+
+                    using (var stream = new FileStream(rutaFisica, FileMode.Create))
+                    {
+                        await comprobanteArchivo.CopyToAsync(stream);
+                    }
+
+                    gasto.ComprobanteRuta = "/comprobantes/" + nombreArchivoUnique;
                 }
+
+
+                _context.Add(gasto);
+                await _context.SaveChangesAsync();
+
+                TempData["MensajeExito"] = "El gasto se registro correctamente y quedo en estado Pendiente.";
+                return RedirectToAction(nameof(Registrar));
             }
-            else
+            catch (Exception ex)
             {
-
-                var nuevoGasto = new GastoOperativo
-                {
-                    UsuarioId = tecnicoId,
-                    CategoriaId = categoria == "Viáticos" ? 1 : 2,
-                    Monto = monto,
-                    Fecha = DateOnly.FromDateTime(DateTime.Today),
-                    Descripcion = descripcion,
-                    Estado = "Pendiente"
-                };
-                _context.GastoOperativo.Add(nuevoGasto);
-                TempData["Exito"] = "Gasto registrado con éxito y asociado a su cuenta técnica.";
+                ModelState.AddModelError("", "Ocurrió un error al guardar: " + ex.Message);
             }
 
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(PanelTecnico));
-        }
-
-        [Authorize(Roles = "1")] 
-        public async Task<IActionResult> PanelAdmin()
-        {
-
-            var pendientes = await _context.GastoOperativo
-                .Include(g => g.Usuario)
-                .Where(g => g.Estado == "Pendiente")
-                .ToListAsync();
-
-            return View(pendientes);
-        }
-
-
-        [HttpPost]
-        [Authorize(Roles = "1")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ProcesarGasto(int id, string accion, string motivoRechazo)
-        {
-            var gasto = await _context.GastoOperativo.FindAsync(id);
-            if (gasto == null) return NotFound();
-
-            if (accion == "Aprobar")
-            {
-                gasto.Estado = "Aprobado";
-                gasto.MotivoRechazo = null;
-            }
-            else if (accion == "Rechazar")
-            {
-                if (string.IsNullOrEmpty(motivoRechazo))
-                {
-                    TempData["ErrorAdmin"] = "Debe especificar una justificación para rechazar el gasto.";
-                    return RedirectToAction(nameof(PanelAdmin));
-                }
-                gasto.Estado = "Rechazado";
-                gasto.MotivoRechazo = motivoRechazo;
-            }
-
-            _context.GastoOperativo.Update(gasto);
-            await _context.SaveChangesAsync();
-
-            TempData["ExitoAdmin"] = $"Gasto #{id} actualizado a '{gasto.Estado}' correctamente.";
-            return RedirectToAction(nameof(PanelAdmin));
+            ViewBag.Categorias = new SelectList(await _context.CategoriaGastoOperativo.ToListAsync(), "Id", "NombreCategoria", gasto.CategoriaId);
+            return View(gasto);
         }
     }
 }

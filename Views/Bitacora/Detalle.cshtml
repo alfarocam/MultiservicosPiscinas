@@ -1,77 +1,33 @@
 ﻿@model MultiserviciosPiscinas.Models.BitacoraAuditoria
+
 @{
-    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
-    ViewData["Title"] = "Detalle de actividad";
-
-    string TraducirTabla(string tabla) => tabla switch
-    {
-        "inv.PRODUCTO"        => "Inventario — Producto",
-        "fin.GASTO_OPERATIVO" => "Finanzas — Gasto operativo",
-        _                     => tabla
-    };
-    string TraducirAccion(string accion) => accion switch
-    {
-        "INSERT" => "Registro nuevo",
-        "UPDATE" => "Modificación",
-        "DELETE" => "Eliminación",
-        _        => accion
-    };
-
-    string badgeClass = Model.Accion == "INSERT" ? "c-badge-green"
-                      : Model.Accion == "UPDATE" ? "c-badge-amber"
-                      : "c-badge-red";
+    ViewData["Title"] = "Detalle del Cambio";
 }
 
-<div class="c-page-header">
-    <h2><i class="bi bi-journal-text me-2"></i>Detalle de actividad</h2>
-    <span class="c-badge @badgeClass" style="font-size:0.85rem;padding:6px 16px">
-        @TraducirAccion(Model.Accion)
-    </span>
-</div>
+<div class="container mt-5">
+    <div class="card shadow">
+        <div class="card-header bg-dark text-white">
+            <h4 class="mb-0">Auditoría Registro #@Model.Id</h4>
+        </div>
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-3">Tabla Afectada:</dt>
+                <dd class="col-sm-9">@Model.TablaAfectada</dd>
 
-<div class="c-detail-card">
-    <div class="row g-3 mb-4">
-        <div class="col-md-6">
-            <div class="c-detail-field">
-                <label>Fecha y hora</label>
-                <p>@Model.FechaHora.ToString("dd/MM/yyyy HH:mm:ss")</p>
-            </div>
+                <dt class="col-sm-3">Operacion:</dt>
+                <dd class="col-sm-9">@Model.Accion</dd>
+
+                <dt class="col-sm-3">Valor Anterior:</dt>
+                <dd class="col-sm-9">
+                    <pre class="bg-light p-2 border">@(Model.ValorAnterior ?? "N/A (Registro Nuevo)")</pre>
+                </dd>
+
+                <dt class="col-sm-3">Valor Nuevo:</dt>
+                <dd class="col-sm-9">
+                    <pre class="bg-light p-2 border">@Model.ValorNuevo</pre>
+                </dd>
+            </dl>
+            <a asp-action="Index" class="btn btn-secondary">Regresar a la Lista</a>
         </div>
-        <div class="col-md-6">
-            <div class="c-detail-field c-field-blue">
-                <label>Usuario</label>
-                <p>@Model.Usuario.Nombre @Model.Usuario.ApellidoPaterno @Model.Usuario.ApellidoMaterno</p>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="c-detail-field c-field-gray">
-                <label>Módulo afectado</label>
-                <p style="font-weight:400">@TraducirTabla(Model.TablaAfectada)</p>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="c-detail-field c-field-amber">
-                <label>Tipo de acción</label>
-                <p>@TraducirAccion(Model.Accion)</p>
-            </div>
-        </div>
-        <div class="col-12">
-            <div class="c-detail-field">
-                <label>@(Model.Accion == "UPDATE" ? "Valores nuevos (después del cambio)" : "Datos registrados")</label>
-                <p style="font-weight:400">@Model.ValorNuevo</p>
-            </div>
-        </div>
-        @if (!string.IsNullOrEmpty(Model.ValorAnterior))
-        {
-            <div class="col-12">
-                <div class="c-detail-field c-field-red">
-                    <label>Valores anteriores (antes del cambio)</label>
-                    <p style="font-weight:400">@Model.ValorAnterior</p>
-                </div>
-            </div>
-        }
     </div>
-    <a asp-action="Index" class="btn btn-outline-secondary">
-        <i class="bi bi-arrow-left me-1"></i>Volver al listado
-    </a>
 </div>
