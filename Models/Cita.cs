@@ -20,6 +20,7 @@ public partial class Cita
     public string? Notas { get; set; }
 
     public virtual ICollection<GastoOperativo> GastoOperativo { get; set; } = new List<GastoOperativo>();
+    public virtual ICollection<Notificacion> Notificacion { get; set; } = new List<Notificacion>();
 
     public virtual Piscina Piscina { get; set; } = null!;
 

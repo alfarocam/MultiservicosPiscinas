@@ -1,0 +1,64 @@
+﻿@model List<MultiserviciosPiscinas.Models.Anuncio>
+@{
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    ViewData["Title"] = "Tablón de anuncios";
+}
+
+@if (TempData["MensajeExito"] != null)
+{
+    <div class="alert alert-success">@TempData["MensajeExito"]</div>
+}
+
+<div class="c-page-header">
+    <h2><i class="bi bi-megaphone-fill me-2"></i>Tablón de anuncios</h2>
+    <a asp-action="Crear" class="btn">+ Nuevo comunicado</a>
+</div>
+
+<div class="c-data-card">
+    <table class="c-data-table">
+        <thead>
+            <tr>
+                <th>Título</th>
+                <th>Autor</th>
+                <th>Fecha</th>
+                <th>Prioridad</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (!Model.Any())
+            {
+                <tr><td colspan="5" class="text-center text-muted py-4">No hay anuncios publicados.</td></tr>
+            }
+            else
+            {
+                foreach (var anuncio in Model)
+                {
+                    var estiloFila = anuncio.Prioridad == "Urgente"
+                        ? "border-left: 4px solid #dc3545; background-color: #fff5f5;"
+                        : "";
+                    <tr style="@estiloFila">
+                        <td class="fw-semibold">@anuncio.Titulo</td>
+                        <td>@anuncio.Autor.Nombre @anuncio.Autor.ApellidoPaterno</td>
+                        <td>@anuncio.FechaPublicacion.ToString("dd/MM/yyyy")</td>
+                        <td>
+                            @if (anuncio.Prioridad == "Urgente")
+                            {
+                                <span class="c-badge c-badge-red">Urgente</span>
+                            }
+                            else
+                            {
+                                <span class="c-badge c-badge-gray">@anuncio.Prioridad</span>
+                            }
+                        </td>
+                        <td>
+                            <a asp-action="Editar" asp-route-id="@anuncio.Id" class="c-btn-sm c-btn-sm-primary">
+                                <i class="bi bi-pencil me-1"></i>Editar
+                            </a>
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>

@@ -53,6 +53,8 @@ public partial class PiscinasYMultiserviciosContext : DbContext
 
     public virtual DbSet<ItemCarrito> ItemCarrito { get; set; }
 
+    public virtual DbSet<Notificacion> Notificacion { get; set; }
+
     public virtual DbSet<Piscina> Piscina { get; set; }
 
     public virtual DbSet<PiscinaEquipamiento> PiscinaEquipamiento { get; set; }
@@ -614,7 +616,32 @@ public partial class PiscinasYMultiserviciosContext : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_ITEM_PRODUCTO");
         });
+        modelBuilder.Entity<Notificacion>(entity =>
+        {
+            entity.ToTable("NOTIFICACION", "ops");
 
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.UsuarioId).HasColumnName("usuario_id");
+            entity.Property(e => e.CitaId).HasColumnName("cita_id");
+            entity.Property(e => e.Mensaje)
+                .HasMaxLength(300)
+                .IsUnicode(false)
+                .HasColumnName("mensaje");
+            entity.Property(e => e.Leida).HasColumnName("leida");
+            entity.Property(e => e.FechaCreacion)
+                .HasColumnType("datetime")
+                .HasColumnName("fecha_creacion");
+
+            entity.HasOne(d => d.Usuario).WithMany(p => p.Notificacion)
+                .HasForeignKey(d => d.UsuarioId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_NOTIFICACION_USUARIO");
+
+            entity.HasOne(d => d.Cita).WithMany(p => p.Notificacion)
+                .HasForeignKey(d => d.CitaId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_NOTIFICACION_CITA");
+        });
         modelBuilder.Entity<Piscina>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__PISCINA__3213E83FEB3F804C");

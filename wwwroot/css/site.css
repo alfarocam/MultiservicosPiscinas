@@ -180,7 +180,63 @@ p, .a-text-dark {
         border-color: var(--color-btn-bg) !important;
         box-shadow: 0 0 0 4px rgba(10, 147, 150, 0.15) !important;
     }
+/* ---checkboxes--- */
+.form-check-input {
+    width: 1.15em !important;
+    height: 1.15em !important;
+    padding: 0 !important;
+    border-radius: 0.25em !important;
+    background-color: #fff !important;
+    vertical-align: middle;
+}
 
+    .form-check-input:checked {
+        background-color: var(--color-btn-bg) !important;
+        border-color: var(--color-btn-bg) !important;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%23fff'%3e%3cpath d='M6 10l3 3 6-6'/%3e%3c/svg%3e") !important;
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: 65% 65%;
+    }
+/* ---campana de notificaciones --- */
+#btnCampana {
+    background-color: transparent !important;
+    color: #fff !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    border-radius: 50% !important;
+}
+.notif-item {
+    border-bottom: 1px solid #eef2f5;
+}
+
+    .notif-item:last-child {
+        border-bottom: none;
+    }
+
+    .notif-item:hover {
+        background-color: #f7fbfc;
+    }
+
+.btn-marcar-leida {
+    background: none !important;
+    border: none !important;
+    color: var(--color-btn-bg) !important;
+    font-size: 0.72rem !important;
+    font-weight: 600;
+    padding: 0 !important;
+    box-shadow: none !important;
+}
+
+    .btn-marcar-leida:hover {
+        text-decoration: underline;
+        transform: none !important;
+    }
+    #btnCampana:hover {
+        background-color: rgba(255, 255, 255, 0.15) !important;
+        transform: none !important;
+        box-shadow: none !important;
+    }
 /* --- ÁTOMO: Marca / Logo --- */
 .a-logo, .navbar-brand {
     font-family: var(--font-family-logo) !important;
