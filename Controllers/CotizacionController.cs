@@ -6,6 +6,7 @@ using MultiserviciosPiscinas.DTOs.Factura;
 using MultiserviciosPiscinas.Interfaces;
 using MultiserviciosPiscinas.Models;
 using MultiserviciosPiscinas.Services;
+using System.Globalization;
 using System.Security.Claims;
 
 namespace MultiserviciosPiscinas.Controllers
@@ -19,6 +20,7 @@ namespace MultiserviciosPiscinas.Controllers
         private readonly FacturaPdfService _facturaPdfService;
         private readonly IConfiguration _configuracion;
         private readonly PiscinasYMultiserviciosContext _context;
+        private readonly ILogger<CotizacionController> _logger;
 
         public CotizacionController(
             ICotizacionRepository cotizacionRepositorio,
@@ -26,7 +28,8 @@ namespace MultiserviciosPiscinas.Controllers
             CotizacionPdfService pdfService,
             FacturaPdfService facturaPdfService,
             IConfiguration configuracion,
-            PiscinasYMultiserviciosContext context)
+            PiscinasYMultiserviciosContext context,
+            ILogger<CotizacionController> logger)
         {
             _cotizacionRepositorio = cotizacionRepositorio;
             _facturaRepositorio = facturaRepositorio;
@@ -34,6 +37,7 @@ namespace MultiserviciosPiscinas.Controllers
             _facturaPdfService = facturaPdfService;
             _configuracion = configuracion;
             _context = context;
+            _logger = logger;
         }
 
         public async Task<IActionResult> Index()
@@ -78,7 +82,7 @@ namespace MultiserviciosPiscinas.Controllers
                 var carrito = HttpContext.Session.ObtenerCarrito();
                 var itemExistente = carrito.FirstOrDefault(i => i.ProductoId == productoId);
 
-                var tasaIva = decimal.Parse(_configuracion["Facturacion:TasaIva"] ?? "0.13");
+                var tasaIva = decimal.Parse(_configuracion["Facturacion:TasaIva"] ?? "0.13", CultureInfo.InvariantCulture);
 
                 if (itemExistente != null)
                 {
@@ -110,7 +114,8 @@ namespace MultiserviciosPiscinas.Controllers
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, mensaje = $"Error: {ex.Message}" });
+                _logger.LogError(ex, "Error al procesar la solicitud del carrito de cotización.");
+                return Json(new { success = false, mensaje = "Ocurrió un error al procesar la solicitud." });
             }
         }
 
@@ -128,7 +133,8 @@ namespace MultiserviciosPiscinas.Controllers
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, mensaje = $"Error: {ex.Message}" });
+                _logger.LogError(ex, "Error al procesar la solicitud del carrito de cotización.");
+                return Json(new { success = false, mensaje = "Ocurrió un error al procesar la solicitud." });
             }
         }
 
@@ -202,8 +208,8 @@ namespace MultiserviciosPiscinas.Controllers
                 }
 
                 // Crear cotización
-                var tasaIva = decimal.Parse(_configuracion["Facturacion:TasaIva"] ?? "0.13");
-                var diasVigencia = int.Parse(_configuracion["Facturacion:DiasVigenciaCotizacion"] ?? "5");
+                var tasaIva = decimal.Parse(_configuracion["Facturacion:TasaIva"] ?? "0.13", CultureInfo.InvariantCulture);
+                var diasVigencia = int.Parse(_configuracion["Facturacion:DiasVigenciaCotizacion"] ?? "5", CultureInfo.InvariantCulture);
 
                 var cotizacion = await _cotizacionRepositorio.CrearCotizacionAsync(clienteId, carrito, tasaIva, diasVigencia);
 
@@ -235,7 +241,8 @@ namespace MultiserviciosPiscinas.Controllers
             }
             catch (Exception ex)
             {
-                TempData["Mensaje"] = $"Error al generar la cotización: {ex.Message}";
+                _logger.LogError(ex, "Error al generar la cotización.");
+                TempData["Mensaje"] = "Ocurrió un error al generar la cotización. Intenta de nuevo.";
                 TempData["TipoMensaje"] = "danger";
                 return RedirectToAction("Crear");
             }
@@ -306,7 +313,7 @@ namespace MultiserviciosPiscinas.Controllers
 
                 var comprobanteRuta = $"/comprobantes/facturas/{nombreArchivo}";
 
-                var diasVencimiento = int.Parse(_configuracion["Facturacion:DiasVencimientoFactura"] ?? "30");
+                var diasVencimiento = int.Parse(_configuracion["Facturacion:DiasVencimientoFactura"] ?? "30", CultureInfo.InvariantCulture);
                 var factura = await _facturaRepositorio.CrearFacturaAsync(cotizacionId, comprobanteRuta, usuario.Id, diasVencimiento);
 
                 var pdfDto = new FacturaPdfDto
@@ -328,7 +335,8 @@ namespace MultiserviciosPiscinas.Controllers
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError(string.Empty, $"Error al generar la factura: {ex.Message}");
+                _logger.LogError(ex, "Error al generar la factura.");
+                ModelState.AddModelError(string.Empty, "Ocurrió un error al generar la factura. Intenta de nuevo.");
                 return View(modeloActual);
             }
         }

@@ -3,6 +3,16 @@
     ViewData["Title"] = "Nueva cotización";
 }
 
+@if (TempData["Mensaje"] != null)
+{
+    var tipoAlert = TempData["TipoMensaje"]?.ToString() ?? "success";
+
+    <div class="alert alert-@tipoAlert alert-dismissible fade show" role="alert">
+        @TempData["Mensaje"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h2 class="mb-0">Nueva cotización</h2>
     <button type="button" class="btn btn-info" id="btnAbrirCarrito" data-bs-toggle="modal" data-bs-target="#modalCarrito">
@@ -92,5 +102,5 @@
 </div>
 
 @section Scripts {
-    <script src="~/js/cotizacion.js"></script>
+    <script src="~/js/cotizacion.js" asp-append-version="true"></script>
 }

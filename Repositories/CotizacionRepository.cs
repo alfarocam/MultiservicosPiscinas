@@ -145,10 +145,10 @@ public class CotizacionRepository : ICotizacionRepository
 
         try
         {
-            // Ejecutar stored procedure seg.InsertUserAndClient
+            // Ejecutar stored procedure seg.InsertarUsuarioYCliente
             var usuarioIdResult = await _context.Database
                 .SqlQueryRaw<int>(
-                    "EXEC seg.InsertUserAndClient @p0, @p1, @p2, @p3, @p4, @p5, @p6",
+                    "EXEC seg.InsertarUsuarioYCliente @p0, @p1, @p2, @p3, @p4, @p5, @p6",
                     rolId,
                     nombre,
                     "", // ApellidoPaterno vacío
@@ -218,7 +218,7 @@ public class CotizacionRepository : ICotizacionRepository
                 DescuentoTotal = 0,
                 ImpuestoTotal = impuestoTotal,
                 Total = total,
-                Estado = "Pendiente"
+                Estado = "Enviada"
             };
 
             _context.Cotizacion.Add(cotizacion);
