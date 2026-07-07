@@ -32,6 +32,7 @@ public partial class Usuario
     public virtual Cliente? Cliente { get; set; }
 
     public virtual ICollection<GastoOperativo> GastoOperativo { get; set; } = new List<GastoOperativo>();
+    public virtual ICollection<Notificacion> Notificacion { get; set; } = new List<Notificacion>();
 
     public virtual Rol Rol { get; set; } = null!;
 

@@ -1,59 +1,168 @@
-﻿@{
+﻿@model MultiserviciosPiscinas.Models.CitaEditarViewModel
+@{
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
-    ViewData["Title"] = "Editar agenda";
+    ViewData["Title"] = "Detalle de la cita";
+    var historial = ViewBag.Historial as List<MultiserviciosPiscinas.Models.BitacoraAuditoria>;
+
+    var badgeClass = Model.Estado switch
+    {
+        "Pendiente" => "c-badge-gray",
+        "Confirmada" => "c-badge-blue",
+        "En camino" => "c-badge-blue",
+        "En progreso" => "c-badge-amber",
+        "Completada" => "c-badge-green",
+        "Cancelada" => "c-badge-red",
+        _ => "c-badge-gray"
+    };
 }
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h2 class="mb-0">Editar agenda</h2>
-    <a asp-action="Index" class="btn btn-secondary">Volver</a>
+@if (TempData["MensajeError"] != null)
+{
+    <div class="alert alert-danger">@TempData["MensajeError"]</div>
+}
+
+<div class="c-page-header">
+    <h2><i class="bi bi-calendar-event me-2"></i>Cita #@Model.Id</h2>
+    <span class="c-badge @badgeClass" style="font-size:0.85rem;padding:6px 16px">@Model.Estado</span>
 </div>
 
-<div class="card border-0 shadow-sm">
-    <div class="card-body">
-        <form method="post">
-            @Html.AntiForgeryToken()
+<ul class="nav nav-tabs mb-3">
+    <li class="nav-item">
+        <a class="nav-link active" data-bs-toggle="tab" href="#tabDetalle">Detalle</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" data-bs-toggle="tab" href="#tabHistorial">Historial</a>
+    </li>
+</ul>
 
-            <div class="row g-3">
-                <div class="col-md-6">
-                    <label class="form-label">Cliente</label>
-                    <input class="form-control" value="Taylor Swift" />
+<div class="tab-content">
+    <div class="tab-pane fade show active" id="tabDetalle">
+        <div class="card">
+            <div class="card-body">
+                <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Cliente</label>
+                        <p class="form-control-plaintext">@Model.ClienteNombre</p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Piscina</label>
+                        <p class="form-control-plaintext">@Model.PiscinaDescripcion</p>
+                    </div>
                 </div>
 
-                <div class="col-md-6">
-                    <label class="form-label">Piscina</label>
-                    <input class="form-control" value="Piscina principal" />
-                </div>
+                @if (Model.Estado != "Cancelada")
+                {
+                    <form asp-action="Editar" asp-route-id="@Model.Id" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="Id" />
 
-                <div class="col-md-4">
-                    <label class="form-label">Fecha</label>
-                    <input type="date" class="form-control" value="2026-04-15" />
-                </div>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-4">
+                                <label asp-for="TecnicoId" class="form-label fw-semibold"></label>
+                                <select asp-for="TecnicoId" class="form-select" required>
+                                    @foreach (var t in ViewBag.Tecnicos)
+                                    {
+                                        <option value="@t.id">@t.nombre</option>
+                                    }
+                                </select>
+                                <span asp-validation-for="TecnicoId" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="Fecha" class="form-label fw-semibold"></label>
+                                <input asp-for="Fecha" type="date" class="form-control" required />
+                                <span asp-validation-for="Fecha" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="Hora" class="form-label fw-semibold"></label>
+                                <input asp-for="Hora" type="time" class="form-control" required />
+                                <span asp-validation-for="Hora" class="text-danger small"></span>
+                            </div>
+                            <div class="col-12">
+                                <label asp-for="Notas" class="form-label fw-semibold"></label>
+                                <textarea asp-for="Notas" class="form-control" rows="3"></textarea>
+                            </div>
+                        </div>
 
-                <div class="col-md-4">
-                    <label class="form-label">Hora</label>
-                    <input type="time" class="form-control" value="09:00" />
-                </div>
-
-                <div class="col-md-4">
-                    <label class="form-label">Estado</label>
-                    <select class="form-select">
-                        <option>Pendiente</option>
-                        <option selected>Programada</option>
-                        <option>Finalizada</option>
-                        <option>Cancelada</option>
-                    </select>
-                </div>
-
-                <div class="col-md-12">
-                    <label class="form-label">Observaciones</label>
-                    <textarea class="form-control" rows="3">Visita programada para mantenimiento preventivo.</textarea>
-                </div>
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn">
+                                <i class="bi bi-check-circle-fill me-1"></i>Guardar cambios
+                            </button>
+                            <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#modalCancelar">
+                                <i class="bi bi-x-circle me-1"></i>Cancelar cita
+                            </button>
+                            <a asp-action="Index" class="btn btn-sm" style="background-color: var(--color-text-muted) !important;">Volver</a>
+                        </div>
+                    </form>
+                }
+                else
+                {
+                    <p class="text-muted">Esta cita está cancelada y no se puede modificar.</p>
+                    <a asp-action="Index" class="btn btn-sm">Volver</a>
+                }
             </div>
+        </div>
+    </div>
 
-            <div class="mt-4">
-                <button type="submit" class="btn btn-warning">Guardar cambios</button>
-                <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
-            </div>
-        </form>
+    <div class="tab-pane fade" id="tabHistorial">
+        <div class="c-data-card">
+            <table class="c-data-table">
+                <thead>
+                    <tr>
+                        <th>Fecha y hora</th>
+                        <th>Usuario responsable</th>
+                        <th>Acción</th>
+                        <th>Valor anterior</th>
+                        <th>Valor nuevo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (historial == null || !historial.Any())
+                    {
+                        <tr><td colspan="5" class="text-center text-muted py-4">Todavía no hay cambios registrados para esta cita.</td></tr>
+                    }
+                    else
+                    {
+                        foreach (var h in historial)
+                        {
+                            <tr>
+                                <td>@h.FechaHora.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td>@h.Usuario.Nombre @h.Usuario.ApellidoPaterno</td>
+                                <td>
+    @(h.ValorNuevo.StartsWith("Estado: Cancelada")
+        ? "Cita cancelada"
+        : h.Accion == "UPDATE" ? "Cita modificada" : h.Accion)
+</td>
+                                <td>@h.ValorAnterior</td>
+                                <td>@h.ValorNuevo</td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalCancelar" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-action="Cancelar" asp-route-id="@Model.Id" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-header">
+                    <h5 class="modal-title">Cancelar cita</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <label class="form-label fw-semibold">Motivo de cancelación</label>
+                    <textarea name="motivoCancelacion" class="form-control" rows="3" required></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm" data-bs-dismiss="modal" style="background-color: var(--color-text-muted) !important;">Volver</button>
+                    <button type="submit" class="btn btn-outline-danger">Confirmar cancelación</button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>

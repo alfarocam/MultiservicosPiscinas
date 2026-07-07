@@ -29,6 +29,11 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 // Agregar soporte para Razor Pages
 builder.Services.AddRazorPages();
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+});
 
 // Configuracion de Autenticacion por Cookies
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
