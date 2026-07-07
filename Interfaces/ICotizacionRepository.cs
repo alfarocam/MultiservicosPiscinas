@@ -5,7 +5,13 @@ namespace MultiserviciosPiscinas.Interfaces;
 
 public interface ICotizacionRepository
 {
-    Task<List<ProductoBusquedaDto>> BuscarProductosAsync(string filtro);
+    Task<List<CategoriaProductoDto>> ObtenerCategoriasAsync();
+
+    Task<List<ProductoBusquedaDto>> ObtenerProductosPorCategoriaAsync(int categoriaId);
+
+    Task<ProductoBusquedaDto?> ObtenerProductoPorIdAsync(int productoId);
+
+    Task<List<ClienteBusquedaDto>> BuscarClientesAsync(string filtro);
 
     Task<ClienteBusquedaDto?> BuscarClientePorCorreoOTelefonoAsync(string valor);
 

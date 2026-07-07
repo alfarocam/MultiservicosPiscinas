@@ -10,7 +10,9 @@ using QuestPDF.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// --- Servicios personalizados --- 
+// --- Servicios personalizados ---
+QuestPDF.Settings.License = LicenseType.Community;
+
 builder.Services.AddControllersWithViews(); // Mantenemos solo uno aquo
 
 // Registrar el HttpClient para el Seeder de Costa Rica
@@ -58,6 +60,14 @@ builder.Services.AddScoped<CotizacionPdfService>();
 // Facturación
 builder.Services.AddScoped<IFacturaRepository, FacturaRepository>();
 builder.Services.AddScoped<FacturaPdfService>();
+
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
 
 var app = builder.Build();
 
