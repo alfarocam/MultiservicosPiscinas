@@ -48,10 +48,12 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 // Inyeccion de dependencias (Servicios y Repositorios)
 builder.Services.AddTransient<Generales>();
 
-// Repositorios  HU-2.5 - HU-3.4 - HU-7.1
+// Repositorios  HU-2.5 - HU-3.4 - HU-7.1 - HU-6.5
 builder.Services.AddScoped<IHistorialServicioRepository, HistorialServicioRepository>();
 builder.Services.AddScoped<IReporteSatisfaccionRepository, ReporteSatisfaccionRepository>();
+builder.Services.AddScoped<IReporteGastosOperativosRepository, ReporteGastosOperativosRepository>();
 builder.Services.AddScoped<BitacoraService>();
+builder.Services.AddScoped<GastoOperativoExcelService>();
 
 // Cotización Manual
 builder.Services.AddScoped<ICotizacionRepository, CotizacionRepository>();
