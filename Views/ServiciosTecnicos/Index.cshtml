@@ -175,7 +175,7 @@
                                     <form asp-action="Finalizar"
                                           asp-route-id="@servicio.Id"
                                           method="post"
-                                          onsubmit="return confirm('¿Seguro que desea dar por finalizado este servicio?');">
+                                          onsubmit="return FinalizarServicio(event, this);">
                                         @Html.AntiForgeryToken()
 
                                         <button type="submit"
@@ -193,3 +193,5 @@
         </tbody>
     </table>
 </div>
+
+<script src="~/js/sweetalerts.js" asp-append-version="true"></script>
