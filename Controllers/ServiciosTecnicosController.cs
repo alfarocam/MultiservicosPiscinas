@@ -539,21 +539,21 @@ namespace MultiserviciosPiscinas.Controllers
                 FechaHora = DateTime.Now
             });
 
-            var administradores = await _context.Usuario
-                .Where(u => u.RolId == 1 && u.Activo)
-                .ToListAsync();
+            //var administradores = await _context.Usuario
+            //    .Where(u => u.RolId == 1 && u.Activo)
+            //    .ToListAsync();
 
-            foreach (var admin in administradores)
-            {
-                _context.Notificacion.Add(new Notificacion
-                {
-                    UsuarioId = admin.Id,
-                    CitaId = cita.Id,
-                    Mensaje = $"El técnico {cita.Tecnico.Nombre} reprogramó una cita para el {cita.FechaHora:dd/MM/yyyy} a las {cita.FechaHora:HH:mm}.",
-                    Leida = false,
-                    FechaCreacion = DateTime.Now
-                });
-            }
+            //foreach (var admin in administradores)
+            //{
+            //    _context.Notificacion.Add(new Notificacion
+            //    {
+            //        UsuarioId = admin.Id,
+            //        CitaId = cita.Id,
+            //        Mensaje = $"El técnico {cita.Tecnico.Nombre} reprogramó una cita para el {cita.FechaHora:dd/MM/yyyy} a las {cita.FechaHora:HH:mm}.",
+            //        Leida = false,
+            //        FechaCreacion = DateTime.Now
+            //    });
+            //}
 
             await _context.SaveChangesAsync();
 

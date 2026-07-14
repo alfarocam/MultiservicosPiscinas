@@ -6,16 +6,23 @@ using System.Security.Claims;
 
 namespace MultiserviciosPiscinas.Controllers
 {
+    [Authorize(Roles = "1,2")]
     public class TablonAnunciosController(PiscinasYMultiserviciosContext context) : Controller
     {
         private readonly PiscinasYMultiserviciosContext _context = context;
 
+        [HttpGet]
         public async Task<IActionResult> Index()
         {
+            var hoy = DateOnly.FromDateTime(DateTime.Today);
+
             var anuncios = await _context.Anuncio
                 .Include(a => a.Autor)
-                .OrderByDescending(a => a.Prioridad == "Urgente")
-                .ThenByDescending(a => a.FechaPublicacion)
+                .Where(a => a.FechaPublicacion <= hoy
+                         && (a.FechaCaducidad == null || a.FechaCaducidad >= hoy))
+                .OrderByDescending(a => a.FechaPublicacion)
+                .ThenByDescending(a => a.Id)
+                .AsNoTracking()
                 .ToListAsync();
 
             return View(anuncios);
@@ -52,7 +59,8 @@ namespace MultiserviciosPiscinas.Controllers
                 Titulo = model.Titulo.Trim(),
                 Contenido = model.Contenido.Trim(),
                 Prioridad = model.Urgente ? "Urgente" : "Normal",
-                FechaPublicacion = DateOnly.FromDateTime(DateTime.Now)
+                FechaPublicacion = DateOnly.FromDateTime(DateTime.Now),
+                FechaCaducidad = null
             };
 
             _context.Anuncio.Add(anuncio);
