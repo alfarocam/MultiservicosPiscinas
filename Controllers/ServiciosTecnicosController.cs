@@ -110,7 +110,7 @@ namespace MultiserviciosPiscinas.Controllers
 
             if (servicio == null)
             {
-                TempData["MensajeError"] = "No se encontró el servicio asignado o no tiene permiso para consultarlo.";
+                TempData["MensajeError"] = "No se encontrÃ³ el servicio asignado o no tiene permiso para consultarlo.";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -150,7 +150,7 @@ namespace MultiserviciosPiscinas.Controllers
 
             if (servicio == null)
             {
-                TempData["MensajeError"] = "No se encontró el servicio asignado.";
+                TempData["MensajeError"] = "No se encontrÃ³ el servicio asignado.";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -193,7 +193,7 @@ namespace MultiserviciosPiscinas.Controllers
 
             if (servicio == null)
             {
-                TempData["MensajeError"] = "No se encontró el servicio asignado.";
+                TempData["MensajeError"] = "No se encontrÃ³ el servicio asignado.";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -267,13 +267,13 @@ namespace MultiserviciosPiscinas.Controllers
 
             if (servicio == null)
             {
-                TempData["MensajeError"] = "No se encontró el servicio o no tiene permiso para finalizarlo.";
+                TempData["MensajeError"] = "No se encontrÃ³ el servicio o no tiene permiso para finalizarlo.";
                 return RedirectToAction(nameof(Index));
             }
 
             if (servicio.Estado == "Cerrado")
             {
-                TempData["MensajeError"] = "Este servicio ya está cerrado.";
+                TempData["MensajeError"] = "Este servicio ya estÃ¡ cerrado.";
                 return RedirectToAction(nameof(Detalle), new { id = servicio.Id });
             }
 
@@ -315,6 +315,185 @@ namespace MultiserviciosPiscinas.Controllers
             return RedirectToAction(nameof(Detalle), new { id = servicio.Id });
         }
 
+        [Authorize(Roles = "1")]
+        [HttpGet]
+        public async Task<IActionResult> CambiarTecnico(int id)
+        {
+            var servicio = await _context.Servicio
+                .Include(s => s.Cita)
+                    .ThenInclude(c => c.Tecnico)
+                .Include(s => s.Cita)
+                    .ThenInclude(c => c.Piscina)
+                        .ThenInclude(p => p.Cliente)
+                            .ThenInclude(cl => cl.Usuario)
+                .FirstOrDefaultAsync(s => s.Id == id);
+
+            if (servicio == null)
+            {
+                TempData["MensajeError"] = "No se encontrÃ³ el servicio asignado.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            if (servicio.Estado == "Cerrado" || servicio.Estado == "Cancelado")
+            {
+                TempData["MensajeError"] = "No se puede cambiar el tÃ©cnico de un servicio cerrado o cancelado.";
+                return RedirectToAction(nameof(Detalle), new { id = servicio.Id });
+            }
+
+            var modelo = CrearModeloCambiarTecnico(servicio);
+            await CargarTecnicosDisponiblesAsync();
+
+            return View(modelo);
+        }
+
+        [Authorize(Roles = "1")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CambiarTecnico(CambiarTecnicoServicioViewModel modelo)
+        {
+            var usuarioId = await ObtenerUsuarioIdAsync();
+
+            if (usuarioId == null)
+                return RedirectToAction("InicioSesion", "Auth");
+
+            var servicio = await _context.Servicio
+                .Include(s => s.Cita)
+                    .ThenInclude(c => c.Tecnico)
+                .Include(s => s.Cita)
+                    .ThenInclude(c => c.Piscina)
+                        .ThenInclude(p => p.Cliente)
+                            .ThenInclude(cl => cl.Usuario)
+                .FirstOrDefaultAsync(s => s.Id == modelo.ServicioId);
+
+            if (servicio == null)
+            {
+                TempData["MensajeError"] = "No se encontrÃ³ el servicio asignado.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            if (servicio.Estado == "Cerrado" || servicio.Estado == "Cancelado")
+            {
+                TempData["MensajeError"] = "No se puede cambiar el tÃ©cnico de un servicio cerrado o cancelado.";
+                return RedirectToAction(nameof(Detalle), new { id = servicio.Id });
+            }
+
+            // <!-- Validar que el tÃ©cnico exista y sea vÃ¡lido -->
+            var tecnicoNuevo = await _context.Usuario
+                .FirstOrDefaultAsync(u => u.Id == modelo.TecnicoId);
+
+            if (tecnicoNuevo == null || tecnicoNuevo.RolId != 2 || !tecnicoNuevo.Activo)
+            {
+                ModelState.AddModelError(nameof(modelo.TecnicoId), "El tÃ©cnico seleccionado no existe, no es vÃ¡lido o no estÃ¡ activo.");
+            }
+
+            // <!-- Validar conflicto de horario -->
+            if (ModelState.IsValid && servicio.Cita.TecnicoId != modelo.TecnicoId)
+            {
+                var conflicto = await _context.Cita
+                    .AnyAsync(c => c.Id != servicio.CitaId
+                                && c.TecnicoId == modelo.TecnicoId
+                                && c.Estado != "Cancelada"
+                                && c.FechaHora == servicio.Cita.FechaHora);
+
+                if (conflicto)
+                {
+                    ModelState.AddModelError(nameof(modelo.TecnicoId), "El tÃ©cnico seleccionado ya tiene otra cita programada para esa fecha y hora.");
+                }
+            }
+
+            if (!ModelState.IsValid)
+            {
+                CargarDatosCambiarTecnico(modelo, servicio);
+                await CargarTecnicosDisponiblesAsync();
+                return View(modelo);
+            }
+
+            // <!-- Si el tÃ©cnico es el mismo, no hacer nada -->
+            if (servicio.Cita.TecnicoId == modelo.TecnicoId)
+            {
+                TempData["MensajeExito"] = "El tÃ©cnico seleccionado es el mismo que ya estaba asignado.";
+                return RedirectToAction(nameof(Detalle), new { id = servicio.Id });
+            }
+
+            var ahora = DateTime.Now;
+            var tecnicoAnterior = servicio.Cita.Tecnico;
+            var tecnicoAnteriorId = servicio.Cita.TecnicoId;
+
+            // <!-- Registrar auditorÃ­a -->
+            _context.BitacoraAuditoria.Add(new BitacoraAuditoria
+            {
+                UsuarioId = usuarioId.Value,
+                Accion = "UPDATE",
+                TablaAfectada = "ops.CITA",
+                RegistroId = servicio.CitaId,
+                ValorAnterior = $"TÃ©cnico anterior: {tecnicoAnterior.Nombre} {tecnicoAnterior.ApellidoPaterno}",
+                ValorNuevo = $"TÃ©cnico nuevo: {tecnicoNuevo!.Nombre} {tecnicoNuevo.ApellidoPaterno}",
+                FechaHora = ahora
+            });
+
+            // <!-- Actualizar tÃ©cnico -->
+            servicio.Cita.TecnicoId = modelo.TecnicoId;
+
+            // <!-- Crear notificaciones -->
+            _context.Notificacion.Add(new Notificacion
+            {
+                UsuarioId = modelo.TecnicoId,
+                CitaId = servicio.CitaId,
+                Mensaje = $"Se te asignÃ³ el servicio #{servicio.Id} el {servicio.Cita.FechaHora:dd/MM/yyyy} a las {servicio.Cita.FechaHora:HH:mm}.",
+                Leida = false,
+                FechaCreacion = ahora
+            });
+
+            _context.Notificacion.Add(new Notificacion
+            {
+                UsuarioId = tecnicoAnteriorId,
+                CitaId = servicio.CitaId,
+                Mensaje = $"Ya no tienes asignado el servicio #{servicio.Id} del {servicio.Cita.FechaHora:dd/MM/yyyy}.",
+                Leida = false,
+                FechaCreacion = ahora
+            });
+
+            await _context.SaveChangesAsync();
+
+            TempData["MensajeExito"] = "El tÃ©cnico fue actualizado correctamente.";
+            return RedirectToAction(nameof(Detalle), new { id = servicio.Id });
+        }
+
+        private CambiarTecnicoServicioViewModel CrearModeloCambiarTecnico(Servicio servicio)
+        {
+            var modelo = new CambiarTecnicoServicioViewModel
+            {
+                TecnicoId = servicio.Cita.TecnicoId
+            };
+
+            CargarDatosCambiarTecnico(modelo, servicio);
+
+            return modelo;
+        }
+
+        private static void CargarDatosCambiarTecnico(CambiarTecnicoServicioViewModel modelo, Servicio servicio)
+        {
+            var cliente = servicio.Cita.Piscina.Cliente.Usuario;
+            var piscina = servicio.Cita.Piscina;
+
+            modelo.ServicioId = servicio.Id;
+            modelo.CitaId = servicio.CitaId;
+            modelo.Cliente = $"{cliente.Nombre} {cliente.ApellidoPaterno} {cliente.ApellidoMaterno}".Trim();
+            modelo.Piscina = $"{piscina.Tipo} â€” {piscina.VolumenM3:0.##} mÂ³";
+            modelo.TecnicoActual = $"{servicio.Cita.Tecnico.Nombre} {servicio.Cita.Tecnico.ApellidoPaterno}";
+            modelo.FechaHoraCita = servicio.Cita.FechaHora;
+            modelo.EstadoServicio = servicio.Estado;
+        }
+
+        private async Task CargarTecnicosDisponiblesAsync()
+        {
+            ViewBag.Tecnicos = await _context.Usuario
+                .Where(u => u.RolId == 2 && u.Activo)
+                .OrderBy(u => u.ApellidoPaterno)
+                .Select(u => new { id = u.Id, nombre = $"{u.Nombre} {u.ApellidoPaterno}" })
+                .ToListAsync();
+        }
+
         private RegistrarTareasViewModel CrearModeloRegistrarTareas(Servicio servicio)
         {
             var modelo = new RegistrarTareasViewModel
@@ -333,14 +512,14 @@ namespace MultiserviciosPiscinas.Controllers
             var piscina = servicio.Cita.Piscina;
             var direccion = piscina.Direccion;
 
-            var distrito = direccion?.Distrito?.Nombre ?? "—";
-            var canton = direccion?.Distrito?.Canton?.Nombre ?? "—";
-            var provincia = direccion?.Distrito?.Canton?.Provincia?.Nombre ?? "—";
-            var detalles = direccion?.Detalles ?? "Dirección no registrada";
+            var distrito = direccion?.Distrito?.Nombre ?? "â€”";
+            var canton = direccion?.Distrito?.Canton?.Nombre ?? "â€”";
+            var provincia = direccion?.Distrito?.Canton?.Provincia?.Nombre ?? "â€”";
+            var detalles = direccion?.Detalles ?? "DirecciÃ³n no registrada";
 
             modelo.ServicioId = servicio.Id;
             modelo.Cliente = $"{cliente.Nombre} {cliente.ApellidoPaterno} {cliente.ApellidoMaterno}".Trim();
-            modelo.Piscina = $"{piscina.Tipo} — {piscina.VolumenM3:0.##} m³";
+            modelo.Piscina = $"{piscina.Tipo} â€” {piscina.VolumenM3:0.##} mÂ³";
             modelo.Direccion = $"{detalles}, {distrito}, {canton}, {provincia}";
             modelo.TipoServicio = servicio.Cita.Tipo;
             modelo.EstadoServicio = servicio.Estado;
@@ -405,7 +584,7 @@ namespace MultiserviciosPiscinas.Controllers
                     CitaId = c.Id,
                     ServicioId = c.Servicio?.Id,
                     Cliente = $"{c.Piscina.Cliente.Usuario.Nombre} {c.Piscina.Cliente.Usuario.ApellidoPaterno} {c.Piscina.Cliente.Usuario.ApellidoMaterno}".Trim(),
-                    Piscina = $"{c.Piscina.Tipo} — {c.Piscina.VolumenM3:0.##} m³",
+                    Piscina = $"{c.Piscina.Tipo} â€” {c.Piscina.VolumenM3:0.##} mÂ³",
                     Direccion = CrearDireccionCompleta(c.Piscina.Direccion),
                     TipoServicio = c.Tipo,
                     Estado = c.Estado,
@@ -440,7 +619,7 @@ namespace MultiserviciosPiscinas.Controllers
 
             if (cita == null)
             {
-                TempData["MensajeError"] = "No se encontró la cita asignada.";
+                TempData["MensajeError"] = "No se encontrÃ³ la cita asignada.";
                 return RedirectToAction(nameof(MiAgenda));
             }
 
@@ -479,7 +658,7 @@ namespace MultiserviciosPiscinas.Controllers
 
             if (cita == null)
             {
-                TempData["MensajeError"] = "No se encontró la cita asignada.";
+                TempData["MensajeError"] = "No se encontrÃ³ la cita asignada.";
                 return RedirectToAction(nameof(MiAgenda));
             }
 
@@ -521,7 +700,7 @@ namespace MultiserviciosPiscinas.Controllers
 
             if (!string.IsNullOrWhiteSpace(modelo.Motivo))
             {
-                var notaReprogramacion = $"Reprogramada por técnico el {DateTime.Now:dd/MM/yyyy HH:mm}. Motivo: {modelo.Motivo.Trim()}";
+                var notaReprogramacion = $"Reprogramada por tÃ©cnico el {DateTime.Now:dd/MM/yyyy HH:mm}. Motivo: {modelo.Motivo.Trim()}";
 
                 cita.Notas = string.IsNullOrWhiteSpace(cita.Notas)
                     ? notaReprogramacion
@@ -535,7 +714,7 @@ namespace MultiserviciosPiscinas.Controllers
                 TablaAfectada = "ops.CITA",
                 RegistroId = cita.Id,
                 ValorAnterior = $"Fecha anterior: {fechaAnterior:dd/MM/yyyy HH:mm} | Estado anterior: {estadoAnterior}",
-                ValorNuevo = $"Nueva fecha: {cita.FechaHora:dd/MM/yyyy HH:mm} | Estado: {cita.Estado} | Reprogramada por técnico: {cita.Tecnico.Nombre} {cita.Tecnico.ApellidoPaterno}",
+                ValorNuevo = $"Nueva fecha: {cita.FechaHora:dd/MM/yyyy HH:mm} | Estado: {cita.Estado} | Reprogramada por tÃ©cnico: {cita.Tecnico.Nombre} {cita.Tecnico.ApellidoPaterno}",
                 FechaHora = DateTime.Now
             });
 
@@ -549,7 +728,7 @@ namespace MultiserviciosPiscinas.Controllers
             //    {
             //        UsuarioId = admin.Id,
             //        CitaId = cita.Id,
-            //        Mensaje = $"El técnico {cita.Tecnico.Nombre} reprogramó una cita para el {cita.FechaHora:dd/MM/yyyy} a las {cita.FechaHora:HH:mm}.",
+            //        Mensaje = $"El tÃ©cnico {cita.Tecnico.Nombre} reprogramÃ³ una cita para el {cita.FechaHora:dd/MM/yyyy} a las {cita.FechaHora:HH:mm}.",
             //        Leida = false,
             //        FechaCreacion = DateTime.Now
             //    });
@@ -557,7 +736,7 @@ namespace MultiserviciosPiscinas.Controllers
 
             await _context.SaveChangesAsync();
 
-            TempData["MensajeExito"] = "La cita fue reprogramada correctamente y se notificó al administrador.";
+            TempData["MensajeExito"] = "La cita fue reprogramada correctamente y se notificÃ³ al administrador.";
 
             return RedirectToAction(nameof(MiAgenda), new
             {
@@ -583,7 +762,7 @@ namespace MultiserviciosPiscinas.Controllers
         {
             modelo.CitaId = cita.Id;
             modelo.Cliente = $"{cita.Piscina.Cliente.Usuario.Nombre} {cita.Piscina.Cliente.Usuario.ApellidoPaterno} {cita.Piscina.Cliente.Usuario.ApellidoMaterno}".Trim();
-            modelo.Piscina = $"{cita.Piscina.Tipo} — {cita.Piscina.VolumenM3:0.##} m³";
+            modelo.Piscina = $"{cita.Piscina.Tipo} â€” {cita.Piscina.VolumenM3:0.##} mÂ³";
             modelo.Direccion = CrearDireccionCompleta(cita.Piscina.Direccion);
             modelo.TipoServicio = cita.Tipo;
             modelo.Estado = cita.Estado;
@@ -593,12 +772,12 @@ namespace MultiserviciosPiscinas.Controllers
         private static string CrearDireccionCompleta(DireccionCliente? direccion)
         {
             if (direccion == null)
-                return "Dirección no registrada";
+                return "DirecciÃ³n no registrada";
 
-            var detalles = direccion.Detalles ?? "Sin señas";
-            var distrito = direccion.Distrito?.Nombre ?? "—";
-            var canton = direccion.Distrito?.Canton?.Nombre ?? "—";
-            var provincia = direccion.Distrito?.Canton?.Provincia?.Nombre ?? "—";
+            var detalles = direccion.Detalles ?? "Sin seÃ±as";
+            var distrito = direccion.Distrito?.Nombre ?? "â€”";
+            var canton = direccion.Distrito?.Canton?.Nombre ?? "â€”";
+            var provincia = direccion.Distrito?.Canton?.Provincia?.Nombre ?? "â€”";
 
             return $"{detalles}, {distrito}, {canton}, {provincia}";
         }
