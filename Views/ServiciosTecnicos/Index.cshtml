@@ -170,6 +170,16 @@
                                     <i class="bi bi-eye-fill me-1"></i>Ver
                                 </a>
 
+                                @if (User.IsInRole("1") && servicio.Estado != "Cerrado" && servicio.Estado != "Cancelado")
+                                {
+                                    <a asp-action="CambiarTecnico"
+                                       asp-route-id="@servicio.Id"
+                                       class="c-btn-sm c-btn-sm-primary"
+                                       title="Cambiar técnico asignado">
+                                        <i class="bi bi-pencil-fill"></i>
+                                    </a>
+                                }
+
                                 @if (servicio.Estado != "Cerrado" && servicio.Estado != "Cancelado")
                                 {
                                     <form asp-action="Finalizar"
