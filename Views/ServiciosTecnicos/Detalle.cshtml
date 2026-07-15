@@ -1,325 +1,78 @@
 ﻿@model MultiserviciosPiscinas.Models.Servicio
-
 @{
-    Layout = User.IsInRole("2")
-        ? "~/Views/Shared/_LayoutTecnico.cshtml"
-        : "~/Views/Shared/_LayoutAdmin.cshtml";
-
-    ViewData["Title"] = "Detalle del servicio asignado";
-
-    var cliente = Model.Cita.Piscina.Cliente.Usuario;
-    var tecnico = Model.Cita.Tecnico;
-    var piscina = Model.Cita.Piscina;
-    var direccion = piscina.Direccion;
-
-    var distrito = direccion?.Distrito?.Nombre ?? "—";
-    var canton = direccion?.Distrito?.Canton?.Nombre ?? "—";
-    var provincia = direccion?.Distrito?.Canton?.Provincia?.Nombre ?? "—";
-    var detalles = direccion?.Detalles ?? "Dirección no registrada";
-
-    var direccionCompleta = $"{detalles}, {distrito}, {canton}, {provincia}";
-
-    var historial = ViewBag.HistorialServicio as List<MultiserviciosPiscinas.Models.BitacoraAuditoria>
-        ?? new List<MultiserviciosPiscinas.Models.BitacoraAuditoria>();
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    ViewData["Title"] = "Detalle del servicio técnico";
 
     var badgeClass = Model.Estado switch
     {
-        "Abierto" => "c-badge-blue",
         "En progreso" => "c-badge-amber",
-        "Cerrado" => "c-badge-green",
-        "Cancelado" => "c-badge-red",
-        _ => "c-badge-gray"
+        "Cerrado" => "c-badge-gray",
+        _ => "c-badge-blue"
     };
 }
 
-@if (TempData["MensajeError"] != null)
-{
-    <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
-        <i class="bi bi-exclamation-triangle-fill me-2"></i>
-        @TempData["MensajeError"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
-    </div>
-}
-
-@if (TempData["MensajeExito"] != null)
-{
-    <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
-        <i class="bi bi-check-circle-fill me-2"></i>
-        @TempData["MensajeExito"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
-    </div>
-}
-
 <div class="c-page-header">
-    <h2>
-        <i class="bi bi-eye-fill me-2"></i>
-        Servicio asignado #@Model.Id
-    </h2>
-
-    <div class="d-flex gap-2 flex-wrap">
-        @if (User.IsInRole("2") && Model.Estado != "Cerrado" && Model.Estado != "Cancelado")
-        {
-            <a asp-action="RegistrarTareas"
-               asp-route-id="@Model.Id"
-               class="btn">
-                <i class="bi bi-list-task me-1"></i>Registrar tareas
-            </a>
-        }
-
-        @if (Model.Estado != "Cerrado" && Model.Estado != "Cancelado")
-        {
-            <form asp-action="Finalizar"
-                  asp-route-id="@Model.Id"
-                  method="post"
-                  onsubmit="return confirm('¿Seguro que desea dar por finalizado este servicio?');">
-                @Html.AntiForgeryToken()
-
-                <button type="submit" class="btn">
-                    <i class="bi bi-check-circle-fill me-1"></i>Dar por Finalizado
-                </button>
-            </form>
-        }
-
-        <span class="c-badge @badgeClass" style="font-size:0.85rem;padding:6px 16px">
-            @Model.Estado
-        </span>
-    </div>
+    <h2><i class="bi bi-tools me-2"></i>Servicio técnico #@Model.Id</h2>
+    <span class="c-badge @badgeClass" style="font-size:0.85rem;padding:6px 16px">@Model.Estado</span>
 </div>
 
 <div class="c-detail-card">
-
-    <h5 class="fw-bold mb-3" style="color: var(--color-btn-bg);">
-        <i class="bi bi-person-fill me-2"></i>Información del usuario
-    </h5>
-
-    <hr style="border-color: var(--color-accent);" />
-
-    <div class="row g-3 mb-4">
-        <div class="col-md-4">
-            <div class="c-detail-field c-field-blue">
-                <label>Nombre de usuario / cliente</label>
-                <p>@cliente.Nombre @cliente.ApellidoPaterno @cliente.ApellidoMaterno</p>
-            </div>
-        </div>
-
+    <div class="row g-3 mb-3">
         <div class="col-md-4">
             <div class="c-detail-field">
-                <label>Correo del usuario</label>
-                <p>@cliente.Correo</p>
+                <label>N° de orden</label>
+                <p>@Model.Id</p>
             </div>
         </div>
-
+        <div class="col-md-4">
+            <div class="c-detail-field c-field-blue">
+                <label>Cliente</label>
+                <p>@Model.Cita.Piscina.Cliente.Usuario.Nombre @Model.Cita.Piscina.Cliente.Usuario.ApellidoPaterno</p>
+            </div>
+        </div>
         <div class="col-md-4">
             <div class="c-detail-field c-field-amber">
                 <label>Técnico asignado</label>
-                <p>@tecnico.Nombre @tecnico.ApellidoPaterno</p>
+                <p>@Model.Cita.Tecnico.Nombre @Model.Cita.Tecnico.ApellidoPaterno</p>
             </div>
         </div>
     </div>
 
-    <h5 class="fw-bold mb-3" style="color: var(--color-btn-bg);">
-        <i class="bi bi-calendar-check-fill me-2"></i>Datos del servicio
-    </h5>
-
-    <hr style="border-color: var(--color-accent);" />
-
-    <div class="row g-3 mb-4">
-        <div class="col-md-3">
-            <div class="c-detail-field">
-                <label>Fecha de apertura</label>
-                <p>@Model.FechaApertura.ToString("dd/MM/yyyy")</p>
-            </div>
-        </div>
-
-        <div class="col-md-3">
-            <div class="c-detail-field c-field-blue">
-                <label>Fecha de finalización</label>
-                <p>
-                    @(Model.FechaCierre.HasValue
-                                        ? Model.FechaCierre.Value.ToString("dd/MM/yyyy")
-                                        : "—")
-                </p>
-            </div>
-        </div>
-
-        <div class="col-md-3">
-            <div class="c-detail-field">
-                <label>Fecha y hora de la cita</label>
-                <p>@Model.Cita.FechaHora.ToString("dd/MM/yyyy HH:mm")</p>
-            </div>
-        </div>
-
-        <div class="col-md-3">
-            <div class="c-detail-field">
-                <label>Tipo de servicio</label>
-                <p>@Model.Cita.Tipo</p>
-            </div>
-        </div>
-
+    <div class="row g-3 mb-3">
         <div class="col-md-6">
             <div class="c-detail-field">
                 <label>Piscina</label>
-                <p>@piscina.Tipo — @piscina.VolumenM3.ToString("0.##") m³</p>
+                <p>@Model.Cita.Piscina.Tipo — @Model.Cita.Piscina.VolumenM3 m³</p>
             </div>
         </div>
-
         <div class="col-md-6">
             <div class="c-detail-field c-field-gray">
-                <label>Dirección</label>
-                <p style="font-weight:400">@direccionCompleta</p>
+                <label>Dirección de domicilio</label>
+                <p style="font-weight:400">@Model.Cita.Piscina.Direccion.Detalles, @Model.Cita.Piscina.Direccion.Distrito.Nombre</p>
             </div>
         </div>
     </div>
 
-    <h5 class="fw-bold mb-3" style="color: var(--color-btn-bg);">
-        <i class="bi bi-list-task me-2"></i>Tareas realizadas
-    </h5>
-
-    <hr style="border-color: var(--color-accent);" />
-
-    @if (!Model.TareaServicio.Any())
-    {
-        <div class="alert alert-info">
-            No hay tareas registradas para este servicio.
-        </div>
-    }
-    else
-    {
-        <div class="c-data-card mb-4">
-            <table class="c-data-table">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Tarea</th>
-                        <th>Estado</th>
-                        <th>Fecha y hora registro</th>
-                        <th>Fecha completación</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                    @foreach (var tarea in Model.TareaServicio.OrderByDescending(t => t.FechaHoraRegistro ?? t.FechaAsignacion.ToDateTime(TimeOnly.MinValue)))
-                    {
-                        var fechaHora = tarea.FechaHoraRegistro
-                        ?? tarea.FechaAsignacion.ToDateTime(TimeOnly.MinValue);
-
-                        var tareaBadge = tarea.Estado switch
-                        {
-                            "Pendiente" => "c-badge-gray",
-                            "En progreso" => "c-badge-amber",
-                            "Completada" => "c-badge-green",
-                            "Cancelada" => "c-badge-red",
-                            _ => "c-badge-gray"
-                        };
-
-                        <tr>
-                            <td class="c-num">@tarea.Id</td>
-
-                            <td class="fw-semibold">
-                                @tarea.Descripcion
-                            </td>
-
-                            <td>
-                                <span class="c-badge @tareaBadge">
-                                    @tarea.Estado
-                                </span>
-                            </td>
-
-                            <td>
-                                @fechaHora.ToString("dd/MM/yyyy HH:mm")
-                            </td>
-
-                            <td>
-                                @(tarea.FechaCompletacion.HasValue
-                                                        ? tarea.FechaCompletacion.Value.ToString("dd/MM/yyyy")
-                                                        : "—")
-                    </td>
-                </tr>
-                                }
-                </tbody>
-            </table>
-        </div>
-    }
-
-    <h5 class="fw-bold mb-3" style="color: var(--color-btn-bg);">
-        <i class="bi bi-clock-history me-2"></i>Historial del servicio
-    </h5>
-
-    <hr style="border-color: var(--color-accent);" />
-
-    @if (!historial.Any())
-    {
-        <div class="alert alert-info">
-            Todavía no hay movimientos registrados en el historial de este servicio.
-        </div>
-    }
-    else
-    {
-        <div class="c-data-card mb-4">
-            <table class="c-data-table">
-                <thead>
-                    <tr>
-                        <th>Fecha</th>
-                        <th>Usuario</th>
-                        <th>Acción</th>
-                        <th>Detalle</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                    @foreach (var item in historial)
-                    {
-                        <tr>
-                            <td>@item.FechaHora.ToString("dd/MM/yyyy HH:mm")</td>
-
-                            <td>
-                                @(item.Usuario != null
-                                                        ? $"{item.Usuario.Nombre} {item.Usuario.ApellidoPaterno}"
-                                                        : "Usuario no disponible")
-                    </td>
-
-                            <td>
-                                <span class="c-badge c-badge-blue">
-                                    @item.Accion
-                                </span>
-                            </td>
-
-                            <td style="font-size:0.9rem">
-                                @item.ValorNuevo
-                            </td>
-                        </tr>
-                                }
-                </tbody>
-            </table>
-        </div>
-    }
-
-    <h5 class="fw-bold mb-3" style="color: var(--color-btn-bg);">
-        <i class="bi bi-file-text-fill me-2"></i>Observaciones del servicio
-    </h5>
-
-    <hr style="border-color: var(--color-accent);" />
-
-    <div class="row g-3 mb-4">
+    <div class="row g-3 mb-3">
         <div class="col-md-6">
-            <div class="c-detail-field c-field-gray">
-                <label>Trabajo realizado</label>
-                <p style="font-weight:400">
-                    @(string.IsNullOrWhiteSpace(Model.TrabajoRealizado)
-                                        ? "Sin detalle registrado."
-                                        : Model.TrabajoRealizado)
-                </p>
+            <div class="c-detail-field">
+                <label>Tarea a realizar</label>
+                <p>@Model.Cita.Tipo</p>
             </div>
         </div>
-
         <div class="col-md-6">
+            <div class="c-detail-field">
+                <label>Fecha y hora de apertura</label>
+                <p>@Model.Cita.FechaHora.ToString("dd/MM/yyyy HH:mm")</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-12">
             <div class="c-detail-field c-field-gray">
-                <label>Notas de la cita</label>
-                <p style="font-weight:400">
-                    @(string.IsNullOrWhiteSpace(Model.Cita.Notas)
-                                        ? "Sin notas registradas."
-                                        : Model.Cita.Notas)
-                </p>
+                <label>Observaciones</label>
+                <p style="font-weight:400">@Model.TrabajoRealizado</p>
             </div>
         </div>
     </div>
@@ -327,5 +80,4 @@
     <a asp-action="Index" class="btn btn-outline-secondary">
         <i class="bi bi-arrow-left me-1"></i>Volver al listado
     </a>
-
 </div>

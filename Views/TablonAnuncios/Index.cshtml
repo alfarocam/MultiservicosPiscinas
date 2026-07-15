@@ -1,157 +1,64 @@
 ﻿@model List<MultiserviciosPiscinas.Models.Anuncio>
-
 @{
-    Layout = User.IsInRole("2")
-        ? "~/Views/Shared/_LayoutTecnico.cshtml"
-        : "~/Views/Shared/_LayoutAdmin.cshtml";
-
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
     ViewData["Title"] = "Tablón de anuncios";
 }
 
 @if (TempData["MensajeExito"] != null)
 {
-    <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
-        <i class="bi bi-check-circle-fill me-2"></i>
-        @TempData["MensajeExito"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
-    </div>
+    <div class="alert alert-success">@TempData["MensajeExito"]</div>
 }
 
 <div class="c-page-header">
-    <h2>
-        <i class="bi bi-megaphone-fill me-2"></i>
-        Tablón de anuncios
-    </h2>
-
-    @if (User.IsInRole("1"))
-    {
-        <a asp-action="Crear" class="btn">
-            + Nuevo comunicado
-        </a>
-    }
+    <h2><i class="bi bi-megaphone-fill me-2"></i>Tablón de anuncios</h2>
+    <a asp-action="Crear" class="btn">+ Nuevo comunicado</a>
 </div>
 
-<div class="c-detail-card mb-4">
-    <div class="row g-3">
-        <div class="col-md-4">
-            <div class="c-detail-field c-field-blue">
-                <label>Anuncios vigentes</label>
-                <p>@Model.Count</p>
-            </div>
-        </div>
-
-        <div class="col-md-4">
-            <div class="c-detail-field c-field-amber">
-                <label>Orden</label>
-                <p>Más reciente primero</p>
-            </div>
-        </div>
-
-        <div class="col-md-4">
-            <div class="c-detail-field">
-                <label>Acceso</label>
-                <p>
-                    @(User.IsInRole("2")
-                                        ? "Disponible para técnico"
-                                        : "Disponible para administrador")
-                </p>
-            </div>
-        </div>
-    </div>
-</div>
-
-@if (!Model.Any())
-{
-    <div class="c-detail-card text-center py-5">
-        <i class="bi bi-info-circle display-5 text-muted"></i>
-
-        <h4 class="mt-3">
-            No hay anuncios vigentes
-        </h4>
-
-        <p class="text-muted mb-0">
-            Actualmente no hay comunicados publicados para mostrar.
-        </p>
-    </div>
-}
-else
-{
-    <div class="row g-4">
-        @foreach (var anuncio in Model)
-        {
-            var prioridadClass = anuncio.Prioridad switch
+<div class="c-data-card">
+    <table class="c-data-table">
+        <thead>
+            <tr>
+                <th>Título</th>
+                <th>Autor</th>
+                <th>Fecha</th>
+                <th>Prioridad</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (!Model.Any())
             {
-                "Urgente" => "c-badge-red",
-                "Alta" => "c-badge-amber",
-                "Normal" => "c-badge-blue",
-                "Baja" => "c-badge-gray",
-                _ => "c-badge-gray"
-            };
-
-            <div class="col-12 col-md-6 col-xl-4">
-                <div class="c-detail-card h-100">
-
-                    <div class="d-flex justify-content-between align-items-start gap-2 mb-3">
-                        <h5 class="fw-bold mb-0" style="color: var(--color-btn-bg);">
-                            @anuncio.Titulo
-                        </h5>
-
-                        <span class="c-badge @prioridadClass">
-                            @anuncio.Prioridad
-                        </span>
-                    </div>
-
-                    <div class="mb-3 text-muted small">
-                        <i class="bi bi-calendar-event me-1"></i>
-                        Publicado: @anuncio.FechaPublicacion.ToString("dd/MM/yyyy")
-                    </div>
-
-                    <p style="white-space: pre-line;">
-                        @anuncio.Contenido
-                    </p>
-
-                    <hr style="border-color: var(--color-accent);" />
-
-                    <div class="small text-muted">
-                        <div>
-                            <i class="bi bi-person-fill me-1"></i>
-                            Publicado por:
-                            @anuncio.Autor.Nombre @anuncio.Autor.ApellidoPaterno
-                        </div>
-
-                        <div>
-                            <i class="bi bi-clock-history me-1"></i>
-                            Vigente hasta:
-                            @(anuncio.FechaCaducidad.HasValue
-                                                ? anuncio.FechaCaducidad.Value.ToString("dd/MM/yyyy")
-                                                : "Sin fecha de caducidad")
-                </div>
-            </div>
-
-            @if (User.IsInRole("1"))
-                    {
-                        <div class="mt-3 d-flex gap-2 flex-wrap">
-                            <a asp-action="Editar"
-                               asp-route-id="@anuncio.Id"
-                               class="c-btn-sm c-btn-sm-primary">
+                <tr><td colspan="5" class="text-center text-muted py-4">No hay anuncios publicados.</td></tr>
+            }
+            else
+            {
+                foreach (var anuncio in Model)
+                {
+                    var estiloFila = anuncio.Prioridad == "Urgente"
+                        ? "border-left: 4px solid #dc3545; background-color: #fff5f5;"
+                        : "";
+                    <tr style="@estiloFila">
+                        <td class="fw-semibold">@anuncio.Titulo</td>
+                        <td>@anuncio.Autor.Nombre @anuncio.Autor.ApellidoPaterno</td>
+                        <td>@anuncio.FechaPublicacion.ToString("dd/MM/yyyy")</td>
+                        <td>
+                            @if (anuncio.Prioridad == "Urgente")
+                            {
+                                <span class="c-badge c-badge-red">Urgente</span>
+                            }
+                            else
+                            {
+                                <span class="c-badge c-badge-gray">@anuncio.Prioridad</span>
+                            }
+                        </td>
+                        <td>
+                            <a asp-action="Editar" asp-route-id="@anuncio.Id" class="c-btn-sm c-btn-sm-primary">
                                 <i class="bi bi-pencil me-1"></i>Editar
                             </a>
-
-                            <form asp-action="Eliminar"
-                                  asp-route-id="@anuncio.Id"
-                                  method="post"
-                                  onsubmit="return confirm('¿Seguro que desea eliminar este comunicado?');">
-                                @Html.AntiForgeryToken()
-
-                                <button type="submit" class="c-btn-sm c-btn-sm-primary">
-                                    <i class="bi bi-trash me-1"></i>Eliminar
-                                </button>
-                            </form>
-                        </div>
-                    }
-
-                </div>
-            </div>
-        }
-    </div>
-}
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
