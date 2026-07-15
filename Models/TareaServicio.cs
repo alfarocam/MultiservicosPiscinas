@@ -17,5 +17,7 @@ public partial class TareaServicio
 
     public DateOnly? FechaCompletacion { get; set; }
 
+    public DateTime? FechaHoraRegistro { get; set; }
+
     public virtual Servicio Servicio { get; set; } = null!;
 }

@@ -10,7 +10,9 @@ using QuestPDF.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// --- Servicios personalizados --- 
+// --- Servicios personalizados ---
+QuestPDF.Settings.License = LicenseType.Community;
+
 builder.Services.AddControllersWithViews(); // Mantenemos solo uno aquo
 
 // Registrar el HttpClient para el Seeder de Costa Rica
@@ -46,10 +48,12 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 // Inyeccion de dependencias (Servicios y Repositorios)
 builder.Services.AddTransient<Generales>();
 
-// Repositorios  HU-2.5 - HU-3.4 - HU-7.1
+// Repositorios  HU-2.5 - HU-3.4 - HU-7.1 - HU-6.5
 builder.Services.AddScoped<IHistorialServicioRepository, HistorialServicioRepository>();
 builder.Services.AddScoped<IReporteSatisfaccionRepository, ReporteSatisfaccionRepository>();
+builder.Services.AddScoped<IReporteGastosOperativosRepository, ReporteGastosOperativosRepository>();
 builder.Services.AddScoped<BitacoraService>();
+builder.Services.AddScoped<GastoOperativoExcelService>();
 
 // Cotización Manual
 builder.Services.AddScoped<ICotizacionRepository, CotizacionRepository>();
@@ -61,6 +65,14 @@ builder.Services.AddScoped<ICarritoRepository, CarritoRepository>();
 // Facturación
 builder.Services.AddScoped<IFacturaRepository, FacturaRepository>();
 builder.Services.AddScoped<FacturaPdfService>();
+
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
 
 var app = builder.Build();
 

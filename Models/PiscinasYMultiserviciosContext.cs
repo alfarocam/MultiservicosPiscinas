@@ -850,16 +850,25 @@ public partial class PiscinasYMultiserviciosContext : DbContext
             entity.ToTable("TAREA_SERVICIO", "ops");
 
             entity.Property(e => e.Id).HasColumnName("id");
+
             entity.Property(e => e.Descripcion)
                 .HasMaxLength(500)
                 .IsUnicode(false)
                 .HasColumnName("descripcion");
+
             entity.Property(e => e.Estado)
                 .HasMaxLength(50)
                 .IsUnicode(false)
                 .HasColumnName("estado");
+
             entity.Property(e => e.FechaAsignacion).HasColumnName("fecha_asignacion");
+
             entity.Property(e => e.FechaCompletacion).HasColumnName("fecha_completacion");
+
+            entity.Property(e => e.FechaHoraRegistro)
+                .HasColumnType("datetime")
+                .HasColumnName("fecha_hora_registro");
+
             entity.Property(e => e.ServicioId).HasColumnName("servicio_id");
 
             entity.HasOne(d => d.Servicio).WithMany(p => p.TareaServicio)
