@@ -21,8 +21,7 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
 // Configurar DbContext con SQL Server
-builder.Services.AddDbContext<PiscinasYMultiserviciosContext>(options =>
-    options.UseSqlServer(connectionString));
+builder.Services.AddDbContext<PiscinasYMultiserviciosContext>(options => { options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")); options.EnableDetailedErrors(); options.EnableSensitiveDataLogging(); });
 
 // Pagina de errores para migraciones en desarrollo
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
