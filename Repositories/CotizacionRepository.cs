@@ -14,23 +14,20 @@ public class CotizacionRepository : ICotizacionRepository
         _context = context;
     }
 
-    public async Task<List<CategoriaProductoDto>> ObtenerCategoriasAsync()
+    public async Task<List<ProductoBusquedaDto>> BuscarProductosAsync(string filtro)
     {
-        return await _context.CategoriaProducto
-            .OrderBy(c => c.NombreCategoria)
-            .Select(c => new CategoriaProductoDto
-            {
-                Id = c.Id,
-                NombreCategoria = c.NombreCategoria
-            })
-            .ToListAsync();
-    }
-
-    public async Task<List<ProductoBusquedaDto>> ObtenerProductosPorCategoriaAsync(int categoriaId)
-    {
-        return await _context.Producto
+        var query = _context.Producto
             .Include(p => p.Categoria)
-            .Where(p => p.Activo && p.CategoriaId == categoriaId)
+            .Where(p => p.Activo);
+
+        if (!string.IsNullOrWhiteSpace(filtro))
+        {
+            query = query.Where(p => p.Nombre.Contains(filtro) ||
+                                     (p.Descripcion != null && p.Descripcion.Contains(filtro)) ||
+                                     p.Categoria.NombreCategoria.Contains(filtro));
+        }
+
+        return await query
             .OrderBy(p => p.Nombre)
             .Select(p => new ProductoBusquedaDto
             {
@@ -41,55 +38,6 @@ public class CotizacionRepository : ICotizacionRepository
                 NombreCategoria = p.Categoria.NombreCategoria
             })
             .ToListAsync();
-    }
-
-    public async Task<ProductoBusquedaDto?> ObtenerProductoPorIdAsync(int productoId)
-    {
-        return await _context.Producto
-            .Include(p => p.Categoria)
-            .Where(p => p.Activo && p.Id == productoId)
-            .Select(p => new ProductoBusquedaDto
-            {
-                Id = p.Id,
-                Nombre = p.Nombre,
-                Descripcion = p.Descripcion,
-                Precio = p.Precio,
-                NombreCategoria = p.Categoria.NombreCategoria
-            })
-            .FirstOrDefaultAsync();
-    }
-
-    public async Task<List<ClienteBusquedaDto>> BuscarClientesAsync(string filtro)
-    {
-        if (string.IsNullOrWhiteSpace(filtro))
-            return new List<ClienteBusquedaDto>();
-
-        var clientes = await _context.Cliente
-            .Include(c => c.Usuario)
-            .Include(c => c.TelefonosCliente)
-            .Where(c => c.Usuario.Nombre.Contains(filtro) ||
-                        c.Usuario.ApellidoPaterno.Contains(filtro) ||
-                        c.Usuario.Correo.Contains(filtro) ||
-                        c.TelefonosCliente.Any(t => t.NumeroTelefono.Contains(filtro)))
-            .OrderBy(c => c.Usuario.Nombre)
-            .Take(15)
-            .ToListAsync();
-
-        return clientes.Select(cliente =>
-        {
-            var telefonoPrincipal = cliente.TelefonosCliente
-                .FirstOrDefault(t => t.EsPrincipal == 1)?
-                .NumeroTelefono ?? cliente.TelefonosCliente.FirstOrDefault()?.NumeroTelefono;
-
-            return new ClienteBusquedaDto
-            {
-                ClienteId = cliente.Id,
-                NombreCompleto = $"{cliente.Usuario.Nombre} {cliente.Usuario.ApellidoPaterno}".Trim(),
-                Correo = cliente.Usuario.Correo,
-                Telefono = telefonoPrincipal,
-                Encontrado = true
-            };
-        }).ToList();
     }
 
     public async Task<ClienteBusquedaDto?> BuscarClientePorCorreoOTelefonoAsync(string valor)
@@ -145,10 +93,10 @@ public class CotizacionRepository : ICotizacionRepository
 
         try
         {
-            // Ejecutar stored procedure seg.InsertarUsuarioYCliente
+            // Ejecutar stored procedure seg.InsertUserAndClient
             var usuarioIdResult = await _context.Database
                 .SqlQueryRaw<int>(
-                    "EXEC seg.InsertarUsuarioYCliente @p0, @p1, @p2, @p3, @p4, @p5, @p6",
+                    "EXEC seg.InsertUserAndClient @p0, @p1, @p2, @p3, @p4, @p5, @p6",
                     rolId,
                     nombre,
                     "", // ApellidoPaterno vacío
@@ -218,7 +166,7 @@ public class CotizacionRepository : ICotizacionRepository
                 DescuentoTotal = 0,
                 ImpuestoTotal = impuestoTotal,
                 Total = total,
-                Estado = "Enviada"
+                Estado = "Pendiente"
             };
 
             _context.Cotizacion.Add(cotizacion);

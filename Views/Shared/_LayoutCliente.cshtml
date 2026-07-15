@@ -45,12 +45,18 @@
                     </a>
                 </li>
                 <li>
+                    <a asp-controller="Agenda" asp-action="MisCitas"
+                       class="nav-link text-white ">
+                        Mis Citas
+                    </a>
+                </li>
+                <li>
                     <a asp-controller="Facturacion" asp-action="MisFacturas"
                        class="nav-link text-white ">
                         Mis Facturas
                     </a>
                 </li>
-                <!-- ✅ HU-2.5 Camila / HU registro de servicios -->
+                <!-- ✅ HU-2.5 Camila -->
                 <li>
                     <a asp-controller="Historial" asp-action="Index"
                        class="nav-link text-white ">
@@ -88,7 +94,6 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="~/js/notificaciones.js" asp-append-version="true"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
