@@ -1,0 +1,72 @@
+@model List<MultiserviciosPiscinas.DTOs.Factura.CompraListadoDto>
+
+@{
+    ViewData["Title"] = "Mis Compras";
+    Layout = "~/Views/Shared/_LayoutCliente.cshtml";
+}
+
+<div class="container-fluid p-4">
+    @if (TempData["Mensaje"] != null)
+    {
+        var tipoAlert = TempData["TipoMensaje"]?.ToString() ?? "success";
+
+        <div class="alert alert-@tipoAlert alert-dismissible fade show" role="alert">
+            @TempData["Mensaje"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["FacturaDescargarId"] != null)
+    {
+        <a id="linkDescargaAuto" href="@Url.Action("DescargarPdf", "Facturacion", new { id = TempData["FacturaDescargarId"] })" class="d-none"></a>
+    }
+
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h1 class="a-title">Mis Compras</h1>
+        </div>
+    </div>
+
+    @if (Model.Count == 0)
+    {
+        <div class="alert alert-info">
+            No tienes compras realizadas aún. <a href="@Url.Action("Index", "Tienda")">Ir a la Tienda</a>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>Número de Factura</th>
+                        <th>Fecha</th>
+                        <th>Total</th>
+                        <th>Estado</th>
+                        <th class="text-center">Acción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var compra in Model)
+                    {
+                        <tr>
+                            <td><strong>@compra.NumeroFactura</strong></td>
+                            <td>@compra.FechaEmision.ToString("dd/MM/yyyy")</td>
+                            <td>₡@compra.Total.ToString("N2")</td>
+                            <td>
+                                <span class="badge bg-success">@compra.Estado</span>
+                            </td>
+                            <td class="text-center">
+                                <a href="@Url.Action("Detalle", "Facturacion", new { id = compra.FacturaId })" class="btn btn-sm btn-primary">Ver Detalle</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script src="~/js/misCompras.js"></script>
+}

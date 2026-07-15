@@ -1,16 +1,20 @@
 namespace MultiserviciosPiscinas.DTOs.Factura;
 
-public class FacturaPdfDto
+public class CompraDetalleViewModel
 {
-    public string NumeroFactura { get; set; } = null!;
+    public int Id { get; set; }
 
-    public string NombreCliente { get; set; } = null!;
+    public string NumeroFactura { get; set; } = null!;
 
     public DateOnly FechaEmision { get; set; }
 
     public DateOnly FechaVencimiento { get; set; }
 
     public string CondicionPago { get; set; } = null!;
+
+    public string? ComprobanteSinpeRuta { get; set; }
+
+    public string Estado { get; set; } = null!;
 
     public List<DetalleFacturarDto> Lineas { get; set; } = new();
 
@@ -19,6 +23,4 @@ public class FacturaPdfDto
     public decimal ImpuestoTotal { get; set; }
 
     public decimal Total { get; set; }
-
-    public string? ComprobanteRutaFisica { get; set; }
 }

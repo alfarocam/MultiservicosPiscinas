@@ -1,0 +1,55 @@
+@{
+    ViewData["Title"] = "Tienda - Productos";
+    Layout = "~/Views/Shared/_LayoutCliente.cshtml";
+}
+
+<div class="container-fluid p-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h1 class="a-title">Catálogo de Productos</h1>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <label for="categoria" class="form-label">Categoría:</label>
+            <select id="categoria" class="form-select">
+                <option value="">-- Seleccionar categoría --</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <button type="button" class="btn btn-primary mt-4" id="btnCarrito" data-bs-toggle="offcanvas" data-bs-target="#canvasCarrito">
+                🛒 Carrito <span class="badge bg-danger" id="badgeCarrito">0</span>
+            </button>
+        </div>
+    </div>
+
+    <div class="row" id="productosContainer">
+        <!-- Los productos se cargan aquí vía AJAX -->
+    </div>
+</div>
+
+<!-- Canvas del carrito -->
+<div class="offcanvas offcanvas-end" tabindex="-1" id="canvasCarrito">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title">Ver Carrito Completo</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+    </div>
+    <div class="offcanvas-body d-flex flex-column">
+        <div id="listaCarritoOffcanvas" class="flex-grow-1">
+            <p class="text-muted text-center mb-0">Tu carrito está vacío.</p>
+        </div>
+        <div id="offcanvasResumen" class="d-none">
+            <hr />
+            <div class="d-flex justify-content-between mb-3">
+                <strong>Total:</strong>
+                <strong id="offcanvasTotal">₡0.00</strong>
+            </div>
+        </div>
+        <a href="@Url.Action("Carrito", "Tienda")" class="btn btn-primary w-100">Ver Carrito Completo</a>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/tienda.js"></script>
+}

@@ -16,9 +16,51 @@ public class CotizacionRepository : ICotizacionRepository
 
     public async Task<List<ProductoBusquedaDto>> BuscarProductosAsync(string filtro)
     {
-        var query = _context.Producto
+        return await _context.CategoriaProducto
+            .OrderBy(c => c.NombreCategoria)
+            .Select(c => new CategoriaProductoDto
+            {
+                Id = c.Id,
+                NombreCategoria = c.NombreCategoria
+            })
+            .ToListAsync();
+    }
+
+    public async Task<List<ProductoBusquedaDto>> ObtenerTodosLosProductosAsync()
+    {
+        return await _context.Producto
             .Include(p => p.Categoria)
-            .Where(p => p.Activo);
+            .Where(p => p.Activo)
+            .OrderBy(p => p.Nombre)
+            .Select(p => new ProductoBusquedaDto
+            {
+                Id = p.Id,
+                Nombre = p.Nombre,
+                Descripcion = p.Descripcion,
+                Precio = p.Precio,
+                Stock = p.Stock,
+                NombreCategoria = p.Categoria.NombreCategoria
+            })
+            .ToListAsync();
+    }
+
+    public async Task<List<ProductoBusquedaDto>> ObtenerProductosPorCategoriaAsync(int categoriaId)
+    {
+        return await _context.Producto
+            .Include(p => p.Categoria)
+            .Where(p => p.Activo && p.CategoriaId == categoriaId)
+            .OrderBy(p => p.Nombre)
+            .Select(p => new ProductoBusquedaDto
+            {
+                Id = p.Id,
+                Nombre = p.Nombre,
+                Descripcion = p.Descripcion,
+                Precio = p.Precio,
+                Stock = p.Stock,
+                NombreCategoria = p.Categoria.NombreCategoria
+            })
+            .ToListAsync();
+    }
 
         if (!string.IsNullOrWhiteSpace(filtro))
         {
@@ -35,6 +77,7 @@ public class CotizacionRepository : ICotizacionRepository
                 Nombre = p.Nombre,
                 Descripcion = p.Descripcion,
                 Precio = p.Precio,
+                Stock = p.Stock,
                 NombreCategoria = p.Categoria.NombreCategoria
             })
             .ToListAsync();

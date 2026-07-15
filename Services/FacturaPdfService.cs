@@ -115,9 +115,20 @@ public class FacturaPdfService
                         });
                     });
 
-                    col.Item().PaddingTop(30).AlignCenter().Text("Comprobante de pago SINPE adjunto")
-                        .FontSize(10)
-                        .Italic();
+                    if (!string.IsNullOrEmpty(datos.ComprobanteRutaFisica) && File.Exists(datos.ComprobanteRutaFisica))
+                    {
+                        col.Item().PaddingTop(30).Column(c =>
+                        {
+                            c.Item().AlignCenter().Text("Comprobante de Pago SINPE").Bold();
+                            c.Item().PaddingTop(5).AlignCenter().MaxHeight(220).Image(datos.ComprobanteRutaFisica).FitArea();
+                        });
+                    }
+                    else
+                    {
+                        col.Item().PaddingTop(30).AlignCenter().Text("Comprobante de pago SINPE adjunto")
+                            .FontSize(10)
+                            .Italic();
+                    }
                 });
 
                 page.Footer().AlignCenter().Text($"Generado: {DateTime.Now:dd/MM/yyyy HH:mm}")
