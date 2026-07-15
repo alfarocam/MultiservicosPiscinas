@@ -1,14 +1,11 @@
 $(document).ready(function () {
     cargarCategorias();
-    actualizarBadgeCarrito();
+    cargarProductos();
+    actualizarCarrito();
 
     $('#categoria').on('change', function () {
         const categoriaId = $(this).val();
-        if (categoriaId) {
-            cargarProductos(categoriaId);
-        } else {
-            $('#productosContainer').empty();
-        }
+        cargarProductos(categoriaId);
     });
 });
 
@@ -26,10 +23,12 @@ function cargarCategorias() {
 }
 
 function cargarProductos(categoriaId) {
+    const url = categoriaId ? '/Tienda/ObtenerProductosPorCategoria' : '/Tienda/ObtenerProductos';
+
     $.ajax({
-        url: '/Tienda/ObtenerProductosPorCategoria',
+        url: url,
         type: 'GET',
-        data: { categoriaId: categoriaId },
+        data: categoriaId ? { categoriaId: categoriaId } : {},
         success: function (data) {
             let html = '';
             data.forEach(function (prod) {
@@ -73,7 +72,7 @@ function agregarAlCarrito(productoId) {
         success: function (result) {
             if (result.success) {
                 mostrarNotificacion(result.mensaje, 'success');
-                actualizarBadgeCarrito();
+                actualizarCarrito();
                 $(`#qty-${productoId}`).val(1);
             } else {
                 mostrarNotificacion(result.mensaje, 'warning');
@@ -101,12 +100,42 @@ function eliminarDelCarrito(productoId) {
     });
 }
 
-function actualizarBadgeCarrito() {
+function actualizarCarrito() {
     $.ajax({
         url: '/Tienda/ObtenerCarrito',
         type: 'GET',
         success: function (result) {
             $('#badgeCarrito').text(result.cantidad);
+
+            const contenedor = $('#listaCarritoOffcanvas');
+            if (contenedor.length === 0) return;
+
+            if (result.items.length === 0) {
+                contenedor.html('<p class="text-muted text-center mb-0">Tu carrito está vacío.</p>');
+                $('#offcanvasResumen').addClass('d-none');
+                return;
+            }
+
+            let html = '';
+            result.items.forEach(function (item) {
+                html += `
+                    <div class="d-flex justify-content-between align-items-center border-bottom py-2">
+                        <div>
+                            <strong>${item.nombre}</strong><br/>
+                            <small class="a-text-muted">${item.cantidad} x ₡${item.precioUnitario.toFixed(2)}</small>
+                        </div>
+                        <div class="text-end d-flex align-items-center gap-2">
+                            <strong>₡${item.lineaTotal.toFixed(2)}</strong>
+                            <button type="button" class="btn btn-sm btn-danger" onclick="eliminarDelCarrito(${item.productoId})">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            contenedor.html(html);
+            $('#offcanvasTotal').text('₡' + result.total.toFixed(2));
+            $('#offcanvasResumen').removeClass('d-none');
         }
     });
 }

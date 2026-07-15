@@ -35,9 +35,18 @@
         <h5 class="offcanvas-title">Ver Carrito Completo</h5>
         <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
     </div>
-    <div class="offcanvas-body">
-        <p class="text-muted">Para ver y confirmar tu carrito, ve a la página de carrito.</p>
-        <a href="@Url.Action("Carrito", "Tienda")" class="btn btn-primary w-100">Ver Carrito</a>
+    <div class="offcanvas-body d-flex flex-column">
+        <div id="listaCarritoOffcanvas" class="flex-grow-1">
+            <p class="text-muted text-center mb-0">Tu carrito está vacío.</p>
+        </div>
+        <div id="offcanvasResumen" class="d-none">
+            <hr />
+            <div class="d-flex justify-content-between mb-3">
+                <strong>Total:</strong>
+                <strong id="offcanvasTotal">₡0.00</strong>
+            </div>
+        </div>
+        <a href="@Url.Action("Carrito", "Tienda")" class="btn btn-primary w-100">Ver Carrito Completo</a>
     </div>
 </div>
 

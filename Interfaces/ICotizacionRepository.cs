@@ -7,6 +7,8 @@ public interface ICotizacionRepository
 {
     Task<List<CategoriaProductoDto>> ObtenerCategoriasAsync();
 
+    Task<List<ProductoBusquedaDto>> ObtenerTodosLosProductosAsync();
+
     Task<List<ProductoBusquedaDto>> ObtenerProductosPorCategoriaAsync(int categoriaId);
 
     Task<ProductoBusquedaDto?> ObtenerProductoPorIdAsync(int productoId);

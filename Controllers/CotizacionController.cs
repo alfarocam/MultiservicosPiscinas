@@ -326,7 +326,8 @@ namespace MultiserviciosPiscinas.Controllers
                     Lineas = modeloActual.Lineas,
                     Subtotal = factura.Subtotal,
                     ImpuestoTotal = factura.ImpuestoTotal,
-                    Total = factura.Total
+                    Total = factura.Total,
+                    ComprobanteRutaFisica = rutaCompleta
                 };
 
                 var bytes = _facturaPdfService.GenerarPdf(pdfDto);

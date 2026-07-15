@@ -13,6 +13,7 @@ $(document).ready(function () {
     }, 'El archivo no debe superar 5MB.');
 
     $('#formComprar').validate({
+        errorClass: 'text-danger',
         rules: {
             Comprobante: {
                 required: true,

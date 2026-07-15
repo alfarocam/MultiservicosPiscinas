@@ -26,6 +26,24 @@ public class CotizacionRepository : ICotizacionRepository
             .ToListAsync();
     }
 
+    public async Task<List<ProductoBusquedaDto>> ObtenerTodosLosProductosAsync()
+    {
+        return await _context.Producto
+            .Include(p => p.Categoria)
+            .Where(p => p.Activo)
+            .OrderBy(p => p.Nombre)
+            .Select(p => new ProductoBusquedaDto
+            {
+                Id = p.Id,
+                Nombre = p.Nombre,
+                Descripcion = p.Descripcion,
+                Precio = p.Precio,
+                Stock = p.Stock,
+                NombreCategoria = p.Categoria.NombreCategoria
+            })
+            .ToListAsync();
+    }
+
     public async Task<List<ProductoBusquedaDto>> ObtenerProductosPorCategoriaAsync(int categoriaId)
     {
         return await _context.Producto
@@ -38,6 +56,7 @@ public class CotizacionRepository : ICotizacionRepository
                 Nombre = p.Nombre,
                 Descripcion = p.Descripcion,
                 Precio = p.Precio,
+                Stock = p.Stock,
                 NombreCategoria = p.Categoria.NombreCategoria
             })
             .ToListAsync();
@@ -54,6 +73,7 @@ public class CotizacionRepository : ICotizacionRepository
                 Nombre = p.Nombre,
                 Descripcion = p.Descripcion,
                 Precio = p.Precio,
+                Stock = p.Stock,
                 NombreCategoria = p.Categoria.NombreCategoria
             })
             .FirstOrDefaultAsync();

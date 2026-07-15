@@ -5,7 +5,6 @@ using MultiserviciosPiscinas.DTOs.Cotizacion;
 using MultiserviciosPiscinas.DTOs.Factura;
 using MultiserviciosPiscinas.Interfaces;
 using MultiserviciosPiscinas.Models;
-using MultiserviciosPiscinas.Services;
 using System.Globalization;
 using System.Security.Claims;
 
@@ -17,7 +16,6 @@ public class TiendaController : Controller
     private readonly ICotizacionRepository _cotizacionRepositorio;
     private readonly ICarritoRepository _carritoRepositorio;
     private readonly IFacturaRepository _facturaRepositorio;
-    private readonly FacturaPdfService _facturaPdfService;
     private readonly IConfiguration _configuracion;
     private readonly PiscinasYMultiserviciosContext _context;
     private readonly ILogger<TiendaController> _logger;
@@ -26,7 +24,6 @@ public class TiendaController : Controller
         ICotizacionRepository cotizacionRepositorio,
         ICarritoRepository carritoRepositorio,
         IFacturaRepository facturaRepositorio,
-        FacturaPdfService facturaPdfService,
         IConfiguration configuracion,
         PiscinasYMultiserviciosContext context,
         ILogger<TiendaController> logger)
@@ -34,7 +31,6 @@ public class TiendaController : Controller
         _cotizacionRepositorio = cotizacionRepositorio;
         _carritoRepositorio = carritoRepositorio;
         _facturaRepositorio = facturaRepositorio;
-        _facturaPdfService = facturaPdfService;
         _configuracion = configuracion;
         _context = context;
         _logger = logger;
@@ -50,6 +46,13 @@ public class TiendaController : Controller
     {
         var categorias = await _cotizacionRepositorio.ObtenerCategoriasAsync();
         return Json(categorias);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> ObtenerProductos()
+    {
+        var productos = await _cotizacionRepositorio.ObtenerTodosLosProductosAsync();
+        return Json(productos);
     }
 
     [HttpGet]
@@ -258,35 +261,14 @@ public class TiendaController : Controller
             var diasVencimiento = int.Parse(_configuracion["Facturacion:DiasVencimientoFactura"] ?? "30", CultureInfo.InvariantCulture);
             var factura = await _facturaRepositorio.CrearFacturaDesdeCarritoAsync(clienteId.Value, carrito, usuario.Id, comprobanteRuta, diasVencimiento);
 
-            // Generar el PDF
-            var pdfDto = new FacturaPdfDto
-            {
-                NumeroFactura = factura.NumeroConsecutivo,
-                NombreCliente = usuario.Nombre + " " + usuario.ApellidoPaterno,
-                FechaEmision = factura.FechaEmision,
-                FechaVencimiento = factura.FechaVencimiento,
-                CondicionPago = factura.CondicionPago,
-                Lineas = carrito.Select(i => new DetalleFacturarDto
-                {
-                    ProductoId = i.ProductoId,
-                    Nombre = i.Nombre,
-                    Descripcion = i.Descripcion,
-                    PrecioUnitario = i.PrecioUnitario,
-                    Cantidad = i.Cantidad,
-                    LineaImpuesto = i.LineaImpuesto
-                }).ToList(),
-                Subtotal = factura.Subtotal,
-                ImpuestoTotal = factura.ImpuestoTotal,
-                Total = factura.Total
-            };
-
-            var bytes = _facturaPdfService.GenerarPdf(pdfDto);
-
             // Eliminar el carrito para que la próxima compra inicie uno nuevo
             await _carritoRepositorio.EliminarCarritoAsync(clienteId.Value);
 
-            // Descargar el PDF
-            return File(bytes, "application/pdf", $"Factura-{factura.NumeroConsecutivo}.pdf");
+            TempData["Mensaje"] = $"Compra realizada exitosamente. Factura {factura.NumeroConsecutivo}.";
+            TempData["TipoMensaje"] = "success";
+            TempData["FacturaDescargarId"] = factura.Id;
+
+            return RedirectToAction("MisCompras", "Facturacion");
         }
         catch (InvalidOperationException ex)
         {

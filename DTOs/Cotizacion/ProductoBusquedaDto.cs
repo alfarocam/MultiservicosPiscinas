@@ -10,5 +10,7 @@ public class ProductoBusquedaDto
 
     public decimal Precio { get; set; }
 
+    public int Stock { get; set; }
+
     public string NombreCategoria { get; set; } = null!;
 }

@@ -6,6 +6,21 @@
 }
 
 <div class="container-fluid p-4">
+    @if (TempData["Mensaje"] != null)
+    {
+        var tipoAlert = TempData["TipoMensaje"]?.ToString() ?? "success";
+
+        <div class="alert alert-@tipoAlert alert-dismissible fade show" role="alert">
+            @TempData["Mensaje"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["FacturaDescargarId"] != null)
+    {
+        <a id="linkDescargaAuto" href="@Url.Action("DescargarPdf", "Facturacion", new { id = TempData["FacturaDescargarId"] })" class="d-none"></a>
+    }
+
     <div class="row mb-4">
         <div class="col-md-12">
             <h1 class="a-title">Mis Compras</h1>
@@ -51,3 +66,7 @@
         </div>
     }
 </div>
+
+@section Scripts {
+    <script src="~/js/misCompras.js"></script>
+}

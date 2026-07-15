@@ -19,4 +19,6 @@ public class FacturaPdfDto
     public decimal ImpuestoTotal { get; set; }
 
     public decimal Total { get; set; }
+
+    public string? ComprobanteRutaFisica { get; set; }
 }
