@@ -1,0 +1,46 @@
+@{
+    ViewData["Title"] = "Tienda - Productos";
+    Layout = "~/Views/Shared/_LayoutCliente.cshtml";
+}
+
+<div class="container-fluid p-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h1 class="a-title">Catálogo de Productos</h1>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <label for="categoria" class="form-label">Categoría:</label>
+            <select id="categoria" class="form-select">
+                <option value="">-- Seleccionar categoría --</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <button type="button" class="btn btn-primary mt-4" id="btnCarrito" data-bs-toggle="offcanvas" data-bs-target="#canvasCarrito">
+                🛒 Carrito <span class="badge bg-danger" id="badgeCarrito">0</span>
+            </button>
+        </div>
+    </div>
+
+    <div class="row" id="productosContainer">
+        <!-- Los productos se cargan aquí vía AJAX -->
+    </div>
+</div>
+
+<!-- Canvas del carrito -->
+<div class="offcanvas offcanvas-end" tabindex="-1" id="canvasCarrito">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title">Ver Carrito Completo</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+    </div>
+    <div class="offcanvas-body">
+        <p class="text-muted">Para ver y confirmar tu carrito, ve a la página de carrito.</p>
+        <a href="@Url.Action("Carrito", "Tienda")" class="btn btn-primary w-100">Ver Carrito</a>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/tienda.js"></script>
+}

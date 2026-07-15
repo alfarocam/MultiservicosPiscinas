@@ -59,6 +59,9 @@ builder.Services.AddScoped<GastoOperativoExcelService>();
 builder.Services.AddScoped<ICotizacionRepository, CotizacionRepository>();
 builder.Services.AddScoped<CotizacionPdfService>();
 
+// Carrito de cliente
+builder.Services.AddScoped<ICarritoRepository, CarritoRepository>();
+
 // Facturación
 builder.Services.AddScoped<IFacturaRepository, FacturaRepository>();
 builder.Services.AddScoped<FacturaPdfService>();

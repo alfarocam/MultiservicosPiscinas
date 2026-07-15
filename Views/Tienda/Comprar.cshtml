@@ -1,0 +1,89 @@
+@model MultiserviciosPiscinas.DTOs.Factura.ComprarCarritoViewModel
+
+@{
+    ViewData["Title"] = "Confirmar Compra";
+    Layout = "~/Views/Shared/_LayoutCliente.cshtml";
+}
+
+<div class="container-fluid p-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h1 class="a-title">Confirmar Compra</h1>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="o-form-card">
+                <h5>Resumen de la Compra</h5>
+                <p><strong>Cliente:</strong> @Model.NombreCliente</p>
+                <p><strong>Fecha:</strong> @Model.FechaEmision.ToString("dd/MM/yyyy")</p>
+
+                <table class="table table-sm">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Producto</th>
+                            <th class="text-end">Precio</th>
+                            <th class="text-end">Cantidad</th>
+                            <th class="text-end">Subtotal</th>
+                            <th class="text-end">IVA</th>
+                            <th class="text-end">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var linea in Model.Lineas)
+                        {
+                            <tr>
+                                <td>@linea.Nombre</td>
+                                <td class="text-end">₡@linea.PrecioUnitario.ToString("N2")</td>
+                                <td class="text-end">@linea.Cantidad</td>
+                                <td class="text-end">₡@linea.LineaSubtotal.ToString("N2")</td>
+                                <td class="text-end">₡@linea.LineaImpuesto.ToString("N2")</td>
+                                <td class="text-end"><strong>₡@linea.LineaTotal.ToString("N2")</strong></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+                <hr />
+
+                <div class="text-end">
+                    <p><strong>Subtotal:</strong> ₡@Model.Subtotal.ToString("N2")</p>
+                    <p><strong>IVA (13%):</strong> ₡@Model.ImpuestoTotal.ToString("N2")</p>
+                    <h5><strong>Total a Pagar:</strong> ₡@Model.Total.ToString("N2")</h5>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="o-form-card">
+                <h5>Subir Comprobante de Pago SINPE</h5>
+
+                @if (ViewData.ModelState.Values.Any(v => v.Errors.Count > 0))
+                {
+                    <div class="alert alert-danger">
+                        <div asp-validation-summary="ModelOnly"></div>
+                    </div>
+                }
+
+                <form id="formComprar" method="post" asp-action="Comprar" enctype="multipart/form-data">
+                    @Html.AntiForgeryToken()
+
+                    <div class="mb-3">
+                        <label for="Comprobante" class="form-label">Comprobante de Pago:</label>
+                        <input type="file" id="Comprobante" name="Comprobante" class="form-control" accept="image/jpeg,image/png" />
+                        <span asp-validation-for="Comprobante" class="text-danger small d-block mt-1"></span>
+                        <small class="d-block mt-1">Formatos: JPG, JPEG, PNG (máx. 5MB)</small>
+                    </div>
+
+                    <button type="submit" class="btn btn-success w-100">Realizar Compra</button>
+                    <a href="@Url.Action("Carrito", "Tienda")" class="btn btn-outline-secondary w-100 mt-2">Cancelar</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/comprar.js"></script>
+}
