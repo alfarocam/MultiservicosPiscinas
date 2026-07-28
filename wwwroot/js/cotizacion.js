@@ -4,6 +4,7 @@ $(document).ready(function () {
     let timerCliente = null;
 
     cargarCategorias();
+    cargarTodosLosProductos();
 
     // Cambio de categoría -> cargar productos en cards
     $('#categoriaProducto').on('change', function () {
@@ -11,8 +12,17 @@ $(document).ready(function () {
         if (categoriaId) {
             cargarProductosPorCategoria(categoriaId);
         } else {
-            $('#productosGrid').html('<p class="text-muted">Selecciona una categoría para ver los productos disponibles.</p>');
+            cargarTodosLosProductos();
         }
+    });
+
+    // Máscara para el teléfono
+    $('#telefonoCliente').on('input', function () {
+        let val = $(this).val().replace(/\D/g, '');
+        if (val.length > 4) {
+            val = val.substring(0, 4) + '-' + val.substring(4, 8);
+        }
+        $(this).val(val);
     });
 
     // Búsqueda de cliente (combobox con texto libre) con debounce
@@ -56,9 +66,11 @@ $(document).ready(function () {
     $(document).on('click', '.item-cliente', function (e) {
         e.preventDefault();
         $('#nombreCliente').val($(this).data('nombre'));
+        $('#apellidoPaterno').val($(this).data('apellidopaterno'));
+        $('#apellidoMaterno').val($(this).data('apellidomaterno'));
         $('#correoCliente').val($(this).data('correo'));
         $('#telefonoCliente').val($(this).data('telefono') || '');
-        $('#busquedaCliente').val($(this).data('nombre'));
+        $('#busquedaCliente').val($(this).data('nombrecompleto'));
         $('#resultadosClientes').hide().empty();
     });
 
@@ -70,10 +82,12 @@ $(document).ready(function () {
     // Validar antes de generar cotización
     $('#formCliente').on('submit', function (e) {
         const nombreCliente = $('#nombreCliente').val().trim();
+        const apellidoPaterno = $('#apellidoPaterno').val().trim();
+        const apellidoMaterno = $('#apellidoMaterno').val().trim();
         const correoCliente = $('#correoCliente').val().trim();
         const telefonoCliente = $('#telefonoCliente').val().trim();
 
-        if (!nombreCliente || !correoCliente || !telefonoCliente) {
+        if (!nombreCliente || !apellidoPaterno || !apellidoMaterno || !correoCliente || !telefonoCliente) {
             e.preventDefault();
             alert('Por favor, completa todos los datos del cliente.');
             return false;
@@ -108,6 +122,46 @@ $(document).ready(function () {
             success: function (data) {
                 if (data.length === 0) {
                     $('#productosGrid').html('<p class="text-muted">No hay productos disponibles en esta categoría.</p>');
+                    return;
+                }
+
+                let html = '';
+                $.each(data, function (i, producto) {
+                    html += `
+                        <div class="col-md-6">
+                            <div class="card h-100 producto-card">
+                                <div class="card-body d-flex flex-column">
+                                    <h6 class="card-title">${producto.nombre}</h6>
+                                    <p class="card-text text-muted small flex-grow-1">${producto.descripcion || 'Sin descripción'}</p>
+                                    <p class="text-success fw-bold mb-2">₡${parseFloat(producto.precio).toFixed(2)}</p>
+                                    <div class="d-flex gap-2 align-items-center">
+                                        <input type="number" class="form-control form-control-sm cantidad-producto" value="1" min="1" style="width: 80px;" />
+                                        <button type="button" class="btn btn-sm btn-primary flex-grow-1 btn-agregar-carrito" data-producto-id="${producto.id}">
+                                            <i class="bi bi-plus-circle"></i> Agregar
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                $('#productosGrid').html(html);
+            },
+            error: function () {
+                $('#productosGrid').html('<p class="text-danger">Error al cargar productos.</p>');
+            }
+        });
+    }
+
+    function cargarTodosLosProductos() {
+        $('#productosGrid').html('<p class="text-muted">Cargando productos...</p>');
+
+        $.ajax({
+            url: '/Cotizacion/ObtenerTodosLosProductos',
+            type: 'GET',
+            success: function (data) {
+                if (data.length === 0) {
+                    $('#productosGrid').html('<p class="text-muted">No hay productos disponibles.</p>');
                     return;
                 }
 
@@ -262,7 +316,10 @@ $(document).ready(function () {
                 $.each(data, function (i, cliente) {
                     html += `
                         <a href="#" class="list-group-item list-group-item-action item-cliente"
-                           data-nombre="${cliente.nombreCompleto}"
+                           data-nombrecompleto="${cliente.nombreCompleto}"
+                           data-nombre="${cliente.nombre}"
+                           data-apellidopaterno="${cliente.apellidoPaterno}"
+                           data-apellidomaterno="${cliente.apellidoMaterno}"
                            data-correo="${cliente.correo}"
                            data-telefono="${cliente.telefono || ''}">
                             <strong>${cliente.nombreCompleto}</strong>

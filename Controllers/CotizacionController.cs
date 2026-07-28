@@ -59,6 +59,13 @@ namespace MultiserviciosPiscinas.Controllers
         }
 
         [HttpGet]
+        public async Task<IActionResult> ObtenerTodosLosProductos()
+        {
+            var productos = await _cotizacionRepositorio.ObtenerTodosLosProductosAsync();
+            return Json(productos);
+        }
+
+        [HttpGet]
         public async Task<IActionResult> ObtenerProductosPorCategoria(int categoriaId)
         {
             var productos = await _cotizacionRepositorio.ObtenerProductosPorCategoriaAsync(categoriaId);
@@ -182,6 +189,8 @@ namespace MultiserviciosPiscinas.Controllers
 
                 // Validar datos del cliente
                 if (string.IsNullOrWhiteSpace(model.NombreCliente) ||
+                    string.IsNullOrWhiteSpace(model.ApellidoPaterno) ||
+                    string.IsNullOrWhiteSpace(model.ApellidoMaterno) ||
                     string.IsNullOrWhiteSpace(model.CorreoCliente) ||
                     string.IsNullOrWhiteSpace(model.TelefonoCliente))
                 {
@@ -189,6 +198,9 @@ namespace MultiserviciosPiscinas.Controllers
                     TempData["TipoMensaje"] = "danger";
                     return RedirectToAction("Crear");
                 }
+
+                // Limpiar guion del teléfono si lo trae
+                model.TelefonoCliente = model.TelefonoCliente.Replace("-", "");
 
                 // Buscar o crear cliente
                 int clienteId;
@@ -202,6 +214,8 @@ namespace MultiserviciosPiscinas.Controllers
                 {
                     clienteId = await _cotizacionRepositorio.RegistrarClienteRapidoAsync(
                         model.NombreCliente,
+                        model.ApellidoPaterno,
+                        model.ApellidoMaterno,
                         model.CorreoCliente,
                         model.TelefonoCliente
                     );

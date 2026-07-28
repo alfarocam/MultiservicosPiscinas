@@ -99,7 +99,7 @@ app.UseSession();
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Ruta por defecto MVC (Apunta a tu Login)
+// Ruta por defecto MVC (Apunta a Login)
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Auth}/{action=InicioSesion}/{id?}");

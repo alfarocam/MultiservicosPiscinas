@@ -61,7 +61,7 @@ namespace MultiserviciosPiscinas.Controllers
                 }
                 else if (usuario.RolId == 3) // Cliente
                 {
-                    return RedirectToAction("Index", "Portal");
+                    return RedirectToAction("Index", "Tienda");
                 }
 
                 return RedirectToAction("InicioSesion");
