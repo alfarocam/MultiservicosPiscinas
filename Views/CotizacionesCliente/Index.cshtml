@@ -1,0 +1,91 @@
+@model IEnumerable<MultiserviciosPiscinas.DTOs.Cotizacion.CotizacionClienteListadoDto>
+
+@{
+    ViewData["Title"] = "Mis Cotizaciones";
+    Layout = "_LayoutCliente";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Mis Cotizaciones</h2>
+    </div>
+
+    @if (TempData["MensajeExito"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["MensajeExito"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["MensajeError"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["MensajeError"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            @if (!Model.Any())
+            {
+                <div class="text-center py-5">
+                    <i class="bi bi-file-earmark-text text-muted" style="font-size: 3rem;"></i>
+                    <p class="mt-3 text-muted">No tienes cotizaciones registradas.</p>
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Número</th>
+                                <th>Fecha Emisión</th>
+                                <th>Fecha Vigencia</th>
+                                <th>Total</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var cotizacion in Model)
+                            {
+                                <tr>
+                                    <td class="fw-bold">@cotizacion.NumeroCotizacion</td>
+                                    <td>@cotizacion.FechaEmision.ToString("dd/MM/yyyy")</td>
+                                    <td>@cotizacion.FechaVigencia.ToString("dd/MM/yyyy")</td>
+                                    <td>₡@cotizacion.Total.ToString("N2")</td>
+                                    <td>
+                                        @if (cotizacion.Estado == "Enviada")
+                                        {
+                                            <span class="badge bg-warning text-dark">Pendiente</span>
+                                        }
+                                        else if (cotizacion.Estado == "Aceptada")
+                                        {
+                                            <span class="badge bg-primary">Aceptada</span>
+                                        }
+                                        else if (cotizacion.Estado == "Rechazada")
+                                        {
+                                            <span class="badge bg-danger">Rechazada</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">@cotizacion.Estado</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <a asp-action="Detalle" asp-route-id="@cotizacion.Id" class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-eye"></i> Ver Detalle
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>
