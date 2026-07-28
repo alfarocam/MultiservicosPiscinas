@@ -37,23 +37,30 @@ function cargarProductos(categoriaId) {
                 const btnDisabled = (!esServicio && prod.stock === 0) ? 'disabled' : '';
                 const btnText = (!esServicio && prod.stock === 0) ? 'Sin Stock' : 'Agregar al Carrito';
                 const stockHtml = esServicio ? '' : `<p class="card-text"><small class="text-muted">Stock: ${prod.stock}</small></p>`;
-                const qtyHtml = esServicio 
-                    ? `<input type="hidden" id="qty-${prod.id}" value="1">`
-                    : `<input type="number" class="form-control" id="qty-${prod.id}" min="1" value="1" style="max-width: 80px;">`;
+                const actionHtml = esServicio
+                    ? `<div class="mb-3">
+                           <input type="hidden" id="qty-${prod.id}" value="1">
+                           <button class="btn btn-primary w-100" type="button" onclick="agregarAlCarrito(${prod.id})" ${btnDisabled}>
+                               ${btnText}
+                           </button>
+                       </div>`
+                    : `<div class="input-group mb-3">
+                           <input type="number" class="form-control" id="qty-${prod.id}" min="1" value="1" style="max-width: 80px;">
+                           <button class="btn btn-primary" type="button" onclick="agregarAlCarrito(${prod.id})" ${btnDisabled}>
+                               ${btnText}
+                           </button>
+                       </div>`;
 
                 html += `
                     <div class="col-md-6 col-lg-4 mb-4">
                         <div class="card h-100">
-                            <div class="card-body">
+                            <div class="card-body d-flex flex-column">
                                 <h5 class="card-title">${prod.nombre}</h5>
                                 <p class="card-text text-muted">${prod.descripcion || 'Sin descripción'}</p>
-                                <p class="card-text"><strong>Precio:</strong> ₡${prod.precio.toFixed(2)}</p>
+                                <p class="card-text mb-2"><strong>Precio:</strong> ₡${prod.precio.toFixed(2)}</p>
                                 ${stockHtml}
-                                <div class="input-group mb-3">
-                                    ${qtyHtml}
-                                    <button class="btn btn-primary" type="button" onclick="agregarAlCarrito(${prod.id})" ${btnDisabled}>
-                                        ${btnText}
-                                    </button>
+                                <div class="mt-auto">
+                                    ${actionHtml}
                                 </div>
                             </div>
                         </div>
@@ -78,9 +85,19 @@ function cargarRecomendaciones() {
                     const btnDisabled = (!esServicio && prod.stock === 0) ? 'disabled' : '';
                     const btnText = (!esServicio && prod.stock === 0) ? 'Sin Stock' : 'Agregar al Carrito';
                     const stockHtml = esServicio ? '' : `<p class="card-text"><small class="text-muted">Stock: ${prod.stock}</small></p>`;
-                    const qtyHtml = esServicio 
-                        ? `<input type="hidden" id="qty-${prod.id}" value="1">`
-                        : `<input type="number" class="form-control" id="qty-${prod.id}" min="1" value="1" style="max-width: 80px;">`;
+                    const actionHtml = esServicio
+                        ? `<div class="mb-3">
+                               <input type="hidden" id="qty-${prod.id}" value="1">
+                               <button class="btn btn-primary w-100" type="button" onclick="agregarAlCarrito(${prod.id})" ${btnDisabled}>
+                                   ${btnText}
+                               </button>
+                           </div>`
+                        : `<div class="input-group mb-3">
+                               <input type="number" class="form-control" id="qty-${prod.id}" min="1" value="1" style="max-width: 80px;">
+                               <button class="btn btn-primary" type="button" onclick="agregarAlCarrito(${prod.id})" ${btnDisabled}>
+                                   ${btnText}
+                               </button>
+                           </div>`;
 
                     html += `
                         <div class="col-md-6 col-lg-4 mb-4">
@@ -88,16 +105,13 @@ function cargarRecomendaciones() {
                                 <div class="card-header bg-warning text-dark fw-bold text-center py-1">
                                     <small><i class="bi bi-stars"></i> Recomendación</small>
                                 </div>
-                                <div class="card-body">
+                                <div class="card-body d-flex flex-column">
                                     <h5 class="card-title">${prod.nombre}</h5>
                                     <p class="card-text text-muted">${prod.descripcion || 'Sin descripción'}</p>
-                                    <p class="card-text"><strong>Precio:</strong> ₡${prod.precio.toFixed(2)}</p>
+                                    <p class="card-text mb-2"><strong>Precio:</strong> ₡${prod.precio.toFixed(2)}</p>
                                     ${stockHtml}
-                                    <div class="input-group mb-3">
-                                        ${qtyHtml}
-                                        <button class="btn btn-primary" type="button" onclick="agregarAlCarrito(${prod.id})" ${btnDisabled}>
-                                            ${btnText}
-                                        </button>
+                                    <div class="mt-auto">
+                                        ${actionHtml}
                                     </div>
                                 </div>
                             </div>
