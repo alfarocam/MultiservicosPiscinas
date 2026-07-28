@@ -16,6 +16,7 @@ public class TiendaController : Controller
     private readonly ICotizacionRepository _cotizacionRepositorio;
     private readonly ICarritoRepository _carritoRepositorio;
     private readonly IFacturaRepository _facturaRepositorio;
+    private readonly IRecomendacionService _recomendacionService;
     private readonly IConfiguration _configuracion;
     private readonly PiscinasYMultiserviciosContext _context;
     private readonly ILogger<TiendaController> _logger;
@@ -24,6 +25,7 @@ public class TiendaController : Controller
         ICotizacionRepository cotizacionRepositorio,
         ICarritoRepository carritoRepositorio,
         IFacturaRepository facturaRepositorio,
+        IRecomendacionService recomendacionService,
         IConfiguration configuracion,
         PiscinasYMultiserviciosContext context,
         ILogger<TiendaController> logger)
@@ -31,6 +33,7 @@ public class TiendaController : Controller
         _cotizacionRepositorio = cotizacionRepositorio;
         _carritoRepositorio = carritoRepositorio;
         _facturaRepositorio = facturaRepositorio;
+        _recomendacionService = recomendacionService;
         _configuracion = configuracion;
         _context = context;
         _logger = logger;
@@ -60,6 +63,14 @@ public class TiendaController : Controller
     {
         var productos = await _cotizacionRepositorio.ObtenerProductosPorCategoriaAsync(categoriaId);
         return Json(productos);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> ObtenerRecomendaciones(int limite = 3)
+    {
+        var clienteId = await ObtenerClienteIdAutenticadoAsync();
+        var recomendaciones = await _recomendacionService.ObtenerRecomendacionesAsync(clienteId, limite);
+        return Json(recomendaciones);
     }
 
     [HttpPost]

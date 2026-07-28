@@ -1,5 +1,6 @@
 $(document).ready(function () {
     cargarCategorias();
+    cargarRecomendaciones();
     cargarProductos();
     actualizarCarrito();
 
@@ -54,6 +55,47 @@ function cargarProductos(categoriaId) {
                 `;
             });
             $('#productosContainer').html(html);
+        }
+    });
+}
+
+function cargarRecomendaciones() {
+    $.ajax({
+        url: '/Tienda/ObtenerRecomendaciones',
+        type: 'GET',
+        data: { limite: 3 },
+        success: function (data) {
+            if (data && data.length > 0) {
+                let html = '<div class="col-12 mb-3"><h4 class="text-primary"><i class="bi bi-star-fill text-warning"></i> Recomendados para ti</h4></div>';
+                data.forEach(function (prod) {
+                    const btnDisabled = prod.stock === 0 ? 'disabled' : '';
+                    const btnText = prod.stock === 0 ? 'Sin Stock' : 'Agregar al Carrito';
+                    html += `
+                        <div class="col-md-6 col-lg-4 mb-4">
+                            <div class="card h-100 border-warning shadow-sm">
+                                <div class="card-header bg-warning text-dark fw-bold text-center py-1">
+                                    <small><i class="bi bi-stars"></i> Recomendación</small>
+                                </div>
+                                <div class="card-body">
+                                    <h5 class="card-title">${prod.nombre}</h5>
+                                    <p class="card-text text-muted">${prod.descripcion || 'Sin descripción'}</p>
+                                    <p class="card-text"><strong>Precio:</strong> ₡${prod.precio.toFixed(2)}</p>
+                                    <p class="card-text"><small class="text-muted">Stock: ${prod.stock}</small></p>
+                                    <div class="input-group mb-3">
+                                        <input type="number" class="form-control" id="qty-${prod.id}" min="1" value="1" style="max-width: 80px;">
+                                        <button class="btn btn-primary" type="button" onclick="agregarAlCarrito(${prod.id})" ${btnDisabled}>
+                                            ${btnText}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                $('#recomendacionesContainer').html(html);
+            } else {
+                $('#recomendacionesContainer').empty();
+            }
         }
     });
 }

@@ -66,6 +66,9 @@ builder.Services.AddScoped<ICarritoRepository, CarritoRepository>();
 builder.Services.AddScoped<IFacturaRepository, FacturaRepository>();
 builder.Services.AddScoped<FacturaPdfService>();
 
+// Recomendaciones
+builder.Services.AddScoped<IRecomendacionService, RecomendacionService>();
+
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
