@@ -1,4 +1,3 @@
-<!-- Cotización Manual - Gestión de carrito, categorías/productos y búsqueda de clientes -->
 
 $(document).ready(function () {
     let timerCliente = null;
