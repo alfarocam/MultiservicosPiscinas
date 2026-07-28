@@ -42,7 +42,7 @@ public class CarritoRepository : ICarritoRepository
         if (cantidad <= 0)
             return (false, "La cantidad debe ser mayor a 0.");
 
-        var producto = await _context.Producto.FirstOrDefaultAsync(p => p.Id == productoId);
+        var producto = await _context.Producto.Include(p => p.Categoria).FirstOrDefaultAsync(p => p.Id == productoId);
         if (producto == null)
             return (false, "Producto no encontrado.");
 
@@ -62,12 +62,22 @@ public class CarritoRepository : ICarritoRepository
             await _context.SaveChangesAsync();
         }
 
-        // Verificar si el producto ya está en el carrito
         var itemExistente = carrito.ItemCarrito.FirstOrDefault(ic => ic.ProductoId == productoId);
+
+        bool esServicio = producto.Categoria?.NombreCategoria?.ToLower().Contains("servicio") ?? false;
+        
+        if (esServicio)
+        {
+            if (itemExistente != null)
+                return (false, "Este servicio ya se encuentra en el carrito.");
+            
+            cantidad = 1; // Forzar a 1
+        }
+
         int cantidadTotal = (itemExistente?.Cantidad ?? 0) + cantidad;
 
         // Validar stock
-        if (cantidadTotal > producto.Stock)
+        if (!esServicio && cantidadTotal > producto.Stock)
             return (false, $"No hay suficiente stock disponible. Existencia: {producto.Stock}.");
 
         if (itemExistente != null)
