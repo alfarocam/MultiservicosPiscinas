@@ -78,22 +78,7 @@ $(document).ready(function () {
         obtenerCarrito();
     });
 
-    // Validar antes de generar cotización
-    $('#formCliente').on('submit', function (e) {
-        const nombreCliente = $('#nombreCliente').val().trim();
-        const apellidoPaterno = $('#apellidoPaterno').val().trim();
-        const apellidoMaterno = $('#apellidoMaterno').val().trim();
-        const correoCliente = $('#correoCliente').val().trim();
-        const telefonoCliente = $('#telefonoCliente').val().trim();
 
-        if (!nombreCliente || !apellidoPaterno || !apellidoMaterno || !correoCliente || !telefonoCliente) {
-            e.preventDefault();
-            alert('Por favor, completa todos los datos del cliente.');
-            return false;
-        }
-
-        return true;
-    });
 
     function cargarCategorias() {
         $.ajax({
