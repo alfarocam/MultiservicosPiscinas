@@ -105,6 +105,9 @@ public class CotizacionRepository : ICotizacionRepository
             {
                 ClienteId = cliente.Id,
                 NombreCompleto = $"{cliente.Usuario.Nombre} {cliente.Usuario.ApellidoPaterno}".Trim(),
+                Nombre = cliente.Usuario.Nombre,
+                ApellidoPaterno = cliente.Usuario.ApellidoPaterno ?? "",
+                ApellidoMaterno = cliente.Usuario.ApellidoMaterno ?? "",
                 Correo = cliente.Usuario.Correo,
                 Telefono = telefonoPrincipal,
                 Encontrado = true
@@ -130,6 +133,9 @@ public class CotizacionRepository : ICotizacionRepository
             {
                 ClienteId = cliente.Id,
                 NombreCompleto = $"{cliente.Usuario.Nombre} {cliente.Usuario.ApellidoPaterno}".Trim(),
+                Nombre = cliente.Usuario.Nombre,
+                ApellidoPaterno = cliente.Usuario.ApellidoPaterno ?? "",
+                ApellidoMaterno = cliente.Usuario.ApellidoMaterno ?? "",
                 Correo = cliente.Usuario.Correo,
                 Telefono = telefonoPrincipal,
                 Encontrado = true
@@ -148,6 +154,9 @@ public class CotizacionRepository : ICotizacionRepository
             {
                 ClienteId = telefonoCliente.ClienteId,
                 NombreCompleto = $"{telefonoCliente.Cliente.Usuario.Nombre} {telefonoCliente.Cliente.Usuario.ApellidoPaterno}".Trim(),
+                Nombre = telefonoCliente.Cliente.Usuario.Nombre,
+                ApellidoPaterno = telefonoCliente.Cliente.Usuario.ApellidoPaterno ?? "",
+                ApellidoMaterno = telefonoCliente.Cliente.Usuario.ApellidoMaterno ?? "",
                 Correo = telefonoCliente.Cliente.Usuario.Correo,
                 Telefono = telefonoCliente.NumeroTelefono,
                 Encontrado = true
@@ -157,7 +166,7 @@ public class CotizacionRepository : ICotizacionRepository
         return null;
     }
 
-    public async Task<int> RegistrarClienteRapidoAsync(string nombre, string correo, string telefono)
+    public async Task<int> RegistrarClienteRapidoAsync(string nombre, string apellidoPaterno, string apellidoMaterno, string correo, string telefono)
     {
         var contrasenaAleatoria = GenerarContrasenAleatoria();
         var fechaCreacion = DateTime.Now;
@@ -171,8 +180,8 @@ public class CotizacionRepository : ICotizacionRepository
                     "EXEC seg.InsertarUsuarioYCliente @p0, @p1, @p2, @p3, @p4, @p5, @p6",
                     rolId,
                     nombre,
-                    "", // ApellidoPaterno vacío
-                    "", // ApellidoMaterno vacío
+                    apellidoPaterno,
+                    apellidoMaterno,
                     correo,
                     contrasenaAleatoria,
                     fechaCreacion

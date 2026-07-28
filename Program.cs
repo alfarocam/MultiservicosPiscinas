@@ -66,6 +66,9 @@ builder.Services.AddScoped<ICarritoRepository, CarritoRepository>();
 builder.Services.AddScoped<IFacturaRepository, FacturaRepository>();
 builder.Services.AddScoped<FacturaPdfService>();
 
+// Recomendaciones
+builder.Services.AddScoped<IRecomendacionService, RecomendacionService>();
+
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
@@ -96,7 +99,7 @@ app.UseSession();
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Ruta por defecto MVC (Apunta a tu Login)
+// Ruta por defecto MVC (Apunta a Login)
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Auth}/{action=InicioSesion}/{id?}");
