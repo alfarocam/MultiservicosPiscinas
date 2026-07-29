@@ -48,7 +48,8 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 // Inyeccion de dependencias (Servicios y Repositorios)
 builder.Services.AddTransient<Generales>();
 
-// Repositorios  HU-2.5 - HU-3.4 - HU-7.1 - HU-6.5
+// Repositorios  HU-2.5 - HU-3.4 - HU-7.1 - HU-6.5 - Dashboard
+builder.Services.AddScoped<IDashboardRepository, DashboardRepository>();
 builder.Services.AddScoped<IHistorialServicioRepository, HistorialServicioRepository>();
 builder.Services.AddScoped<IReporteSatisfaccionRepository, ReporteSatisfaccionRepository>();
 builder.Services.AddScoped<IReporteGastosOperativosRepository, ReporteGastosOperativosRepository>();
