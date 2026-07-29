@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
+using MultiserviciosPiscinas.DTOs.Cotizacion;
 using MultiserviciosPiscinas.Interfaces;
 using MultiserviciosPiscinas.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -16,7 +18,7 @@ namespace MultiserviciosPiscinas.Services
             _context = context;
         }
 
-        public async Task<List<Producto>> ObtenerRecomendacionesAsync(int? clienteId, int limite = 3)
+        public async Task<List<ProductoBusquedaDto>> ObtenerRecomendacionesAsync(int? clienteId, int limite = 3)
         {
             if (clienteId.HasValue)
             {
@@ -36,11 +38,21 @@ namespace MultiserviciosPiscinas.Services
                         .Distinct()
                         .ToListAsync();
 
-                    // Buscar productos activos con stock de las categorías compradas que no haya comprado
+                    // Buscar productos activos con stock (o que sean servicios) de las categorías compradas que no haya comprado
                     var productosRecomendados = await _context.Producto
-                        .Where(p => p.Activo && p.Stock > 0 && categoriasCompradas.Contains(p.CategoriaId) && !productosCompradosIds.Contains(p.Id))
+                        .Include(p => p.Categoria)
+                        .Where(p => p.Activo && (p.Stock > 0 || p.Categoria.NombreCategoria.ToLower().Contains("servicio")) && categoriasCompradas.Contains(p.CategoriaId) && !productosCompradosIds.Contains(p.Id))
                         .OrderBy(p => Guid.NewGuid()) // Aleatorizar un poco la sugerencia
                         .Take(limite)
+                        .Select(p => new ProductoBusquedaDto
+                        {
+                            Id = p.Id,
+                            Nombre = p.Nombre,
+                            Descripcion = p.Descripcion,
+                            Precio = p.Precio,
+                            Stock = p.Stock,
+                            NombreCategoria = p.Categoria.NombreCategoria
+                        })
                         .ToListAsync();
                     
                     // Si encontramos suficientes productos, los retornamos
@@ -52,9 +64,19 @@ namespace MultiserviciosPiscinas.Services
                     // Si no hay suficientes, rellenar con otros productos de esas mismas categorías, aunque ya los haya comprado
                     var faltan = limite - productosRecomendados.Count;
                     var productosExtra = await _context.Producto
-                        .Where(p => p.Activo && p.Stock > 0 && categoriasCompradas.Contains(p.CategoriaId) && productosCompradosIds.Contains(p.Id))
+                        .Include(p => p.Categoria)
+                        .Where(p => p.Activo && (p.Stock > 0 || p.Categoria.NombreCategoria.ToLower().Contains("servicio")) && categoriasCompradas.Contains(p.CategoriaId) && productosCompradosIds.Contains(p.Id))
                         .OrderBy(p => Guid.NewGuid())
                         .Take(faltan)
+                        .Select(p => new ProductoBusquedaDto
+                        {
+                            Id = p.Id,
+                            Nombre = p.Nombre,
+                            Descripcion = p.Descripcion,
+                            Precio = p.Precio,
+                            Stock = p.Stock,
+                            NombreCategoria = p.Categoria.NombreCategoria
+                        })
                         .ToListAsync();
 
                     productosRecomendados.AddRange(productosExtra);
@@ -77,12 +99,22 @@ namespace MultiserviciosPiscinas.Services
                 .Select(x => x.ProductoId)
                 .ToListAsync();
 
-            var productosGlobalesRecomendados = new List<Producto>();
+            var productosGlobalesRecomendados = new List<ProductoBusquedaDto>();
 
             if (productosMasVendidos.Any())
             {
                 var queryProductos = await _context.Producto
-                    .Where(p => p.Activo && p.Stock > 0 && productosMasVendidos.Contains(p.Id))
+                    .Include(p => p.Categoria)
+                    .Where(p => p.Activo && (p.Stock > 0 || p.Categoria.NombreCategoria.ToLower().Contains("servicio")) && productosMasVendidos.Contains(p.Id))
+                    .Select(p => new ProductoBusquedaDto
+                    {
+                        Id = p.Id,
+                        Nombre = p.Nombre,
+                        Descripcion = p.Descripcion,
+                        Precio = p.Precio,
+                        Stock = p.Stock,
+                        NombreCategoria = p.Categoria.NombreCategoria
+                    })
                     .ToListAsync();
                 
                 // Ordenar según el orden de populares
@@ -100,9 +132,19 @@ namespace MultiserviciosPiscinas.Services
                 var faltan = limite - productosGlobalesRecomendados.Count;
 
                 var randomProds = await _context.Producto
-                    .Where(p => p.Activo && p.Stock > 0 && !idsActuales.Contains(p.Id))
+                    .Include(p => p.Categoria)
+                    .Where(p => p.Activo && (p.Stock > 0 || p.Categoria.NombreCategoria.ToLower().Contains("servicio")) && !idsActuales.Contains(p.Id))
                     .OrderBy(p => Guid.NewGuid())
                     .Take(faltan)
+                    .Select(p => new ProductoBusquedaDto
+                    {
+                        Id = p.Id,
+                        Nombre = p.Nombre,
+                        Descripcion = p.Descripcion,
+                        Precio = p.Precio,
+                        Stock = p.Stock,
+                        NombreCategoria = p.Categoria.NombreCategoria
+                    })
                     .ToListAsync();
 
                 productosGlobalesRecomendados.AddRange(randomProds);

@@ -55,7 +55,7 @@ namespace MultiserviciosPiscinas.Controllers
         // POST: /Inventario/Crear
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Crear(Producto producto)
+        public async Task<IActionResult> Crear(Producto producto, IFormFile? imagen)
         {
             ModelState.Remove(nameof(Producto.Categoria));
             ModelState.Remove(nameof(Producto.DetalleCotizacion));
@@ -66,6 +66,40 @@ namespace MultiserviciosPiscinas.Controllers
             {
                 await CargarCategoriasAsync();
                 return View(producto);
+            }
+
+            if (imagen != null && imagen.Length > 0)
+            {
+                var extensionesPermitidas = new[] { ".jpg", ".jpeg", ".png" };
+                var extension = Path.GetExtension(imagen.FileName).ToLower();
+
+                if (!extensionesPermitidas.Contains(extension))
+                {
+                    ModelState.AddModelError("imagen", "Solo se permiten imágenes JPG o PNG.");
+                    await CargarCategoriasAsync();
+                    return View(producto);
+                }
+
+                if (imagen.Length > 5 * 1024 * 1024)
+                {
+                    ModelState.AddModelError("imagen", "El archivo no debe superar 5MB.");
+                    await CargarCategoriasAsync();
+                    return View(producto);
+                }
+
+                var carpeta = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "imagenes", "productos");
+                if (!Directory.Exists(carpeta))
+                    Directory.CreateDirectory(carpeta);
+
+                var nombreArchivo = $"{Guid.NewGuid()}{extension}";
+                var rutaCompleta = Path.Combine(carpeta, nombreArchivo);
+
+                using (var stream = new FileStream(rutaCompleta, FileMode.Create))
+                {
+                    await imagen.CopyToAsync(stream);
+                }
+
+                producto.ImagenRuta = $"/imagenes/productos/{nombreArchivo}";
             }
 
             producto.Activo = true;
@@ -100,7 +134,7 @@ namespace MultiserviciosPiscinas.Controllers
         // POST: /Inventario/Editar/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Editar(int id, Producto producto)
+        public async Task<IActionResult> Editar(int id, Producto producto, IFormFile? imagen)
         {
             if (id != producto.Id)
                 return BadRequest();
@@ -119,6 +153,45 @@ namespace MultiserviciosPiscinas.Controllers
             var anterior = await _context.Producto.AsNoTracking()
                 .FirstOrDefaultAsync(p => p.Id == id);
 
+            if (anterior == null)
+                return NotFound();
+
+            producto.ImagenRuta = anterior.ImagenRuta; // Mantener imagen anterior por defecto
+
+            if (imagen != null && imagen.Length > 0)
+            {
+                var extensionesPermitidas = new[] { ".jpg", ".jpeg", ".png" };
+                var extension = Path.GetExtension(imagen.FileName).ToLower();
+
+                if (!extensionesPermitidas.Contains(extension))
+                {
+                    ModelState.AddModelError("imagen", "Solo se permiten imágenes JPG o PNG.");
+                    await CargarCategoriasAsync(producto.CategoriaId);
+                    return View(producto);
+                }
+
+                if (imagen.Length > 5 * 1024 * 1024)
+                {
+                    ModelState.AddModelError("imagen", "El archivo no debe superar 5MB.");
+                    await CargarCategoriasAsync(producto.CategoriaId);
+                    return View(producto);
+                }
+
+                var carpeta = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "imagenes", "productos");
+                if (!Directory.Exists(carpeta))
+                    Directory.CreateDirectory(carpeta);
+
+                var nombreArchivo = $"{Guid.NewGuid()}{extension}";
+                var rutaCompleta = Path.Combine(carpeta, nombreArchivo);
+
+                using (var stream = new FileStream(rutaCompleta, FileMode.Create))
+                {
+                    await imagen.CopyToAsync(stream);
+                }
+
+                producto.ImagenRuta = $"/imagenes/productos/{nombreArchivo}";
+            }
+
             _context.Producto.Update(producto);
             await _context.SaveChangesAsync();
 
@@ -134,6 +207,56 @@ namespace MultiserviciosPiscinas.Controllers
             );
 
             TempData["MensajeExito"] = "Producto actualizado correctamente.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Eliminar(int id)
+        {
+            var producto = await _context.Producto.FindAsync(id);
+            if (producto == null)
+                return NotFound();
+
+            producto.Activo = false;
+            _context.Producto.Update(producto);
+            await _context.SaveChangesAsync();
+
+            await _bitacora.RegistrarAsync(
+                userClaims: User,
+                accion: "UPDATE",
+                tablaAfectada: "inv.PRODUCTO",
+                registroId: producto.Id,
+                valorNuevo: $"Nombre: {producto.Nombre} | Activo: False",
+                valorAnterior: $"Nombre: {producto.Nombre} | Activo: True"
+            );
+
+            TempData["MensajeExito"] = "Producto eliminado correctamente.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Activar(int id)
+        {
+            var producto = await _context.Producto.FindAsync(id);
+            if (producto == null)
+                return NotFound();
+
+            producto.Activo = true;
+            _context.Producto.Update(producto);
+            await _context.SaveChangesAsync();
+
+            await _bitacora.RegistrarAsync(
+                userClaims: User,
+                accion: "UPDATE",
+                tablaAfectada: "inv.PRODUCTO",
+                registroId: producto.Id,
+                valorNuevo: $"Nombre: {producto.Nombre} | Activo: True",
+                valorAnterior: $"Nombre: {producto.Nombre} | Activo: False"
+            );
+
+            TempData["MensajeExito"] = "Producto activado correctamente.";
             return RedirectToAction(nameof(Index));
         }
 

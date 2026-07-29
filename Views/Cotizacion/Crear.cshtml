@@ -59,27 +59,27 @@
 
                     <div class="mb-3">
                         <label class="form-label">Nombre(s) *</label>
-                        <input type="text" id="nombreCliente" name="NombreCliente" class="form-control" required />
+                        <input type="text" id="nombreCliente" name="NombreCliente" class="form-control" />
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label">Apellido Paterno *</label>
-                        <input type="text" id="apellidoPaterno" name="ApellidoPaterno" class="form-control" required />
+                        <input type="text" id="apellidoPaterno" name="ApellidoPaterno" class="form-control" />
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label">Apellido Materno *</label>
-                        <input type="text" id="apellidoMaterno" name="ApellidoMaterno" class="form-control" required />
+                        <input type="text" id="apellidoMaterno" name="ApellidoMaterno" class="form-control" />
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label">Correo *</label>
-                        <input type="email" id="correoCliente" name="CorreoCliente" class="form-control" required />
+                        <input type="email" id="correoCliente" name="CorreoCliente" class="form-control" />
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label">Teléfono *</label>
-                        <input type="tel" id="telefonoCliente" name="TelefonoCliente" class="form-control" placeholder="Ej: 1234-5678" pattern="[0-9]{4}-[0-9]{4}" maxlength="9" title="El teléfono debe tener 8 dígitos divididos por un guion (ej. 1234-5678)" required />
+                        <input type="tel" id="telefonoCliente" name="TelefonoCliente" class="form-control" placeholder="Ej: 1234-5678" pattern="[0-9]{4}-[0-9]{4}" maxlength="9" title="El teléfono debe tener 8 dígitos divididos por un guion (ej. 1234-5678)" />
                     </div>
 
                     <button type="submit" class="btn btn-success w-100" id="btnGenerarCotizacion">
@@ -113,4 +113,5 @@
 
 @section Scripts {
     <script src="~/js/cotizacion.js" asp-append-version="true"></script>
+    <script src="~/js/cotizacion-validacion.js" asp-append-version="true"></script>
 }

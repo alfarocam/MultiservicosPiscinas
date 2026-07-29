@@ -140,14 +140,21 @@ public class FacturaRepository : IFacturaRepository
             // Validar stock de cada producto antes de proceder
             foreach (var item in items)
             {
-                var producto = await _context.Producto.FirstOrDefaultAsync(p => p.Id == item.ProductoId)
+                var producto = await _context.Producto
+                    .Include(p => p.Categoria)
+                    .FirstOrDefaultAsync(p => p.Id == item.ProductoId)
                     ?? throw new InvalidOperationException($"Producto no encontrado: {item.ProductoId}");
 
-                if (producto.Stock < item.Cantidad)
+                bool esServicio = producto.Categoria?.NombreCategoria?.ToLower().Contains("servicio") ?? false;
+
+                if (!esServicio && producto.Stock < item.Cantidad)
                     throw new InvalidOperationException($"No hay suficiente stock de '{producto.Nombre}'. Disponible: {producto.Stock}.");
 
-                // Descontar el stock
-                producto.Stock -= (int)item.Cantidad;
+                // Descontar el stock solo si no es servicio
+                if (!esServicio)
+                {
+                    producto.Stock -= (int)item.Cantidad;
+                }
             }
 
             var subtotal = items.Sum(i => i.LineaSubtotal);

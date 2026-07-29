@@ -1,7 +1,6 @@
-﻿@model MultiserviciosPiscinas.Models.Producto
+@model MultiserviciosPiscinas.Models.Producto
 
 @{
-    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
     ViewData["Title"] = "Editar producto";
 }
 
@@ -12,7 +11,7 @@
 
 <div class="card border-0 shadow-sm">
     <div class="card-body">
-        <form asp-action="Editar" asp-route-id="@Model.Id" method="post">
+        <form asp-action="Editar" asp-route-id="@Model.Id" method="post" enctype="multipart/form-data">
             @Html.AntiForgeryToken()
             <input type="hidden" asp-for="Id" />
 
@@ -61,6 +60,18 @@
                         <option value="true">Disponible</option>
                         <option value="false">Inactivo</option>
                     </select>
+                </div>
+
+                <div class="col-md-12">
+                    <label for="imagen" class="form-label">Imagen del producto <span class="text-muted">(opcional)</span></label>
+                    @if (!string.IsNullOrEmpty(Model.ImagenRuta))
+                    {
+                        <div class="mb-2">
+                            <img src="@Model.ImagenRuta" alt="Imagen del producto" class="img-fluid img-thumbnail" style="max-height: 150px; width: auto; object-fit: contain; display: block; background-color: #f8f9fa;" />
+                        </div>
+                    }
+                    <input type="file" name="imagen" id="imagen" class="form-control" accept=".jpg,.jpeg,.png" />
+                    @Html.ValidationMessage("imagen", new { @class = "text-danger small" })
                 </div>
 
                 <div class="col-md-12">

@@ -1,0 +1,158 @@
+@model MultiserviciosPiscinas.DTOs.Cotizacion.CotizacionClienteDetalleDto
+
+@{
+    ViewData["Title"] = "Detalle de Cotización";
+    Layout = "_LayoutCliente";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Detalle de Cotización <span class="text-primary">@Model.NumeroCotizacion</span></h2>
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Volver
+        </a>
+    </div>
+
+    @if (TempData["MensajeExito"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["MensajeExito"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["MensajeError"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["MensajeError"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title text-muted mb-3">Información General</h5>
+                    <p class="mb-1"><strong>Fecha de Emisión:</strong> @Model.FechaEmision.ToString("dd/MM/yyyy")</p>
+                    <p class="mb-1"><strong>Válida Hasta:</strong> @Model.FechaVigencia.ToString("dd/MM/yyyy")</p>
+                    <p class="mb-1">
+                        <strong>Estado:</strong>
+                        @if (Model.Estado == "Enviada")
+                        {
+                            <span class="badge bg-warning text-dark">Pendiente de Aceptación</span>
+                        }
+                        else if (Model.Estado == "Aceptada")
+                        {
+                            <span class="badge bg-primary">Aceptada (Pendiente de Facturación)</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">@Model.Estado</span>
+                        }
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100 bg-light">
+                <div class="card-body text-end d-flex flex-column justify-content-center">
+                    <h5 class="text-muted">Total a Pagar</h5>
+                    <h2 class="text-primary fw-bold mb-0">₡@Model.Total.ToString("N2")</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-white py-3">
+            <h5 class="mb-0">Artículos y Servicios</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-4">Producto/Servicio</th>
+                            <th class="text-center">Cantidad</th>
+                            <th class="text-end">Precio Unit.</th>
+                            <th class="text-end">Impuesto</th>
+                            <th class="text-end pe-4">Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var linea in Model.Lineas)
+                        {
+                            <tr>
+                                <td class="ps-4">
+                                    <div class="fw-bold">@linea.NombreProducto</div>
+                                    @if (!string.IsNullOrEmpty(linea.DescripcionProducto))
+                                    {
+                                        <small class="text-muted">@linea.DescripcionProducto</small>
+                                    }
+                                </td>
+                                <td class="text-center">@linea.Cantidad.ToString("0.##")</td>
+                                <td class="text-end">₡@linea.PrecioUnitario.ToString("N2")</td>
+                                <td class="text-end">₡@linea.Impuesto.ToString("N2")</td>
+                                <td class="text-end pe-4 fw-bold">₡@linea.LineaTotal.ToString("N2")</td>
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot class="table-light">
+                        <tr>
+                            <td colspan="4" class="text-end text-muted pe-3">Subtotal</td>
+                            <td class="text-end pe-4">₡@Model.Subtotal.ToString("N2")</td>
+                        </tr>
+                        <tr>
+                            <td colspan="4" class="text-end text-muted pe-3">Impuestos (13%)</td>
+                            <td class="text-end pe-4">₡@Model.ImpuestoTotal.ToString("N2")</td>
+                        </tr>
+                        <tr>
+                            <td colspan="4" class="text-end fw-bold pe-3">TOTAL</td>
+                            <td class="text-end fw-bold pe-4 text-primary">₡@Model.Total.ToString("N2")</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    @if (Model.Estado == "Enviada")
+    {
+        <div class="alert alert-info d-flex align-items-center mb-4" role="alert">
+            <i class="bi bi-info-circle-fill fs-4 me-3"></i>
+            <div>
+                Al aceptar esta cotización, confirmas que estás de acuerdo con los productos, servicios y precios listados. Un administrador procesará esta cotización y generará la factura correspondiente.
+            </div>
+        </div>
+
+        <div class="text-end mb-5">
+            <form asp-action="Aceptar" asp-route-id="@Model.Id" method="post" id="formAceptar">
+                <button type="button" class="btn btn-primary btn-lg px-5 shadow-sm" onclick="confirmarAceptacion()">
+                    <i class="bi bi-check-circle me-2"></i> Aceptar Cotización
+                </button>
+            </form>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        function confirmarAceptacion() {
+            Swal.fire({
+                title: '¿Confirmar cotización?',
+                text: "Estás a punto de aceptar esta cotización. Un administrador será notificado para proceder con la facturación.",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#0d6efd',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Sí, aceptar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('formAceptar').submit();
+                }
+            })
+        }
+    </script>
+}

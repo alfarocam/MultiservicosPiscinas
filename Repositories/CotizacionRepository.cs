@@ -39,7 +39,8 @@ public class CotizacionRepository : ICotizacionRepository
                 Descripcion = p.Descripcion,
                 Precio = p.Precio,
                 Stock = p.Stock,
-                NombreCategoria = p.Categoria.NombreCategoria
+                NombreCategoria = p.Categoria.NombreCategoria,
+                ImagenRuta = p.ImagenRuta
             })
             .ToListAsync();
     }
@@ -57,7 +58,8 @@ public class CotizacionRepository : ICotizacionRepository
                 Descripcion = p.Descripcion,
                 Precio = p.Precio,
                 Stock = p.Stock,
-                NombreCategoria = p.Categoria.NombreCategoria
+                NombreCategoria = p.Categoria.NombreCategoria,
+                ImagenRuta = p.ImagenRuta
             })
             .ToListAsync();
     }
@@ -74,7 +76,8 @@ public class CotizacionRepository : ICotizacionRepository
                 Descripcion = p.Descripcion,
                 Precio = p.Precio,
                 Stock = p.Stock,
-                NombreCategoria = p.Categoria.NombreCategoria
+                NombreCategoria = p.Categoria.NombreCategoria,
+                ImagenRuta = p.ImagenRuta
             })
             .FirstOrDefaultAsync();
     }
@@ -281,6 +284,77 @@ public class CotizacionRepository : ICotizacionRepository
             await transaction.RollbackAsync();
             throw;
         }
+    }
+
+    public async Task<List<CotizacionClienteListadoDto>> ObtenerCotizacionesPorClienteAsync(string correoCliente)
+    {
+        return await _context.Cotizacion
+            .Include(c => c.Cliente)
+                .ThenInclude(cl => cl.Usuario)
+            .Where(c => c.Cliente.Usuario.Correo == correoCliente)
+            .OrderByDescending(c => c.FechaEmision)
+            .Select(c => new CotizacionClienteListadoDto
+            {
+                Id = c.Id,
+                NumeroCotizacion = $"COT-{c.Id:D5}",
+                FechaEmision = c.FechaEmision,
+                FechaVigencia = c.FechaVigencia,
+                Total = c.Total,
+                Estado = c.Estado
+            })
+            .ToListAsync();
+    }
+
+    public async Task<CotizacionClienteDetalleDto?> ObtenerDetalleCotizacionClienteAsync(int id, string correoCliente)
+    {
+        var cotizacion = await _context.Cotizacion
+            .Include(c => c.Cliente)
+                .ThenInclude(cl => cl.Usuario)
+            .Include(c => c.DetalleCotizacion)
+                .ThenInclude(d => d.Producto)
+            .FirstOrDefaultAsync(c => c.Id == id && c.Cliente.Usuario.Correo == correoCliente);
+
+        if (cotizacion == null)
+            return null;
+
+        return new CotizacionClienteDetalleDto
+        {
+            Id = cotizacion.Id,
+            NumeroCotizacion = $"COT-{cotizacion.Id:D5}",
+            FechaEmision = cotizacion.FechaEmision,
+            FechaVigencia = cotizacion.FechaVigencia,
+            Subtotal = cotizacion.Subtotal,
+            ImpuestoTotal = cotizacion.ImpuestoTotal,
+            Total = cotizacion.Total,
+            Estado = cotizacion.Estado,
+            Lineas = cotizacion.DetalleCotizacion.Select(d => new DetalleCotizacionClienteDto
+            {
+                ProductoId = d.ProductoId,
+                NombreProducto = d.Producto.Nombre,
+                DescripcionProducto = d.Producto.Descripcion,
+                Cantidad = d.CantidadPropuesta,
+                PrecioUnitario = d.PrecioUnitario,
+                Impuesto = d.Impuesto,
+                LineaTotal = d.LineaTotal
+            }).ToList()
+        };
+    }
+
+    public async Task<bool> AceptarCotizacionAsync(int id, string correoCliente)
+    {
+        var cotizacion = await _context.Cotizacion
+            .Include(c => c.Cliente)
+                .ThenInclude(cl => cl.Usuario)
+            .FirstOrDefaultAsync(c => c.Id == id && c.Cliente.Usuario.Correo == correoCliente);
+
+        if (cotizacion == null || cotizacion.Estado != "Enviada")
+            return false;
+
+        cotizacion.Estado = "Aceptada";
+        _context.Update(cotizacion);
+        await _context.SaveChangesAsync();
+        
+        return true;
     }
 
     private string GenerarContrasenAleatoria(int longitud = 12)

@@ -19,4 +19,8 @@ public interface ICotizacionRepository
     Task<int> RegistrarClienteRapidoAsync(string nombre, string apellidoPaterno, string apellidoMaterno, string correo, string telefono);
 
     Task<Cotizacion> CrearCotizacionAsync(int clienteId, List<ItemCarritoDto> items, decimal tasaIva, int diasVigencia);
+
+    Task<List<CotizacionClienteListadoDto>> ObtenerCotizacionesPorClienteAsync(string correoCliente);
+    Task<CotizacionClienteDetalleDto?> ObtenerDetalleCotizacionClienteAsync(int id, string correoCliente);
+    Task<bool> AceptarCotizacionAsync(int id, string correoCliente);
 }

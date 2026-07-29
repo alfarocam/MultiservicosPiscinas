@@ -78,22 +78,7 @@ $(document).ready(function () {
         obtenerCarrito();
     });
 
-    // Validar antes de generar cotización
-    $('#formCliente').on('submit', function (e) {
-        const nombreCliente = $('#nombreCliente').val().trim();
-        const apellidoPaterno = $('#apellidoPaterno').val().trim();
-        const apellidoMaterno = $('#apellidoMaterno').val().trim();
-        const correoCliente = $('#correoCliente').val().trim();
-        const telefonoCliente = $('#telefonoCliente').val().trim();
 
-        if (!nombreCliente || !apellidoPaterno || !apellidoMaterno || !correoCliente || !telefonoCliente) {
-            e.preventDefault();
-            alert('Por favor, completa todos los datos del cliente.');
-            return false;
-        }
-
-        return true;
-    });
 
     function cargarCategorias() {
         $.ajax({
@@ -126,9 +111,14 @@ $(document).ready(function () {
 
                 let html = '';
                 $.each(data, function (i, producto) {
+                    const imagenHtml = producto.imagenRuta 
+                        ? `<img src="${producto.imagenRuta}" class="card-img-top p-2" alt="${producto.nombre}" style="height: 180px; object-fit: contain; background-color: #f8f9fa;">`
+                        : `<div class="bg-light d-flex align-items-center justify-content-center card-img-top" style="height: 180px;"><i class="bi bi-image text-muted" style="font-size: 3rem;"></i></div>`;
+                        
                     html += `
                         <div class="col-md-6">
-                            <div class="card h-100 producto-card">
+                            <div class="card h-100 producto-card shadow-sm">
+                                ${imagenHtml}
                                 <div class="card-body d-flex flex-column">
                                     <h6 class="card-title">${producto.nombre}</h6>
                                     <p class="card-text text-muted small flex-grow-1">${producto.descripcion || 'Sin descripción'}</p>
@@ -166,9 +156,14 @@ $(document).ready(function () {
 
                 let html = '';
                 $.each(data, function (i, producto) {
+                    const imagenHtml = producto.imagenRuta 
+                        ? `<img src="${producto.imagenRuta}" class="card-img-top p-2" alt="${producto.nombre}" style="height: 180px; object-fit: contain; background-color: #f8f9fa;">`
+                        : `<div class="bg-light d-flex align-items-center justify-content-center card-img-top" style="height: 180px;"><i class="bi bi-image text-muted" style="font-size: 3rem;"></i></div>`;
+                        
                     html += `
                         <div class="col-md-6">
-                            <div class="card h-100 producto-card">
+                            <div class="card h-100 producto-card shadow-sm">
+                                ${imagenHtml}
                                 <div class="card-body d-flex flex-column">
                                     <h6 class="card-title">${producto.nombre}</h6>
                                     <p class="card-text text-muted small flex-grow-1">${producto.descripcion || 'Sin descripción'}</p>

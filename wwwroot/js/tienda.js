@@ -33,21 +33,39 @@ function cargarProductos(categoriaId) {
         success: function (data) {
             let html = '';
             data.forEach(function (prod) {
-                const btnDisabled = prod.stock === 0 ? 'disabled' : '';
-                const btnText = prod.stock === 0 ? 'Sin Stock' : 'Agregar al Carrito';
+                const esServicio = prod.nombreCategoria && prod.nombreCategoria.toLowerCase().includes('servicio');
+                const btnDisabled = (!esServicio && prod.stock === 0) ? 'disabled' : '';
+                const btnText = (!esServicio && prod.stock === 0) ? 'Sin Stock' : 'Agregar al Carrito';
+                const stockHtml = esServicio ? '' : `<p class="card-text"><small class="text-muted">Stock: ${prod.stock}</small></p>`;
+                const actionHtml = esServicio
+                    ? `<div class="mb-3">
+                           <input type="hidden" id="qty-${prod.id}" value="1">
+                           <button class="btn btn-primary w-100" type="button" onclick="agregarAlCarrito(${prod.id})" ${btnDisabled}>
+                               ${btnText}
+                           </button>
+                       </div>`
+                    : `<div class="input-group mb-3">
+                           <input type="number" class="form-control" id="qty-${prod.id}" min="1" value="1" style="max-width: 80px;">
+                           <button class="btn btn-primary" type="button" onclick="agregarAlCarrito(${prod.id})" ${btnDisabled}>
+                               ${btnText}
+                           </button>
+                       </div>`;
+
+                const imagenHtml = prod.imagenRuta 
+                    ? `<img src="${prod.imagenRuta}" class="card-img-top p-2" alt="${prod.nombre}" style="height: 180px; object-fit: contain; background-color: #f8f9fa;">`
+                    : `<div class="bg-light d-flex align-items-center justify-content-center card-img-top" style="height: 180px;"><i class="bi bi-image text-muted" style="font-size: 3rem;"></i></div>`;
+
                 html += `
                     <div class="col-md-6 col-lg-4 mb-4">
-                        <div class="card h-100">
-                            <div class="card-body">
+                        <div class="card h-100 shadow-sm">
+                            ${imagenHtml}
+                            <div class="card-body d-flex flex-column">
                                 <h5 class="card-title">${prod.nombre}</h5>
                                 <p class="card-text text-muted">${prod.descripcion || 'Sin descripción'}</p>
-                                <p class="card-text"><strong>Precio:</strong> ₡${prod.precio.toFixed(2)}</p>
-                                <p class="card-text"><small class="text-muted">Stock: ${prod.stock}</small></p>
-                                <div class="input-group mb-3">
-                                    <input type="number" class="form-control" id="qty-${prod.id}" min="1" value="1" style="max-width: 80px;">
-                                    <button class="btn btn-primary" type="button" onclick="agregarAlCarrito(${prod.id})" ${btnDisabled}>
-                                        ${btnText}
-                                    </button>
+                                <p class="card-text mb-2"><strong>Precio:</strong> ₡${prod.precio.toFixed(2)}</p>
+                                ${stockHtml}
+                                <div class="mt-auto">
+                                    ${actionHtml}
                                 </div>
                             </div>
                         </div>
@@ -68,24 +86,42 @@ function cargarRecomendaciones() {
             if (data && data.length > 0) {
                 let html = '<div class="col-12 mb-3"><h4 class="text-primary"><i class="bi bi-star-fill text-warning"></i> Recomendados para ti</h4></div>';
                 data.forEach(function (prod) {
-                    const btnDisabled = prod.stock === 0 ? 'disabled' : '';
-                    const btnText = prod.stock === 0 ? 'Sin Stock' : 'Agregar al Carrito';
+                    const esServicio = prod.nombreCategoria && prod.nombreCategoria.toLowerCase().includes('servicio');
+                    const btnDisabled = (!esServicio && prod.stock === 0) ? 'disabled' : '';
+                    const btnText = (!esServicio && prod.stock === 0) ? 'Sin Stock' : 'Agregar al Carrito';
+                    const stockHtml = esServicio ? '' : `<p class="card-text"><small class="text-muted">Stock: ${prod.stock}</small></p>`;
+                    const actionHtml = esServicio
+                        ? `<div class="mb-3">
+                               <input type="hidden" id="qty-${prod.id}" value="1">
+                               <button class="btn btn-primary w-100" type="button" onclick="agregarAlCarrito(${prod.id})" ${btnDisabled}>
+                                   ${btnText}
+                               </button>
+                           </div>`
+                        : `<div class="input-group mb-3">
+                               <input type="number" class="form-control" id="qty-${prod.id}" min="1" value="1" style="max-width: 80px;">
+                               <button class="btn btn-primary" type="button" onclick="agregarAlCarrito(${prod.id})" ${btnDisabled}>
+                                   ${btnText}
+                               </button>
+                           </div>`;
+
+                    const imagenHtml = prod.imagenRuta 
+                        ? `<img src="${prod.imagenRuta}" class="card-img-top p-2" alt="${prod.nombre}" style="height: 180px; object-fit: contain; background-color: #f8f9fa;">`
+                        : `<div class="bg-light d-flex align-items-center justify-content-center card-img-top" style="height: 180px;"><i class="bi bi-image text-muted" style="font-size: 3rem;"></i></div>`;
+
                     html += `
                         <div class="col-md-6 col-lg-4 mb-4">
                             <div class="card h-100 border-warning shadow-sm">
                                 <div class="card-header bg-warning text-dark fw-bold text-center py-1">
                                     <small><i class="bi bi-stars"></i> Recomendación</small>
                                 </div>
-                                <div class="card-body">
+                                ${imagenHtml}
+                                <div class="card-body d-flex flex-column">
                                     <h5 class="card-title">${prod.nombre}</h5>
                                     <p class="card-text text-muted">${prod.descripcion || 'Sin descripción'}</p>
-                                    <p class="card-text"><strong>Precio:</strong> ₡${prod.precio.toFixed(2)}</p>
-                                    <p class="card-text"><small class="text-muted">Stock: ${prod.stock}</small></p>
-                                    <div class="input-group mb-3">
-                                        <input type="number" class="form-control" id="qty-${prod.id}" min="1" value="1" style="max-width: 80px;">
-                                        <button class="btn btn-primary" type="button" onclick="agregarAlCarrito(${prod.id})" ${btnDisabled}>
-                                            ${btnText}
-                                        </button>
+                                    <p class="card-text mb-2"><strong>Precio:</strong> ₡${prod.precio.toFixed(2)}</p>
+                                    ${stockHtml}
+                                    <div class="mt-auto">
+                                        ${actionHtml}
                                     </div>
                                 </div>
                             </div>

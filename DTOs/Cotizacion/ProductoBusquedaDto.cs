@@ -13,4 +13,6 @@ public class ProductoBusquedaDto
     public int Stock { get; set; }
 
     public string NombreCategoria { get; set; } = null!;
+
+    public string? ImagenRuta { get; set; }
 }
