@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 
@@ -717,6 +717,10 @@ public partial class PiscinasYMultiserviciosContext : DbContext
                 .HasColumnType("decimal(10, 2)")
                 .HasColumnName("precio");
             entity.Property(e => e.Stock).HasColumnName("stock");
+            entity.Property(e => e.ImagenRuta)
+                .HasMaxLength(500)
+                .IsUnicode(false)
+                .HasColumnName("imagen_ruta");
 
             entity.HasOne(d => d.Categoria).WithMany(p => p.Producto)
                 .HasForeignKey(d => d.CategoriaId)

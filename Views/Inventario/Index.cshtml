@@ -1,4 +1,4 @@
-﻿@model List<MultiserviciosPiscinas.Models.Producto>
+@model List<MultiserviciosPiscinas.Models.Producto>
 @{
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
     ViewData["Title"] = "Inventario";
@@ -77,6 +77,22 @@
                             <a asp-action="Editar" asp-route-id="@p.Id" class="c-btn-sm c-btn-sm-outline">
                                 <i class="bi bi-pencil me-1"></i>Editar
                             </a>
+                            @if (p.Activo)
+                            {
+                                <form asp-action="Eliminar" asp-route-id="@p.Id" method="post" class="d-inline">
+                                    <button type="button" class="c-btn-sm btn-danger text-white border-0 btn-eliminar" style="padding: 0.25rem 0.5rem; border-radius: 4px;">
+                                        <i class="bi bi-trash me-1"></i>Eliminar
+                                    </button>
+                                </form>
+                            }
+                            else
+                            {
+                                <form asp-action="Activar" asp-route-id="@p.Id" method="post" class="d-inline">
+                                    <button type="button" class="c-btn-sm btn-success text-white border-0 btn-activar" style="padding: 0.25rem 0.5rem; border-radius: 4px;">
+                                        <i class="bi bi-check-circle me-1"></i>Activar
+                                    </button>
+                                </form>
+                            }
                         </td>
                     </tr>
                     c++;
@@ -85,3 +101,7 @@
         </tbody>
     </table>
 </div>
+
+@section Scripts {
+    <script src="~/js/inventario.js" asp-append-version="true"></script>
+}

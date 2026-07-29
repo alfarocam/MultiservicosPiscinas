@@ -39,7 +39,8 @@ public class CotizacionRepository : ICotizacionRepository
                 Descripcion = p.Descripcion,
                 Precio = p.Precio,
                 Stock = p.Stock,
-                NombreCategoria = p.Categoria.NombreCategoria
+                NombreCategoria = p.Categoria.NombreCategoria,
+                ImagenRuta = p.ImagenRuta
             })
             .ToListAsync();
     }
@@ -57,7 +58,8 @@ public class CotizacionRepository : ICotizacionRepository
                 Descripcion = p.Descripcion,
                 Precio = p.Precio,
                 Stock = p.Stock,
-                NombreCategoria = p.Categoria.NombreCategoria
+                NombreCategoria = p.Categoria.NombreCategoria,
+                ImagenRuta = p.ImagenRuta
             })
             .ToListAsync();
     }
@@ -74,7 +76,8 @@ public class CotizacionRepository : ICotizacionRepository
                 Descripcion = p.Descripcion,
                 Precio = p.Precio,
                 Stock = p.Stock,
-                NombreCategoria = p.Categoria.NombreCategoria
+                NombreCategoria = p.Categoria.NombreCategoria,
+                ImagenRuta = p.ImagenRuta
             })
             .FirstOrDefaultAsync();
     }

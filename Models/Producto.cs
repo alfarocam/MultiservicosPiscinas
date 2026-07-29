@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace MultiserviciosPiscinas.Models;
@@ -18,6 +18,8 @@ public partial class Producto
     public int Stock { get; set; }
 
     public bool Activo { get; set; }
+
+    public string? ImagenRuta { get; set; }
 
     public virtual CategoriaProducto Categoria { get; set; } = null!;
 

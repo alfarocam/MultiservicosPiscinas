@@ -51,9 +51,14 @@ function cargarProductos(categoriaId) {
                            </button>
                        </div>`;
 
+                const imagenHtml = prod.imagenRuta 
+                    ? `<img src="${prod.imagenRuta}" class="card-img-top p-2" alt="${prod.nombre}" style="height: 180px; object-fit: contain; background-color: #f8f9fa;">`
+                    : `<div class="bg-light d-flex align-items-center justify-content-center card-img-top" style="height: 180px;"><i class="bi bi-image text-muted" style="font-size: 3rem;"></i></div>`;
+
                 html += `
                     <div class="col-md-6 col-lg-4 mb-4">
-                        <div class="card h-100">
+                        <div class="card h-100 shadow-sm">
+                            ${imagenHtml}
                             <div class="card-body d-flex flex-column">
                                 <h5 class="card-title">${prod.nombre}</h5>
                                 <p class="card-text text-muted">${prod.descripcion || 'Sin descripción'}</p>
@@ -99,12 +104,17 @@ function cargarRecomendaciones() {
                                </button>
                            </div>`;
 
+                    const imagenHtml = prod.imagenRuta 
+                        ? `<img src="${prod.imagenRuta}" class="card-img-top p-2" alt="${prod.nombre}" style="height: 180px; object-fit: contain; background-color: #f8f9fa;">`
+                        : `<div class="bg-light d-flex align-items-center justify-content-center card-img-top" style="height: 180px;"><i class="bi bi-image text-muted" style="font-size: 3rem;"></i></div>`;
+
                     html += `
                         <div class="col-md-6 col-lg-4 mb-4">
                             <div class="card h-100 border-warning shadow-sm">
                                 <div class="card-header bg-warning text-dark fw-bold text-center py-1">
                                     <small><i class="bi bi-stars"></i> Recomendación</small>
                                 </div>
+                                ${imagenHtml}
                                 <div class="card-body d-flex flex-column">
                                     <h5 class="card-title">${prod.nombre}</h5>
                                     <p class="card-text text-muted">${prod.descripcion || 'Sin descripción'}</p>
