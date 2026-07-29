@@ -88,7 +88,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         position: 'bottom',
                         labels: {
                             padding: 14,
-                            font: { size: 12, family: "'Segoe UI', sans-serif" },
+                            font: { size: 12, family: "'Plus Jakarta Sans', sans-serif" },
                             color: '#444'
                         }
                     },

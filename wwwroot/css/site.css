@@ -820,6 +820,7 @@ main {
 
 /* Textos de KPI */
 .c-kpi-label {
+    font-family: var(--font-family-heading);
     font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -828,6 +829,7 @@ main {
 }
 
 .c-kpi-value {
+    font-family: var(--font-family-body);
     font-weight: 700;
     margin-bottom: 0;
     color: var(--color-btn-bg);
@@ -835,6 +837,7 @@ main {
 
 /* Indicadores Operativos */
 .c-op-kpi-label {
+    font-family: var(--font-family-heading);
     font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -843,6 +846,7 @@ main {
 }
 
 .c-op-kpi-num {
+    font-family: var(--font-family-body);
     font-weight: 700;
     margin-bottom: 0;
     font-size: 2.5rem;
