@@ -1,0 +1,44 @@
+@model MultiserviciosPiscinas.Models.ReporteRentabilidadViewModel
+
+@if (Model.Detalles.Count == 0)
+{
+    <p class="text-muted text-center py-4">No hay datos de ingresos o gastos para el año seleccionado.</p>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="c-data-table">
+            <thead>
+                <tr>
+                    <th>Mes</th>
+                    <th class="text-end">Ingresos (Facturas)</th>
+                    <th class="text-end">Gastos (Operativos)</th>
+                    <th class="text-end">Rentabilidad</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.Detalles)
+                {
+                    <tr>
+                        <td>@item.Mes</td>
+                        <td class="text-end text-success">@item.Ingresos.ToString("C")</td>
+                        <td class="text-end text-danger">@item.Gastos.ToString("C")</td>
+                        <td class="text-end fw-bold @(item.Rentabilidad >= 0 ? "text-success" : "text-danger")">
+                            @item.Rentabilidad.ToString("C")
+                        </td>
+                    </tr>
+                }
+            </tbody>
+            <tfoot>
+                <tr class="fw-bold bg-light">
+                    <td>TOTAL ANUAL</td>
+                    <td class="text-end text-success">@Model.TotalIngresos.ToString("C")</td>
+                    <td class="text-end text-danger">@Model.TotalGastos.ToString("C")</td>
+                    <td class="text-end @(Model.RentabilidadTotal >= 0 ? "text-success" : "text-danger")">
+                        @Model.RentabilidadTotal.ToString("C")
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+}

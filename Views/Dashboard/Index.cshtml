@@ -6,8 +6,11 @@
     var jsonOptions = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
 }
 
-<div class="c-page-header">
+<div class="c-page-header d-flex justify-content-between align-items-center">
     <h2><i class="bi bi-speedometer2 me-2"></i>Dashboard — Resumen General</h2>
+    <a asp-controller="Reportes" asp-action="Index" class="btn btn-primary c-btn-action">
+        <i class="bi bi-file-earmark-bar-graph me-2"></i>Generar Reportes
+    </a>
 </div>
 
 <!--KPIs DE ARRIBA-->
@@ -100,7 +103,7 @@
 <!--GRÁFICOS-->
 <div class="row g-3 mb-4">
 
-    <!-- Servicios por mes -->
+    <!--Servicios por mes-->
     <div class="col-lg-7">
         <div class="c-data-card h-100">
             <div class="c-card-header">
@@ -122,7 +125,7 @@
         </div>
     </div>
 
-    <!-- Estado de proyectos -->
+    <!--Estado de proyectos-->
     <div class="col-lg-5">
         <div class="c-data-card h-100">
             <div class="c-card-header">
@@ -146,7 +149,7 @@
 
 </div>
 
-<!-- Visitas por técnico -->
+<!--Visitas por técnico-->
 <div class="row g-3 mb-4">
     <div class="col-12">
         <div class="c-data-card">
@@ -229,7 +232,7 @@
     }
 </div>
 
-<!-- Datos JSON para los gráficos -->
+<!--Datos JSON para los gráficos-->
 <script type="application/json" id="datosServiciosPorMes">
     @Html.Raw(JsonSerializer.Serialize(Model.ServiciosPorMes, jsonOptions))
 </script>

@@ -1,0 +1,110 @@
+@{
+    ViewData["Title"] = "Reportes Generales";
+}
+
+<div class="c-page-header">
+    <h2><i class="bi bi-file-earmark-bar-graph me-2"></i>Reportes Generales</h2>
+</div>
+
+<div class="c-data-card mb-4">
+    <div class="c-card-header">
+        <div class="c-card-header-title">
+            <i class="bi bi-funnel text-white"></i>
+            <span>Filtros de Reporte</span>
+        </div>
+    </div>
+    <div class="c-card-body">
+        <div class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label">Tipo de Reporte</label>
+                <select id="tipoReporte" class="form-select">
+                    <option value="servicios">Servicios Realizados</option>
+                    <option value="proyectos">Proyectos de Construcción</option>
+                    <option value="rentabilidad">Rentabilidad Anual</option>
+                </select>
+            </div>
+        </div>
+
+        <hr class="my-4" />
+
+        <!-- Filtros para Servicios y Proyectos -->
+        <div id="filtrosFechas" class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label">Fecha Desde</label>
+                <input type="date" id="fechaDesde" class="form-control" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Fecha Hasta</label>
+                <input type="date" id="fechaHasta" class="form-control" />
+            </div>
+            
+            <!-- Filtro solo para servicios -->
+            <div class="col-md-3" id="filtroTecnicoContainer">
+                <label class="form-label">Técnico</label>
+                <select id="tecnicoId" class="form-select">
+                    <option value="">Todos</option>
+                    @if (ViewBag.Tecnicos != null)
+                    {
+                        foreach (var tecnico in ViewBag.Tecnicos)
+                        {
+                            <option value="@tecnico.Id">@tecnico.Nombre @tecnico.ApellidoPaterno</option>
+                        }
+                    }
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label">Estado</label>
+                <select id="estadoGeneral" class="form-select">
+                    <option value="">Todos</option>
+                    <!-- Las opciones cambian dinámicamente según el tipo de reporte -->
+                </select>
+            </div>
+        </div>
+
+        <!-- Filtros para Rentabilidad -->
+        <div id="filtrosAnio" class="row g-3 d-none">
+            <div class="col-md-3">
+                <label class="form-label">Año</label>
+                <input type="number" id="anioRentabilidad" class="form-control" value="@DateTime.Now.Year" min="2000" max="2100" />
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <button type="button" id="btnGenerar" class="btn btn-primary me-2">
+                <i class="bi bi-search me-1"></i>Generar Reporte
+            </button>
+            <button type="button" id="btnExportar" class="btn btn-success">
+                <i class="bi bi-file-excel me-1"></i>Exportar a Excel
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="c-data-card">
+    <div class="c-card-header">
+        <div class="c-card-header-title">
+            <i class="bi bi-table text-white"></i>
+            <span>Resultados</span>
+        </div>
+    </div>
+    <div class="c-card-body">
+        <div id="contenedorTabla">
+            <p class="text-muted text-center py-4">Seleccione los filtros y presione "Generar Reporte" para ver los resultados.</p>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        window.reportesUrls = {
+            obtenerRentabilidad: '@Url.Action("ObtenerReporteRentabilidad", "Reportes")',
+            obtenerServicios: '@Url.Action("ObtenerReporteServicios", "Reportes")',
+            obtenerProyectos: '@Url.Action("ObtenerReporteProyectos", "Reportes")',
+            exportarRentabilidad: '@Url.Action("ExportarRentabilidadExcel", "Reportes")',
+            exportarServicios: '@Url.Action("ExportarServiciosExcel", "Reportes")',
+            exportarProyectos: '@Url.Action("ExportarProyectosExcel", "Reportes")'
+        };
+    </script>
+    <script src="~/js/reportesGenerales.js"></script>
+}

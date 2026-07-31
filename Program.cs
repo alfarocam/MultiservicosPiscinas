@@ -53,8 +53,10 @@ builder.Services.AddScoped<IDashboardRepository, DashboardRepository>();
 builder.Services.AddScoped<IHistorialServicioRepository, HistorialServicioRepository>();
 builder.Services.AddScoped<IReporteSatisfaccionRepository, ReporteSatisfaccionRepository>();
 builder.Services.AddScoped<IReporteGastosOperativosRepository, ReporteGastosOperativosRepository>();
+builder.Services.AddScoped<IReportesGeneralesRepository, ReportesGeneralesRepository>();
 builder.Services.AddScoped<BitacoraService>();
 builder.Services.AddScoped<GastoOperativoExcelService>();
+builder.Services.AddScoped<ReportesGeneralesExcelService>();
 
 // Cotización Manual
 builder.Services.AddScoped<ICotizacionRepository, CotizacionRepository>();
