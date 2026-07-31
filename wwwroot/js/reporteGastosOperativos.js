@@ -62,7 +62,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             padding: 15,
                             font: {
                                 size: 12,
-                                family: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+                                family: "'Plus Jakarta Sans', sans-serif"
                             },
                             color: '#333'
                         }

@@ -1,59 +1,246 @@
-﻿@{
+@model MultiserviciosPiscinas.DTOs.DashboardDto
+@using System.Text.Json
+
+@{
     ViewData["Title"] = "Dashboard";
+    var jsonOptions = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
 }
 
-<h2 class="mb-4">Dashboard — Resumen General</h2>
+<div class="c-page-header d-flex justify-content-between align-items-center">
+    <h2><i class="bi bi-speedometer2 me-2"></i>Dashboard — Resumen General</h2>
+    <a asp-controller="Reportes" asp-action="Index" class="btn btn-primary c-btn-action">
+        <i class="bi bi-file-earmark-bar-graph me-2"></i>Generar Reportes
+    </a>
+</div>
 
+<!--KPIs DE ARRIBA-->
 <div class="row g-3 mb-4">
     <div class="col-sm-6 col-xl-3">
-        <div class="card border-0 shadow-sm">
-            <div class="card-body">
-                <p class="text-muted mb-1" style="font-size:13px">
-                    Clientes activos
-                </p>
-                <h3 class="fw-bold mb-0">—</h3>
+        <div class="c-data-card c-card-padded h-100">
+            <div class="d-flex align-items-center gap-3">
+                <div class="c-kpi-icon-box c-kpi-icon-blue">
+                    <i class="bi bi-people-fill"></i>
+                </div>
+                <div>
+                    <p class="c-kpi-label">Clientes activos</p>
+                    <h3 class="c-kpi-value">@Model.ClientesActivos</h3>
+                </div>
             </div>
         </div>
     </div>
     <div class="col-sm-6 col-xl-3">
-        <div class="card border-0 shadow-sm">
-            <div class="card-body">
-                <p class="text-muted mb-1" style="font-size:13px">
-                    Servicios este mes
-                </p>
-                <h3 class="fw-bold mb-0">—</h3>
+        <div class="c-data-card c-card-padded h-100">
+            <div class="d-flex align-items-center gap-3">
+                <div class="c-kpi-icon-box c-kpi-icon-green">
+                    <i class="bi bi-wrench-adjustable-circle-fill"></i>
+                </div>
+                <div>
+                    <p class="c-kpi-label">Servicios este mes</p>
+                    <h3 class="c-kpi-value">@Model.ServiciosEsteMes</h3>
+                </div>
             </div>
         </div>
     </div>
     <div class="col-sm-6 col-xl-3">
-        <div class="card border-0 shadow-sm">
-            <div class="card-body">
-                <p class="text-muted mb-1" style="font-size:13px">
-                    Facturas pendientes
-                </p>
-                <h3 class="fw-bold mb-0">—</h3>
+        <div class="c-data-card c-card-padded h-100">
+            <div class="d-flex align-items-center gap-3">
+                <div class="c-kpi-icon-box c-kpi-icon-red">
+                    <i class="bi bi-receipt-cutoff"></i>
+                </div>
+                <div>
+                    <p class="c-kpi-label">Facturas pendientes</p>
+                    <h3 class="c-kpi-value">@Model.FacturasPendientes</h3>
+                </div>
             </div>
         </div>
     </div>
     <div class="col-sm-6 col-xl-3">
-        <div class="card border-0 shadow-sm">
-            <div class="card-body">
-                <p class="text-muted mb-1" style="font-size:13px">
-                    Técnicos disponibles
-                </p>
-                <h3 class="fw-bold mb-0">—</h3>
+        <div class="c-data-card c-card-padded h-100">
+            <div class="d-flex align-items-center gap-3">
+                <div class="c-kpi-icon-box c-kpi-icon-purple">
+                    <i class="bi bi-person-badge-fill"></i>
+                </div>
+                <div>
+                    <p class="c-kpi-label">Técnicos</p>
+                    <h3 class="c-kpi-value">@Model.TecnicosDisponibles</h3>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
-<div class="card border-0 shadow-sm">
-    <div class="card-header bg-dark text-white">
-        Últimas actividades
+<!--INDICADORES OPERATIVOS (Escenario 2)-->
+<div class="c-data-card mb-4">
+    <div class="c-card-header">
+        <div class="c-card-header-title">
+            <i class="bi bi-bar-chart-line-fill text-white"></i>
+            <span>Indicadores Operativos</span>
+        </div>
+        <span class="badge bg-secondary c-badge-sm">@Model.PeriodoKpi</span>
     </div>
-    <div class="card-body">
-        <p class="text-muted mb-0">
-            Las actividades se mostrarán aquí cuando se conecten los módulos.
-        </p>
+    <div class="row g-0">
+        <div class="col-md-4 p-4 text-center border-end">
+            <p class="c-op-kpi-label">
+                <i class="bi bi-check2-circle me-1 c-op-icon-green"></i>Servicios Realizados
+            </p>
+            <h1 class="c-op-kpi-num c-op-kpi-num-green">@Model.ServiciosRealizados</h1>
+        </div>
+        <div class="col-md-4 p-4 text-center border-end">
+            <p class="c-op-kpi-label">
+                <i class="bi bi-hammer me-1 c-op-icon-amber"></i>Proyectos Activos
+            </p>
+            <h1 class="c-op-kpi-num c-op-kpi-num-amber">@Model.ProyectosActivos</h1>
+        </div>
+        <div class="col-md-4 p-4 text-center">
+            <p class="c-op-kpi-label">
+                <i class="bi bi-calendar-check me-1 c-op-icon-blue"></i>Visitas Técnicas
+            </p>
+            <h1 class="c-op-kpi-num c-op-kpi-num-blue">@Model.VisitasTecnicas</h1>
+        </div>
     </div>
 </div>
+
+<!--GRÁFICOS-->
+<div class="row g-3 mb-4">
+
+    <!--Servicios por mes-->
+    <div class="col-lg-7">
+        <div class="c-data-card h-100">
+            <div class="c-card-header">
+                <div class="c-card-header-title">
+                    <i class="bi bi-graph-up text-white"></i>
+                    <span>Servicios Últimos 6 Meses</span>
+                </div>
+            </div>
+            <div class="c-card-body">
+                @if (Model.ServiciosPorMes.Count == 0)
+                {
+                    <p class="text-muted text-center mb-0 py-4">Sin datos para mostrar.</p>
+                }
+                else
+                {
+                    <canvas id="graficoServiciosMes" class="c-chart-canvas-md"></canvas>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!--Estado de proyectos-->
+    <div class="col-lg-5">
+        <div class="c-data-card h-100">
+            <div class="c-card-header">
+                <div class="c-card-header-title">
+                    <i class="bi bi-pie-chart text-white"></i>
+                    <span>Estado de Proyectos</span>
+                </div>
+            </div>
+            <div class="c-card-body-centered">
+                @if (Model.EstadosProyectos.Count == 0)
+                {
+                    <p class="text-muted text-center mb-0 py-4">Sin proyectos registrados.</p>
+                }
+                else
+                {
+                    <canvas id="graficoEstadosProyecto" class="c-chart-canvas-pie"></canvas>
+                }
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!--Visitas por técnico-->
+<div class="row g-3 mb-4">
+    <div class="col-12">
+        <div class="c-data-card">
+            <div class="c-card-header">
+                <div class="c-card-header-title">
+                    <i class="bi bi-people text-white"></i>
+                    <span>Visitas Técnicas por Técnico (Top 5)</span>
+                </div>
+            </div>
+            <div class="c-card-body">
+                @if (Model.VisitasPorTecnico.Count == 0)
+                {
+                    <p class="text-muted text-center mb-0 py-4">Sin citas registradas.</p>
+                }
+                else
+                {
+                    <canvas id="graficoVisitasTecnico" class="c-chart-canvas-sm"></canvas>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--ACTIVIDAD RECIENTE -->
+<div class="c-data-card mb-3">
+    <div class="c-card-header">
+        <div class="c-card-header-title">
+            <i class="bi bi-activity text-white"></i>
+            <span>Actividad Reciente</span>
+        </div>
+        <a asp-controller="Agenda" asp-action="Index" class="c-btn-sm c-btn-sm-outline">
+            Ver más <i class="bi bi-arrow-right ms-1"></i>
+        </a>
+    </div>
+
+    @if (Model.ActividadReciente.Count == 0)
+    {
+        <div class="c-card-body-empty">
+            <p class="text-muted mb-0 text-center">
+                <i class="bi bi-info-circle me-1"></i>No hay actividad reciente registrada.
+            </p>
+        </div>
+    }
+    else
+    {
+        <table class="c-data-table">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Tipo</th>
+                    <th>Cliente</th>
+                    <th>Técnico</th>
+                    <th>Estado</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.ActividadReciente)
+                {
+                    <tr>
+                        <td>@item.FechaHora.ToString("dd/MM/yyyy HH:mm")</td>
+                        <td><span class="fw-semibold">@item.Tipo</span></td>
+                        <td>@item.NombreCliente</td>
+                        <td>@item.NombreTecnico</td>
+                        <td>
+                            @{
+                                var badgeClass = item.Estado switch {
+                                    "Completado" or "Cerrado" => "c-badge-green",
+                                    "En progreso" or "Abierto" => "c-badge-blue",
+                                    "Cancelado" => "c-badge-red",
+                                    "Pendiente" => "c-badge-amber",
+                                    _ => "c-badge-gray"
+                                };
+                            }
+                            <span class="c-badge @badgeClass">@item.Estado</span>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
+
+<!--Datos JSON para los gráficos-->
+<script type="application/json" id="datosServiciosPorMes">
+    @Html.Raw(JsonSerializer.Serialize(Model.ServiciosPorMes, jsonOptions))
+</script>
+<script type="application/json" id="datosEstadosProyecto">
+    @Html.Raw(JsonSerializer.Serialize(Model.EstadosProyectos, jsonOptions))
+</script>
+<script type="application/json" id="datosVisitasTecnico">
+    @Html.Raw(JsonSerializer.Serialize(Model.VisitasPorTecnico, jsonOptions))
+</script>
+
+<script src="~/js/dashboard.js"></script>
