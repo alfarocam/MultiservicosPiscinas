@@ -38,13 +38,14 @@ namespace MultiserviciosPiscinas.Controllers
             {
                 consulta = consulta.Where(s => s.Cita.TecnicoId == usuarioId.Value);
             }
-
+            
             var servicios = await consulta
                 .OrderBy(s => s.Estado == "Cerrado")
                 .ThenBy(s => s.FechaApertura)
                 .ThenBy(s => s.Cita.FechaHora)
                 .AsNoTracking()
                 .ToListAsync();
+            
 
             if (!string.IsNullOrWhiteSpace(busqueda))
             {
