@@ -11,7 +11,12 @@
 
 <div class="c-page-header">
     <h2><i class="bi bi-calendar3 me-2"></i>Agenda</h2>
-    <a asp-action="Crear" class="btn">+ Nueva cita</a>
+    <div class="d-flex gap-2">
+        <a asp-controller="RutaOptimizada" asp-action="Index" class="btn">
+            <i class="bi bi-signpost-split-fill me-1"></i>Ruta Optimizada
+        </a>
+        <a asp-action="Crear" class="btn">+ Nueva cita</a>
+    </div>
 </div>
 
 <div class="c-data-card">
@@ -37,15 +42,15 @@
                 foreach (var cita in Model)
                 {
                     var badgeClass = cita.Estado switch
-{
-    "Pendiente" => "c-badge-gray",
-    "Confirmada" => "c-badge-blue",
-    "En camino" => "c-badge-blue",
-    "En progreso" => "c-badge-amber",
-    "Completada" => "c-badge-green",
-    "Cancelada" => "c-badge-red",
-    _ => "c-badge-gray"
-};
+                    {
+                        "Pendiente" => "c-badge-gray",
+                        "Confirmada" => "c-badge-blue",
+                        "En camino" => "c-badge-blue",
+                        "En progreso" => "c-badge-amber",
+                        "Completada" => "c-badge-green",
+                        "Cancelada" => "c-badge-red",
+                        _ => "c-badge-gray"
+                    };
                     <tr>
                         <td class="fw-semibold">@cita.Piscina.Cliente.Usuario.Nombre @cita.Piscina.Cliente.Usuario.ApellidoPaterno</td>
                         <td>@cita.Piscina.Tipo — @cita.Piscina.VolumenM3 m³</td>

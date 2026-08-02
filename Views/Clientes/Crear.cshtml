@@ -100,6 +100,21 @@
                               placeholder="Otras señas exactas de la dirección..." required></textarea>
                     <span asp-validation-for="Direccion" class="text-danger small"></span>
                 </div>
+
+                <div class="col-md-6">
+                    <label asp-for="Latitud" class="form-label fw-semibold"></label>
+                    <input asp-for="Latitud" type="number" step="any" class="form-control"
+                           placeholder="Ej: 9.9325" />
+                    <span asp-validation-for="Latitud" class="text-danger small"></span>
+                    <small class="text-muted">Opcional. Necesaria para incluir esta dirección en rutas optimizadas.</small>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="Longitud" class="form-label fw-semibold"></label>
+                    <input asp-for="Longitud" type="number" step="any" class="form-control"
+                           placeholder="Ej: -84.0795" />
+                    <span asp-validation-for="Longitud" class="text-danger small"></span>
+                </div>
             </div>
 
             <div class="d-flex gap-2 mt-2">

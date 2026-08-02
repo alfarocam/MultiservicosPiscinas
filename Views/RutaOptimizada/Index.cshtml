@@ -1,0 +1,215 @@
+﻿@model MultiserviciosPiscinas.Models.RutaOptimizadaViewModel
+
+@{
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    ViewData["Title"] = "Ruta Optimizada";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="a-title mb-0">
+        <i class="bi bi-signpost-split-fill me-2"></i>Ruta Optimizada
+    </h2>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" asp-action="Index" class="row g-3 align-items-end">
+            <div class="col-md-5">
+                <label class="form-label fw-semibold">Técnico</label>
+                <select name="tecnicoId" class="form-select" required>
+                    <option value="">Seleccione un técnico...</option>
+                    @foreach (var tecnico in ViewBag.Tecnicos)
+                    {
+                        <option value="@tecnico.Id" selected="@(tecnico.Id == (int?)ViewBag.TecnicoId)">
+                            @tecnico.Nombre @tecnico.ApellidoPaterno
+                        </option>
+                    }
+                </select>
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label fw-semibold">Fecha</label>
+                <input type="date" name="fecha" class="form-control"
+                       value="@(((DateOnly)ViewBag.FechaSeleccionada).ToString("yyyy-MM-dd"))" required />
+            </div>
+
+            <div class="col-md-3">
+                <button type="submit" class="btn w-100">
+                    <i class="bi bi-search me-1"></i> Ver ruta
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@if (Model.TecnicoId == 0)
+{
+    <div class="alert alert-info">
+        Selecciona un técnico y una fecha para ver su ruta.
+    </div>
+}
+else if (!Model.TieneSuficientesParadas)
+{
+    <div class="alert alert-warning">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        Se necesitan al menos dos destinos para optimizar una ruta.
+        El técnico <strong>@Model.TecnicoNombre</strong> tiene
+        @Model.Paradas.Count cita(s) asignada(s) el @Model.Fecha.ToString("dd/MM/yyyy").
+    </div>
+}
+else
+{
+    <div class="row g-3">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body p-0">
+                    <div id="mapaRuta" style="width: 100%; height: 500px; border-radius: 0.5rem;"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="fw-bold mb-3">
+                        <i class="bi bi-list-ol me-2"></i>Orden sugerido de visitas
+                    </h5>
+                    <ol id="listaParadas" class="ps-3"></ol>
+
+                    <div id="resumenRuta" class="alert alert-info fw-semibold text-center mb-3"></div>
+
+                    <button id="btnExportar" type="button" class="btn w-100" disabled>
+                        <i class="bi bi-google me-1"></i> Exportar a Google Maps
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    @if (Model.TieneSuficientesParadas)
+    {
+        <script>
+            // Paradas que vienen del ViewModel, ya aplanadas por el controller.
+            const paradas = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+                Model.Paradas.Where(p => p.TieneCoordenadas).Select(p => new
+                {
+                    citaId = p.CitaId,
+                    cliente = p.ClienteNombre,
+                    direccion = p.Direccion,
+                    lat = p.Latitud,
+                    lng = p.Longitud,
+                    hora = p.HoraCita.ToString("HH:mm")
+                })
+            ));
+
+            let map;
+            let directionsService;
+            let directionsRenderer;
+            let ordenFinal = [];
+
+            function iniciarMapa() {
+                if (paradas.length < 2) {
+                    return;
+                }
+
+                map = new google.maps.Map(document.getElementById("mapaRuta"), {
+                    zoom: 12,
+                    center: { lat: paradas[0].lat, lng: paradas[0].lng }
+                });
+
+                directionsService = new google.maps.DirectionsService();
+                directionsRenderer = new google.maps.DirectionsRenderer({ map: map });
+
+                const origen = paradas[0];
+                const destino = paradas[paradas.length - 1];
+                const paradasIntermedias = paradas.slice(1, paradas.length - 1);
+
+                const waypoints = paradasIntermedias.map(p => ({
+                    location: { lat: p.lat, lng: p.lng },
+                    stopover: true
+                }));
+
+                directionsService.route({
+                    origin: { lat: origen.lat, lng: origen.lng },
+                    destination: { lat: destino.lat, lng: destino.lng },
+                    waypoints: waypoints,
+                    optimizeWaypoints: true,
+                    travelMode: google.maps.TravelMode.DRIVING
+                }, function (resultado, estado) {
+                    if (estado === "OK") {
+                        directionsRenderer.setDirections(resultado);
+                        procesarResultado(resultado);
+                    } else {
+                        document.getElementById("resumenRuta").innerText =
+                            "No se pudo calcular la ruta: " + estado;
+                    }
+                });
+            }
+
+            function procesarResultado(resultado) {
+                const ruta = resultado.routes[0];
+                const ordenWaypoints = ruta.waypoint_order;
+
+                // Reconstruimos el orden final: origen, waypoints ya optimizados, destino.
+                const intermedias = paradas.slice(1, paradas.length - 1);
+                ordenFinal = [paradas[0]];
+                ordenWaypoints.forEach(indice => ordenFinal.push(intermedias[indice]));
+                ordenFinal.push(paradas[paradas.length - 1]);
+
+                let distanciaTotalMetros = 0;
+                let duracionTotalSegundos = 0;
+                ruta.legs.forEach(tramo => {
+                    distanciaTotalMetros += tramo.distance.value;
+                    duracionTotalSegundos += tramo.duration.value;
+                });
+
+                const distanciaKm = (distanciaTotalMetros / 1000).toFixed(1);
+                const duracionMin = Math.round(duracionTotalSegundos / 60);
+
+                document.getElementById("resumenRuta").innerText =
+                    `Distancia total: ${distanciaKm} km — Tiempo estimado: ${duracionMin} min`;
+
+                const lista = document.getElementById("listaParadas");
+                lista.innerHTML = "";
+                ordenFinal.forEach(parada => {
+                    const item = document.createElement("li");
+                    item.innerHTML = `<strong>${parada.cliente}</strong><br>
+                                       <span class="text-muted small">${parada.direccion} — ${parada.hora}</span>`;
+                    lista.appendChild(item);
+                });
+
+                document.getElementById("btnExportar").disabled = false;
+            }
+
+            document.getElementById("btnExportar").addEventListener("click", function () {
+                if (ordenFinal.length < 2) {
+                    return;
+                }
+
+                const origen = ordenFinal[0];
+                const destino = ordenFinal[ordenFinal.length - 1];
+                const intermedias = ordenFinal.slice(1, ordenFinal.length - 1);
+
+                const waypointsTexto = intermedias
+                    .map(p => `${p.lat},${p.lng}`)
+                    .join("|");
+
+                let url = "https://www.google.com/maps/dir/?api=1"
+                    + `&origin=${origen.lat},${origen.lng}`
+                    + `&destination=${destino.lat},${destino.lng}`
+                    + "&travelmode=driving";
+
+                if (waypointsTexto) {
+                    url += `&waypoints=${waypointsTexto}`;
+                }
+
+                window.open(url, "_blank");
+            });
+        </script>
+
+        <script src="https://maps.googleapis.com/maps/api/js?key=@Model.GoogleMapsApiKey&callback=iniciarMapa&loading=async"
+                async defer></script>
+    }
+}
