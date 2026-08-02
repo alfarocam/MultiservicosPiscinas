@@ -79,7 +79,7 @@ namespace MultiserviciosPiscinas.Controllers
                 ApellidoMaterno = model.ApellidoMaterno,
                 Correo = model.Correo,
                 Contrasena = "Temporal123",
-                RolId = 2,
+                RolId = 3,
                 Activo = true,
                 FechaCreacion = DateTime.Now
             };
@@ -112,7 +112,9 @@ namespace MultiserviciosPiscinas.Controllers
                 DistritoId = model.DistritoId,
                 TipoDireccion = "Principal",
                 Detalles = model.Direccion,
-                EsPrincipal = 1
+                EsPrincipal = 1,
+                Latitud = model.Latitud,
+                Longitud = model.Longitud
             };
 
             _context.DireccionCliente.Add(direccion);
