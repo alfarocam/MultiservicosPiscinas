@@ -1,4 +1,4 @@
-﻿@model MultiserviciosPiscinas.Models.AnuncioEditarViewModel
+@model MultiserviciosPiscinas.Models.AnuncioEditarViewModel
 @{
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
     ViewData["Title"] = "Editar comunicado";
@@ -62,7 +62,7 @@
                     <p>¿Seguro que querés eliminar este comunicado? Esta acción <strong>no se puede deshacer</strong> y desaparecerá del tablón para todos los empleados.</p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-sm" data-bs-dismiss="modal" style="background-color: var(--color-text-muted) !important;">Cancelar</button>
+                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                     <button type="submit" class="btn btn-outline-danger">Sí, eliminar</button>
                 </div>
             </form>

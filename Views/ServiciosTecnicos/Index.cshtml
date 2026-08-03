@@ -1,4 +1,4 @@
-﻿@model List<MultiserviciosPiscinas.Models.Servicio>
+@model List<MultiserviciosPiscinas.Models.Servicio>
 
 @{
     Layout = User.IsInRole("2")
@@ -47,8 +47,7 @@
         <input type="text"
                name="busqueda"
                value="@ViewBag.Busqueda"
-               class="form-control"
-               style="max-width:320px"
+               class="form-control c-filter-input"
                placeholder="Buscar por cliente, piscina, tipo, fecha o estado..." />
 
         <button type="submit" class="btn">

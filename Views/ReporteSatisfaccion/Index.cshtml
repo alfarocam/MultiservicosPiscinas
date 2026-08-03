@@ -7,14 +7,14 @@
     <h2><i class="bi bi-bar-chart-line me-2"></i>Reporte de Satisfacción</h2>
 </div>
 
-<div class="c-data-card mb-3" style="padding:20px 24px">
+<div class="c-data-card mb-3 p-4">
     <form method="get" asp-action="Index" class="row g-3 align-items-end">
         <div class="col-md-4">
-            <label class="form-label fw-semibold small text-muted text-uppercase" style="letter-spacing:.05em">Fecha desde</label>
+            <label class="form-label c-kpi-label">Fecha desde</label>
             <input type="date" name="fechaDesde" value="@(Model.FechaDesde?.ToString("yyyy-MM-dd"))" class="form-control" />
         </div>
         <div class="col-md-4">
-            <label class="form-label fw-semibold small text-muted text-uppercase" style="letter-spacing:.05em">Fecha hasta</label>
+            <label class="form-label c-kpi-label">Fecha hasta</label>
             <input type="date" name="fechaHasta" value="@(Model.FechaHasta?.ToString("yyyy-MM-dd"))" class="form-control" />
         </div>
         <div class="col-md-4 d-flex gap-2">
@@ -35,7 +35,7 @@
             <div class="c-stat-label">Promedio General</div>
             <div class="c-stat-stars">
                 @{ int est = (int)Math.Round(Model.PromedioGeneral);
-                   for (int i = 1; i <= 5; i++) { <span style="color:@(i <= est ? "#f59e0b" : "#d1d5db")">★</span> } }
+                   for (int i = 1; i <= 5; i++) { <span class="@(i <= est ? "text-warning" : "text-muted")">★</span> } }
             </div>
         </div>
     </div>
@@ -43,23 +43,25 @@
         <div class="c-stat-card">
             <div class="c-stat-num c-stat-num-blue">@Model.TotalEncuestas</div>
             <div class="c-stat-label">Total de Encuestas</div>
-            <div class="c-stat-icon" style="color:#0891b2"><i class="bi bi-clipboard-data"></i></div>
+            <div class="c-stat-icon text-info"><i class="bi bi-clipboard-data"></i></div>
         </div>
     </div>
     <div class="col-md-4">
         <div class="c-stat-card">
             <div class="c-stat-num c-stat-num-red">@Model.TotalCriticas</div>
             <div class="c-stat-label">Calificaciones Críticas (≤ 2)</div>
-            <div class="c-stat-icon" style="color:#ef4444"><i class="bi bi-exclamation-triangle"></i></div>
+            <div class="c-stat-icon text-danger"><i class="bi bi-exclamation-triangle"></i></div>
         </div>
     </div>
 </div>
 
 <!-- Promedio por técnico -->
 <div class="c-data-card mb-3">
-    <div style="background-color:var(--color-navbar-bg);padding:14px 20px;display:flex;align-items:center;gap:8px">
-        <i class="bi bi-person-badge text-white"></i>
-        <span class="fw-bold text-white" style="font-family:var(--font-family-heading)">Promedio por Técnico</span>
+    <div class="c-card-header">
+        <div class="c-card-header-title">
+            <i class="bi bi-person-badge text-white"></i>
+            <span>Promedio por Técnico</span>
+        </div>
     </div>
     @if (!Model.PromediosPorTecnico.Any())
     {
@@ -76,7 +78,7 @@
                     string bl = t.Promedio >= 4.0 ? "Excelente" : t.Promedio >= 3.0 ? "Bueno" : t.Promedio >= 2.0 ? "Regular" : "Crítico";
                     <tr>
                         <td class="fw-semibold">@t.NombreTecnico</td>
-                        <td><span class="fw-bold" style="color:var(--color-btn-bg)">@t.Promedio.ToString("F2")</span> <span class="text-muted small">/ 5</span></td>
+                        <td><span class="c-price">@t.Promedio.ToString("F2")</span> <span class="text-muted small">/ 5</span></td>
                         <td>@t.TotalEncuestas</td>
                         <td><span class="c-badge @bc">@bl</span></td>
                     </tr>
@@ -88,9 +90,11 @@
 
 <!-- Últimas encuestas -->
 <div class="c-data-card">
-    <div style="background-color:var(--color-navbar-bg);padding:14px 20px;display:flex;align-items:center;gap:8px">
-        <i class="bi bi-chat-square-text text-white"></i>
-        <span class="fw-bold text-white" style="font-family:var(--font-family-heading)">Últimas 10 Encuestas</span>
+    <div class="c-card-header">
+        <div class="c-card-header-title">
+            <i class="bi bi-chat-square-text text-white"></i>
+            <span>Últimas 10 Encuestas</span>
+        </div>
     </div>
     @if (!Model.UltimasEncuestas.Any())
     {

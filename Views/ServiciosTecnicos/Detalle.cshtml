@@ -1,4 +1,4 @@
-﻿@model MultiserviciosPiscinas.Models.Servicio
+@model MultiserviciosPiscinas.Models.Servicio
 
 @{
     Layout = User.IsInRole("2")
@@ -80,7 +80,7 @@
             </form>
         }
 
-        <span class="c-badge @badgeClass" style="font-size:0.85rem;padding:6px 16px">
+        <span class="c-badge c-badge-lg @badgeClass">
             @Model.Estado
         </span>
     </div>
@@ -88,11 +88,11 @@
 
 <div class="c-detail-card">
 
-    <h5 class="fw-bold mb-3" style="color: var(--color-btn-bg);">
+    <h5 class="fw-bold mb-3 c-section-title">
         <i class="bi bi-person-fill me-2"></i>Información del usuario
     </h5>
 
-    <hr style="border-color: var(--color-accent);" />
+    <hr class="c-hr-accent" />
 
     <div class="row g-3 mb-4">
         <div class="col-md-4">
@@ -117,11 +117,11 @@
         </div>
     </div>
 
-    <h5 class="fw-bold mb-3" style="color: var(--color-btn-bg);">
+    <h5 class="fw-bold mb-3 c-section-title">
         <i class="bi bi-calendar-check-fill me-2"></i>Datos del servicio
     </h5>
 
-    <hr style="border-color: var(--color-accent);" />
+    <hr class="c-hr-accent" />
 
     <div class="row g-3 mb-4">
         <div class="col-md-3">
@@ -166,16 +166,16 @@
         <div class="col-md-6">
             <div class="c-detail-field c-field-gray">
                 <label>Dirección</label>
-                <p style="font-weight:400">@direccionCompleta</p>
+                <p>@direccionCompleta</p>
             </div>
         </div>
     </div>
 
-    <h5 class="fw-bold mb-3" style="color: var(--color-btn-bg);">
+    <h5 class="fw-bold mb-3 c-section-title">
         <i class="bi bi-list-task me-2"></i>Tareas realizadas
     </h5>
 
-    <hr style="border-color: var(--color-accent);" />
+    <hr class="c-hr-accent" />
 
     @if (!Model.TareaServicio.Any())
     {
@@ -241,11 +241,11 @@
         </div>
     }
 
-    <h5 class="fw-bold mb-3" style="color: var(--color-btn-bg);">
+    <h5 class="fw-bold mb-3 c-section-title">
         <i class="bi bi-clock-history me-2"></i>Historial del servicio
     </h5>
 
-    <hr style="border-color: var(--color-accent);" />
+    <hr class="c-hr-accent" />
 
     @if (!historial.Any())
     {
@@ -284,7 +284,7 @@
                                 </span>
                             </td>
 
-                            <td style="font-size:0.9rem">
+                            <td>
                                 @item.ValorNuevo
                             </td>
                         </tr>
@@ -294,17 +294,17 @@
         </div>
     }
 
-    <h5 class="fw-bold mb-3" style="color: var(--color-btn-bg);">
+    <h5 class="fw-bold mb-3 c-section-title">
         <i class="bi bi-file-text-fill me-2"></i>Observaciones del servicio
     </h5>
 
-    <hr style="border-color: var(--color-accent);" />
+    <hr class="c-hr-accent" />
 
     <div class="row g-3 mb-4">
         <div class="col-md-6">
             <div class="c-detail-field c-field-gray">
                 <label>Trabajo realizado</label>
-                <p style="font-weight:400">
+                <p>
                     @(string.IsNullOrWhiteSpace(Model.TrabajoRealizado)
                                         ? "Sin detalle registrado."
                                         : Model.TrabajoRealizado)
@@ -315,7 +315,7 @@
         <div class="col-md-6">
             <div class="c-detail-field c-field-gray">
                 <label>Notas de la cita</label>
-                <p style="font-weight:400">
+                <p>
                     @(string.IsNullOrWhiteSpace(Model.Cita.Notas)
                                         ? "Sin notas registradas."
                                         : Model.Cita.Notas)

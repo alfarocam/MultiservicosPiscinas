@@ -1,4 +1,4 @@
-<div class="container my-5" style="max-width: 600px;">
+<div class="container my-5 u-container-max-sm">
     <div class="mb-4">
         <h1 class="a-title">Registrar Nueva Piscina</h1>
         <p class="a-text-muted">Introduzca los datos correspondientes para dar de alta la estructura en el sistema.</p>
@@ -9,7 +9,7 @@
 
             <div class="m-form-field">
                 <label>Cliente</label>
-                <input type="text" class="a-input" value="@ViewBag.NombreCliente" readonly />
+                <input type="text" class="a-input c-input-disabled" value="@ViewBag.NombreCliente" readonly />
                 <input type="hidden" name="ClienteId" value="@ViewBag.ClienteId" />
             </div>
 
@@ -50,7 +50,7 @@
             </div>
 
             <div class="d-flex justify-content-end gap-2 mt-4">
-                <a asp-action="Index" asp-controller="Clientes" class="btn a-btn-outline" style="color: var(--color-navbar-bg) !important; border-color: var(--color-navbar-bg) !important;">Cancelar</a>
+                <a asp-action="Index" asp-controller="Clientes" class="btn btn-outline-secondary">Cancelar</a>
                 <button type="submit" class="a-btn">Guardar Registro</button>
             </div>
         </form>

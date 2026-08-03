@@ -19,7 +19,7 @@
 <div class="c-filter-bar mb-3">
     <form method="get" asp-action="Index" class="d-flex gap-2 align-items-center flex-wrap w-100">
         <input type="text" name="busqueda" value="@ViewBag.Busqueda"
-               class="form-control" style="max-width:300px" placeholder="Buscar por nombre..." />
+               class="form-control c-filter-input" placeholder="Buscar por nombre..." />
         <button type="submit" class="btn">
             <i class="bi bi-search me-1"></i>Buscar
         </button>
@@ -79,7 +79,7 @@
                             @if (p.Activo)
                             {
                                 <form asp-action="Eliminar" asp-route-id="@p.Id" method="post" class="d-inline">
-                                    <button type="button" class="c-btn-sm btn-danger text-white border-0 btn-eliminar" style="padding: 0.25rem 0.5rem; border-radius: 4px;">
+                                    <button type="button" class="c-btn-sm btn-danger text-white border-0 btn-eliminar">
                                         <i class="bi bi-trash me-1"></i>Eliminar
                                     </button>
                                 </form>
@@ -87,7 +87,7 @@
                             else
                             {
                                 <form asp-action="Activar" asp-route-id="@p.Id" method="post" class="d-inline">
-                                    <button type="button" class="c-btn-sm btn-success text-white border-0 btn-activar" style="padding: 0.25rem 0.5rem; border-radius: 4px;">
+                                    <button type="button" class="c-btn-sm btn-success text-white border-0 btn-activar">
                                         <i class="bi bi-check-circle me-1"></i>Activar
                                     </button>
                                 </form>

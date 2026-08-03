@@ -1,4 +1,4 @@
-﻿@model MultiserviciosPiscinas.Models.CitaEditarViewModel
+@model MultiserviciosPiscinas.Models.CitaEditarViewModel
 @{
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
     ViewData["Title"] = "Detalle de la cita";
@@ -23,7 +23,7 @@
 
 <div class="c-page-header">
     <h2><i class="bi bi-calendar-event me-2"></i>Cita #@Model.Id</h2>
-    <span class="c-badge @badgeClass" style="font-size:0.85rem;padding:6px 16px">@Model.Estado</span>
+    <span class="c-badge c-badge-lg @badgeClass">@Model.Estado</span>
 </div>
 
 <ul class="nav nav-tabs mb-3">
@@ -92,7 +92,7 @@
                             <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#modalCancelar">
                                 <i class="bi bi-x-circle me-1"></i>Cancelar cita
                             </button>
-                            <a asp-action="Index" class="btn btn-sm" style="background-color: var(--color-text-muted) !important;">Volver</a>
+                            <a asp-action="Index" class="btn btn-secondary">Volver</a>
                         </div>
                     </form>
                 }
@@ -159,7 +159,7 @@
                     <textarea name="motivoCancelacion" class="form-control" rows="3" required></textarea>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-sm" data-bs-dismiss="modal" style="background-color: var(--color-text-muted) !important;">Volver</button>
+                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Volver</button>
                     <button type="submit" class="btn btn-outline-danger">Confirmar cancelación</button>
                 </div>
             </form>

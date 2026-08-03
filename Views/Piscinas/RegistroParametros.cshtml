@@ -1,4 +1,4 @@
-﻿@model MultiserviciosPiscinas.Models.RegistroParametrosListaViewModel
+@model MultiserviciosPiscinas.Models.RegistroParametrosListaViewModel
 
 @{
     Layout = "~/Views/Shared/_LayoutTecnico.cshtml";
@@ -37,9 +37,9 @@
     @if (!Model.Visitas.Any())
     {
         <div class="o-form-card text-center py-5">
-            <i class="bi bi-calendar-x" style="font-size: 3rem; color: var(--color-text-muted);"></i>
+            <i class="bi bi-calendar-x c-empty-state-icon"></i>
 
-            <h4 class="mt-3 mb-2" style="color: var(--color-text-dark);">
+            <h4 class="mt-3 mb-2">
                 No hay visitas disponibles
             </h4>
 
@@ -52,9 +52,9 @@
     {
         <div class="o-form-card">
             <div class="table-responsive">
-                <table class="table align-middle w-100" style="color: var(--color-text-dark);">
+                <table class="c-data-table align-middle w-100">
                     <thead>
-                        <tr style="border-bottom: 2px solid #e1ecf4;">
+                        <tr>
                             <th class="a-text-muted small text-uppercase">Fecha</th>
                             <th class="a-text-muted small text-uppercase">Cliente</th>
                             <th class="a-text-muted small text-uppercase">Piscina</th>
@@ -68,16 +68,16 @@
                     <tbody>
                         @foreach (var visita in Model.Visitas)
                         {
-                            var colorEstado = visita.EstadoCita switch
+                            var badgeClass = visita.EstadoCita switch
                             {
-                                "Pendiente" => "var(--color-text-muted)",
-                                "Confirmada" => "var(--color-link)",
-                                "En camino" => "var(--color-link)",
-                                "En progreso" => "var(--color-accent-orange)",
-                                _ => "var(--color-text-muted)"
+                                "Pendiente" => "c-badge-gray",
+                                "Confirmada" => "c-badge-blue",
+                                "En camino" => "c-badge-blue",
+                                "En progreso" => "c-badge-amber",
+                                _ => "c-badge-gray"
                             };
 
-                            <tr style="border-bottom: 1px solid #e1ecf4;">
+                            <tr>
                                 <td>
                                     <strong>@visita.FechaHora.ToString("dd/MM/yyyy")</strong>
                                     <div class="a-text-muted small">
@@ -95,8 +95,7 @@
                                 <td class="small">@visita.Direccion</td>
 
                                 <td>
-                                    <span class="badge"
-                                          style="background-color: @colorEstado; padding: 0.4rem 0.6rem; border-radius: var(--border-radius-sm);">
+                                    <span class="c-badge @badgeClass">
                                         @visita.EstadoCita
                                     </span>
                                 </td>

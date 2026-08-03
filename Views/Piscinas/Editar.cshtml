@@ -4,7 +4,7 @@
     ViewData["Title"] = "Editar Piscina";
 }
 
-<div class="container my-5" style="max-width: 600px;">
+<div class="container my-5 u-container-max-sm">
     <div class="mb-4">
         <h1 class="a-title">Modificar Piscina #@Model.Id</h1>
         <p class="a-text-muted">Actualice las especificaciones o el estado operativo del registro seleccionado.</p>
@@ -18,8 +18,7 @@
 
             <div class="m-form-field">
                 <label>Cliente</label>
-                <input type="text" class="a-input" value="@ViewBag.NombreCliente" readonly
-                       style="background-color: #e9ecef !important; cursor: not-allowed;" />
+                <input type="text" class="a-input c-input-disabled" value="@ViewBag.NombreCliente" readonly />
             </div>
 
             <div class="m-form-field">
@@ -54,8 +53,7 @@
 
             <div class="d-flex justify-content-end gap-2 mt-4">
                 <a asp-action="Index" asp-controller="Piscinas"
-                   class="btn a-btn-outline"
-                   style="color: var(--color-navbar-bg) !important; border-color: var(--color-navbar-bg) !important;">
+                   class="btn btn-outline-secondary">
                     Cancelar
                 </a>
                 <button type="submit" class="a-btn">Actualizar Cambios</button>

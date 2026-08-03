@@ -26,20 +26,19 @@
 
             <div asp-validation-summary="All" class="text-danger mb-3"></div>
 
-            <h5 class="fw-bold mb-3" style="color: var(--color-btn-bg);">
+            <h5 class="fw-bold mb-3 c-section-title">
                 <i class="bi bi-person-fill me-2"></i>Cliente y piscina
             </h5>
 
-            <hr style="border-color: var(--color-accent);" />
+            <hr class="c-hr-accent" />
 
             <div class="row g-3 mb-4">
                 <div class="col-md-6">
                     <label class="form-label fw-semibold">Cliente</label>
                     <input type="text"
-                           class="form-control"
+                           class="form-control c-input-disabled"
                            value="@ViewBag.NombreCliente"
-                           readonly
-                           style="background-color: #e9ecef; cursor: not-allowed;" />
+                           readonly />
                 </div>
 
                 <div class="col-md-6">
@@ -63,11 +62,11 @@
                 </div>
             </div>
 
-            <h5 class="fw-bold mb-3" style="color: var(--color-btn-bg);">
+            <h5 class="fw-bold mb-3 c-section-title">
                 <i class="bi bi-clipboard-fill me-2"></i>Información del proyecto
             </h5>
 
-            <hr style="border-color: var(--color-accent);" />
+            <hr class="c-hr-accent" />
 
             <div class="row g-3 mb-4">
                 <div class="col-md-8">
@@ -106,11 +105,11 @@
                 </div>
             </div>
 
-            <h5 class="fw-bold mb-3" style="color: var(--color-btn-bg);">
+            <h5 class="fw-bold mb-3 c-section-title">
                 <i class="bi bi-calendar-event-fill me-2"></i>Fechas y presupuesto
             </h5>
 
-            <hr style="border-color: var(--color-accent);" />
+            <hr class="c-hr-accent" />
 
             <div class="row g-3 mb-4">
                 <div class="col-md-4">
@@ -148,8 +147,7 @@
                 <a asp-action="Detalle"
                    asp-controller="Proyecto"
                    asp-route-id="@Model.Id"
-                   class="btn btn-sm"
-                   style="background-color: var(--color-text-muted) !important;">
+                   class="btn btn-outline-secondary">
                     Cancelar
                 </a>
             </div>

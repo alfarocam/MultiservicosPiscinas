@@ -1,4 +1,4 @@
-﻿@model MultiserviciosPiscinas.Models.RegistrarTareasViewModel
+@model MultiserviciosPiscinas.Models.RegistrarTareasViewModel
 
 @{
     Layout = "~/Views/Shared/_LayoutTecnico.cshtml";
@@ -27,11 +27,11 @@
 
 <div class="c-detail-card mb-4">
 
-    <h5 class="fw-bold mb-3" style="color: var(--color-btn-bg);">
+    <h5 class="fw-bold mb-3 c-section-title">
         <i class="bi bi-info-circle-fill me-2"></i>Información del servicio
     </h5>
 
-    <hr style="border-color: var(--color-accent);" />
+    <hr class="c-hr-accent" />
 
     <div class="row g-3 mb-4">
         <div class="col-md-4">
@@ -79,16 +79,16 @@
         <div class="col-12">
             <div class="c-detail-field c-field-gray">
                 <label>Dirección</label>
-                <p style="font-weight:400">@Model.Direccion</p>
+                <p>@Model.Direccion</p>
             </div>
         </div>
     </div>
 
-    <h5 class="fw-bold mb-3" style="color: var(--color-btn-bg);">
+    <h5 class="fw-bold mb-3 c-section-title">
         <i class="bi bi-pencil-square me-2"></i>Nueva tarea realizada
     </h5>
 
-    <hr style="border-color: var(--color-accent);" />
+    <hr class="c-hr-accent" />
 
     <form asp-action="RegistrarTareas" method="post">
         @Html.AntiForgeryToken()
@@ -121,11 +121,11 @@
 
 <div class="c-detail-card">
 
-    <h5 class="fw-bold mb-3" style="color: var(--color-btn-bg);">
+    <h5 class="fw-bold mb-3 c-section-title">
         <i class="bi bi-clock-history me-2"></i>Tareas registradas
     </h5>
 
-    <hr style="border-color: var(--color-accent);" />
+    <hr class="c-hr-accent" />
 
     @if (!Model.TareasRegistradas.Any())
     {

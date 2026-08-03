@@ -1,4 +1,4 @@
-﻿@model MultiserviciosPiscinas.Models.MiAgendaViewModel
+@model MultiserviciosPiscinas.Models.MiAgendaViewModel
 
 @{
     Layout = "~/Views/Shared/_LayoutTecnico.cshtml";
@@ -41,8 +41,7 @@
         <input type="date"
                name="fecha"
                value="@Model.FechaConsulta.ToString("yyyy-MM-dd")"
-               class="form-control"
-               style="max-width:220px" />
+               class="form-control c-filter-input-sm" />
 
         <button type="submit" class="btn">
             <i class="bi bi-search me-1"></i>Consultar
@@ -134,7 +133,7 @@
                             @cita.Piscina
                         </td>
 
-                        <td style="max-width:340px">
+                        <td class="c-table-col-md">
                             @cita.Direccion
                         </td>
 

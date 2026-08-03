@@ -14,9 +14,9 @@
 
 <div class="o-form-card">
     <div class="table-responsive">
-        <table id="tablaClientes" class="table align-middle w-100" style="color: var(--color-text-dark);">
+        <table id="tablaClientes" class="c-data-table align-middle w-100">
             <thead>
-                <tr style="border-bottom: 2px solid #e1ecf4;">
+                <tr>
                     <th class="a-text-muted small text-uppercase">ID</th>
                     <th class="a-text-muted small text-uppercase">Nombre</th>
                     <th class="a-text-muted small text-uppercase">Correo</th>
@@ -27,7 +27,7 @@
             <tbody>
                 @foreach (var cliente in Model)
                 {
-                    <tr style="border-bottom: 1px solid #e1ecf4;">
+                    <tr>
                         <td>@cliente.Id</td>
                         <td>@cliente.Usuario.Nombre @cliente.Usuario.ApellidoPaterno</td>
                         <td>@cliente.Usuario.Correo</td>
@@ -35,8 +35,7 @@
                         <td class="text-center">
                             <a asp-action="Detalle"
                                asp-route-id="@cliente.Id"
-                               class="btn btn-sm" title="Ver detalle"
-                               style="background-color: transparent !important; color: var(--color-navbar-bg) !important; border: 1px solid var(--color-navbar-bg) !important; box-shadow: none !important;">
+                               class="c-btn-sm c-btn-sm-outline" title="Ver detalle">
                                  Ver
                             </a>
                             <a asp-action="Editar"
@@ -47,8 +46,7 @@
                             <a asp-action="Crear"
                                asp-controller="Piscinas"
                                asp-route-clienteId="@cliente.Id"
-                               class="btn btn-sm" title="Crear piscina"
-                               style="background-color: var(--color-footer-bg) !important;">
+                               class="c-btn-sm c-btn-sm-primary" title="Crear piscina">
                                 Crear Piscina
                             </a>
                         </td>

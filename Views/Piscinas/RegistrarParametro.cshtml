@@ -1,11 +1,11 @@
-﻿@model MultiserviciosPiscinas.Models.RegistrarParametroAguaViewModel
+@model MultiserviciosPiscinas.Models.RegistrarParametroAguaViewModel
 
 @{
     Layout = "~/Views/Shared/_LayoutTecnico.cshtml";
     ViewData["Title"] = "Registrar Parámetros del Agua";
 }
 
-<div class="container my-4" style="max-width: 960px;">
+<div class="container my-4 u-container-max-lg">
 
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
@@ -19,8 +19,7 @@
 
         <a asp-action="RegistroParametros"
            asp-controller="Piscinas"
-           class="btn a-btn-outline"
-           style="color: var(--color-navbar-bg) !important; border-color: var(--color-navbar-bg) !important;">
+           class="btn btn-outline-secondary">
             <i class="bi bi-arrow-left me-1"></i> Volver
         </a>
     </div>
@@ -29,51 +28,50 @@
 
         <div class="col-lg-4">
             <div class="o-form-card h-100">
-                <h5 class="fw-bold mb-3" style="color: var(--color-btn-bg);">
+                <h5 class="fw-bold mb-3 c-section-title">
                     <i class="bi bi-info-circle me-2"></i>Información de la visita
                 </h5>
 
-                <hr style="border-color: var(--color-accent);" />
+                <hr class="c-hr-accent" />
 
                 <div class="mb-3">
                     <div class="a-text-muted small mb-1">Cliente</div>
-                    <div class="fw-semibold" style="color: var(--color-text-dark);">
+                    <div class="fw-semibold">
                         @Model.Cliente
                     </div>
                 </div>
 
                 <div class="mb-3">
                     <div class="a-text-muted small mb-1">Piscina</div>
-                    <div style="color: var(--color-text-dark);">
+                    <div>
                         @Model.Piscina
                     </div>
                 </div>
 
                 <div class="mb-3">
                     <div class="a-text-muted small mb-1">Dirección</div>
-                    <div class="small" style="color: var(--color-text-dark);">
+                    <div class="small">
                         @Model.Direccion
                     </div>
                 </div>
 
                 <div class="mb-3">
                     <div class="a-text-muted small mb-1">Fecha de visita</div>
-                    <div style="color: var(--color-text-dark);">
+                    <div>
                         @Model.FechaHoraCita.ToString("dd/MM/yyyy HH:mm")
                     </div>
                 </div>
 
                 <div class="mb-3">
                     <div class="a-text-muted small mb-1">Tipo</div>
-                    <span class="badge"
-                          style="background-color: var(--color-link); padding: 0.4rem 0.6rem; border-radius: var(--border-radius-sm);">
+                    <span class="c-badge c-badge-blue">
                         @Model.TipoCita
                     </span>
                 </div>
 
                 <div>
                     <div class="a-text-muted small mb-1">Mediciones registradas</div>
-                    <div class="fw-bold fs-5" style="color: var(--color-btn-bg);">
+                    <div class="fw-bold fs-5 c-section-title">
                         @Model.MedicionesRegistradas
                     </div>
                 </div>
@@ -90,11 +88,11 @@
 
                     <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
 
-                    <h5 class="fw-bold mb-3" style="color: var(--color-btn-bg);">
+                    <h5 class="fw-bold mb-3 c-section-title">
                         <i class="bi bi-clipboard-pulse me-2"></i>Valores de medición
                     </h5>
 
-                    <hr style="border-color: var(--color-accent);" />
+                    <hr class="c-hr-accent" />
 
                     <div class="row g-3">
 
@@ -168,8 +166,7 @@
                     <div class="d-flex justify-content-end gap-2 mt-4">
                         <a asp-action="RegistroParametros"
                            asp-controller="Piscinas"
-                           class="btn a-btn-outline"
-                           style="color: var(--color-navbar-bg) !important; border-color: var(--color-navbar-bg) !important;">
+                           class="btn btn-outline-secondary">
                             Cancelar
                         </a>
 
