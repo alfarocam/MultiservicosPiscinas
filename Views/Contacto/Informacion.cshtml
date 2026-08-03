@@ -1,33 +1,101 @@
-﻿@model MultiserviciosPiscinas.Models.ContactoEmpresa
+@model MultiserviciosPiscinas.Models.ContactoEmpresa
 
-<h2>Medios de Contacto</h2>
+@{
+    ViewData["Title"] = "Medios de Contacto";
+}
 
-<div class="card shadow-sm">
-    <div class="card-body">
-
-        <h5 class="mb-3">
-            Información de contacto
-        </h5>
-
-        <p>
-            <strong>Teléfono:</strong>
-            @Model?.Telefono
+<div class="c-page-header">
+    <div>
+        <h2><i class="bi bi-building me-2"></i>Medios de Contacto e Información</h2>
+        <p class="a-text-light mb-0 small opacity-75">
+            Canales de comunicación oficiales, canales de atención telefónica y ubicación de nuestra sede central.
         </p>
+    </div>
+</div>
 
-        <p>
-            <strong>Correo:</strong>
-            @Model?.Correo
-        </p>
+<div class="row g-4">
 
-        <p>
-            <strong>Dirección:</strong>
-            @Model?.Direccion
-        </p>
+    <!-- Teléfono -->
+    <div class="col-md-6 col-lg-3">
+        <div class="c-detail-card h-100 text-center">
+            <div class="fs-1 text-primary mb-2">
+                <i class="bi bi-telephone-fill"></i>
+            </div>
+            <div class="c-kpi-label mb-1">Teléfono Central</div>
+            <div class="fw-bold fs-5 mb-2">
+                @(Model?.Telefono ?? "+(506) 2234-5678")
+            </div>
+            <a href="tel:@(Model?.Telefono ?? "22345678")" class="c-btn-sm c-btn-sm-outline mt-2 text-decoration-none">
+                <i class="bi bi-telephone-outbound me-1"></i>Llamar ahora
+            </a>
+        </div>
+    </div>
 
-        <p>
-            <strong>Horario de Atención:</strong>
-            @Model?.HorarioAtencion
-        </p>
+    <!-- Correo -->
+    <div class="col-md-6 col-lg-3">
+        <div class="c-detail-card h-100 text-center">
+            <div class="fs-1 text-info mb-2">
+                <i class="bi bi-envelope-fill"></i>
+            </div>
+            <div class="c-kpi-label mb-1">Correo Electrónico</div>
+            <div class="fw-bold fs-6 mb-2 text-break">
+                @(Model?.Correo ?? "soporte@multiserviciospiscinas.com")
+            </div>
+            <a href="mailto:@(Model?.Correo ?? "soporte@multiserviciospiscinas.com")" class="c-btn-sm c-btn-sm-outline mt-2 text-decoration-none">
+                <i class="bi bi-send me-1"></i>Enviar correo
+            </a>
+        </div>
+    </div>
 
+    <!-- Dirección -->
+    <div class="col-md-6 col-lg-3">
+        <div class="c-detail-card h-100 text-center">
+            <div class="fs-1 text-danger mb-2">
+                <i class="bi bi-geo-alt-fill"></i>
+            </div>
+            <div class="c-kpi-label mb-1">Sede Principal</div>
+            <div class="fw-semibold small mb-2 text-dark">
+                @(Model?.Direccion ?? "San José, Costa Rica")
+            </div>
+            <span class="c-badge c-badge-gray mt-2">
+                <i class="bi bi-pin-map me-1"></i>Oficinas Centrales
+            </span>
+        </div>
+    </div>
+
+    <!-- Horario -->
+    <div class="col-md-6 col-lg-3">
+        <div class="c-detail-card h-100 text-center">
+            <div class="fs-1 text-warning mb-2">
+                <i class="bi bi-clock-history"></i>
+            </div>
+            <div class="c-kpi-label mb-1">Horario de Atención</div>
+            <div class="fw-semibold small mb-2 text-dark">
+                @(Model?.HorarioAtencion ?? "Lunes a Viernes: 7:30 AM - 5:00 PM")
+            </div>
+            <span class="c-badge c-badge-green mt-2">
+                <i class="bi bi-check-circle me-1"></i>Abierto hoy
+            </span>
+        </div>
+    </div>
+
+</div>
+
+<!-- Sección Adicional: Garantía y Respaldo -->
+<div class="o-form-card mt-4">
+    <div class="row align-items-center g-3">
+        <div class="col-md-8">
+            <h5 class="fw-bold c-section-title mb-1">
+                <i class="bi bi-shield-check me-2"></i>Compromiso de Calidad y Servicio
+            </h5>
+            <p class="a-text-muted mb-0 small">
+                Todos nuestros servicios técnicos y mantenimientos cuentan con garantía de satisfacción y supervisión por especialistas certificados.
+            </p>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <a asp-action="Index" asp-controller="Contacto" class="a-btn text-decoration-none">
+                <i class="bi bi-chat-dots me-1"></i>Enviar Mensaje
+            </a>
+        </div>
     </div>
 </div>

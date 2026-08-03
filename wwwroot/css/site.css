@@ -502,21 +502,28 @@ main {
     width: 100%;
     border-collapse: collapse;
     font-family: var(--font-family-body);
+    margin-bottom: 0;
 }
 
-    .c-data-table thead tr {
-        background-color: #f0f7fa;
-        border-bottom: 2px solid #d0e8f0;
+    .c-data-table thead tr,
+    .c-data-table thead tr.table-dark,
+    .c-data-table thead tr.table-light {
+        background-color: #f0f7fa !important;
+        border-bottom: 2px solid #d0e8f0 !important;
     }
 
-    .c-data-table thead th {
+    .c-data-table thead th,
+    .c-data-table thead tr.table-dark th,
+    .c-data-table thead tr.table-light th {
         padding: 12px 20px;
         font-size: 0.75rem;
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.06em;
-        color: var(--color-navbar-bg);
+        color: var(--color-navbar-bg) !important;
+        background-color: #f0f7fa !important;
         font-family: var(--font-family-heading);
+        border: none !important;
     }
 
     .c-data-table tbody tr {
@@ -529,7 +536,7 @@ main {
         }
 
         .c-data-table tbody tr:hover {
-            background-color: #f7fbfd;
+            background-color: #f7fbfd !important;
         }
 
     .c-data-table tbody td {
@@ -537,6 +544,13 @@ main {
         font-size: 0.9rem;
         color: var(--color-text-dark);
         vertical-align: middle;
+        border-top: none;
+        border-bottom: 1px solid #edf4f8;
+    }
+
+    .c-data-table.table-sm tbody td,
+    .c-data-table.table-sm thead th {
+        padding: 8px 14px;
     }
 
     .c-data-table td.c-num {
