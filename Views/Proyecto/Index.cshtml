@@ -1,4 +1,4 @@
-﻿@model IEnumerable<MultiserviciosPiscinas.Models.ProyectoConstruccion>
+@model IEnumerable<MultiserviciosPiscinas.Models.ProyectoConstruccion>
 
 @{
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
@@ -114,7 +114,7 @@
                                        asp-controller="Proyecto"
                                        asp-route-id="@proyecto.Id"
                                        class="c-btn-sm c-btn-sm-outline">
-                                        Ver
+                                        <i class="bi bi-eye me-1"></i>Ver
                                     </a>
 
                             @if (esEditable)

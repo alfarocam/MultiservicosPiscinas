@@ -5,7 +5,7 @@
 
 <div class="c-page-header">
     <h2><i class="bi bi-box-seam me-2"></i>Inventario</h2>
-    <a asp-action="Crear" class="btn">+ Nuevo producto</a>
+    <a asp-action="Crear" class="btn"><i class="bi bi-plus-circle me-1"></i>Nuevo producto</a>
 </div>
 
 @if (TempData["MensajeExito"] != null)
@@ -25,7 +25,7 @@
         </button>
         @if (!string.IsNullOrWhiteSpace(ViewBag.Busqueda as string))
         {
-            <a asp-action="Index" class="btn btn-outline-secondary">Limpiar</a>
+            <a asp-action="Index" class="btn btn-outline-secondary"><i class="bi bi-x-lg me-1"></i>Limpiar</a>
         }
     </form>
 </div>

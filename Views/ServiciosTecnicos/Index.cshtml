@@ -37,7 +37,7 @@
     @if (User.IsInRole("1"))
     {
         <a asp-action="Crear" class="btn">
-            + Nuevo servicio
+            <i class="bi bi-plus-circle me-1"></i>Nuevo servicio
         </a>
     }
 </div>
@@ -57,7 +57,7 @@
         @if (!string.IsNullOrWhiteSpace(ViewBag.Busqueda as string))
         {
             <a asp-action="Index" class="btn btn-outline-secondary">
-                Limpiar
+                <i class="bi bi-x-lg me-1"></i>Limpiar
             </a>
         }
     </form>
@@ -142,50 +142,45 @@
                             </span>
                         </td>
 
-                        <td>
-                            <div class="d-flex justify-content-center gap-1 flex-wrap">
-                        @if (User.IsInRole("2") && servicio.Estado != "Cerrado" && servicio.Estado != "Cancelado")
-                                {
-                                    <a asp-action="RegistrarTareas"
-                                       asp-route-id="@servicio.Id"
-                                       class="c-btn-sm c-btn-sm-primary"
-                                       title="Registrar tareas completadas">
-                                        <i class="bi bi-list-task me-1"></i>Lista
-                                    </a>
-                                }
-
-                                <a asp-action="Detalle"
-                                   asp-route-id="@servicio.Id"
-                                   class="c-btn-sm c-btn-sm-primary"
-                                   title="Ver detalle del servicio">
-                                    <i class="bi bi-eye-fill me-1"></i>Ver
-                                </a>
-
-                                @if (User.IsInRole("1") && servicio.Estado != "Cerrado" && servicio.Estado != "Cancelado")
-                                {
-                                    <a asp-action="CambiarTecnico"
-                                       asp-route-id="@servicio.Id"
-                                       class="c-btn-sm c-btn-sm-primary"
-                                       title="Cambiar técnico asignado">
-                                        <i class="bi bi-pencil-fill"></i>
-                                    </a>
-                                }
-
-                                @if (servicio.Estado != "Cerrado" && servicio.Estado != "Cancelado")
-                                {
-                                    <form asp-action="Finalizar"
-                                          asp-route-id="@servicio.Id"
-                                          method="post"
-                                          onsubmit="return FinalizarServicio(event, this);">
-                                        @Html.AntiForgeryToken()
-
-                                        <button type="submit"
-                                                class="c-btn-sm c-btn-sm-primary"
-                                                title="Dar por finalizado">
-                                            <i class="bi bi-check-circle-fill me-1"></i>Finalizar
-                                        </button>
-                                    </form>
-                                }
+                        <td class="text-center">
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-three-dots-vertical me-1"></i>Acciones
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                                    @if (User.IsInRole("2") && servicio.Estado != "Cerrado" && servicio.Estado != "Cancelado")
+                                    {
+                                        <li>
+                                            <a asp-action="RegistrarTareas" asp-route-id="@servicio.Id" class="dropdown-item">
+                                                <i class="bi bi-list-task me-2 text-primary"></i>Registrar tareas
+                                            </a>
+                                        </li>
+                                    }
+                                    <li>
+                                        <a asp-action="Detalle" asp-route-id="@servicio.Id" class="dropdown-item">
+                                            <i class="bi bi-eye-fill me-2 text-info"></i>Ver detalle
+                                        </a>
+                                    </li>
+                                    @if (User.IsInRole("1") && servicio.Estado != "Cerrado" && servicio.Estado != "Cancelado")
+                                    {
+                                        <li>
+                                            <a asp-action="CambiarTecnico" asp-route-id="@servicio.Id" class="dropdown-item">
+                                                <i class="bi bi-person-gear me-2 text-warning"></i>Cambiar técnico
+                                            </a>
+                                        </li>
+                                    }
+                                    @if (servicio.Estado != "Cerrado" && servicio.Estado != "Cancelado")
+                                    {
+                                        <li>
+                                            <form asp-action="Finalizar" asp-route-id="@servicio.Id" method="post" onsubmit="return FinalizarServicio(event, this);" class="d-inline">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="dropdown-item text-success">
+                                                    <i class="bi bi-check-circle-fill me-2"></i>Finalizar servicio
+                                                </button>
+                                            </form>
+                                        </li>
+                                    }
+                                </ul>
                             </div>
                         </td>
                     </tr>

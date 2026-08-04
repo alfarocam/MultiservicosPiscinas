@@ -25,7 +25,9 @@
             @await Html.PartialAsync("_CampanaNotificaciones")
             <span class="text-white small">@User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value</span>
             <form asp-controller="Auth" asp-action="CerrarSesion" method="post" onsubmit="localStorage.removeItem('activeSidebarLink')">
-                <button type="submit" class="btn btn-outline-light btn-sm">Salir</button>
+                <button type="submit" class="btn btn-outline-light btn-sm">
+                    <i class="bi bi-box-arrow-right me-1"></i>Salir
+                </button>
             </form>
         </div>
     </nav>

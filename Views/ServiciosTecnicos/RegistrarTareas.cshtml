@@ -1,4 +1,4 @@
-﻿@model MultiserviciosPiscinas.Models.RegistrarTareasViewModel
+@model MultiserviciosPiscinas.Models.RegistrarTareasViewModel
 
 @{
     Layout = "~/Views/Shared/_LayoutTecnico.cshtml";
@@ -106,14 +106,14 @@
             <span asp-validation-for="NuevaTarea" class="text-danger small"></span>
         </div>
 
-        <div class="d-flex gap-2">
-            <button type="submit" class="btn">
-                <i class="bi bi-save me-1"></i>Guardar Tareas
-            </button>
-
+        <div class="d-flex justify-content-end gap-2">
             <a asp-action="Detalle" asp-route-id="@Model.ServicioId" class="btn btn-outline-secondary">
                 <i class="bi bi-eye-fill me-1"></i>Ver detalle
             </a>
+
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-save me-1"></i>Guardar Tareas
+            </button>
         </div>
     </form>
 

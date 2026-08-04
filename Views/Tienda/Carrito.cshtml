@@ -1,4 +1,4 @@
-﻿@model List<MultiserviciosPiscinas.DTOs.Cotizacion.ItemCarritoDto>
+@model List<MultiserviciosPiscinas.DTOs.Cotizacion.ItemCarritoDto>
 
 @{
     ViewData["Title"] = "Mi Carrito";
@@ -78,8 +78,12 @@
                         <p><strong>IVA (13%):</strong> <span id="totalIVA">₡@Model.Sum(i => i.LineaImpuesto).ToString("N2")</span></p>
                         <h5><strong>Total:</strong> <strong id="totalGeneral">₡@Model.Sum(i => i.LineaTotal).ToString("N2")</strong></h5>
                     </div>
-                    <a href="@Url.Action("Comprar", "Tienda")" class="btn btn-success w-100">Comprar</a>
-                    <a href="@Url.Action("Index", "Tienda")" class="btn btn-outline-secondary w-100 mt-2">Continuar Comprando</a>
+                    <a href="@Url.Action("Comprar", "Tienda")" class="btn btn-success w-100">
+                        <i class="bi bi-credit-card me-1"></i>Comprar
+                    </a>
+                    <a href="@Url.Action("Index", "Tienda")" class="btn btn-outline-secondary w-100 mt-2">
+                        <i class="bi bi-arrow-left me-1"></i>Continuar Comprando
+                    </a>
                 </div>
             </div>
         </div>

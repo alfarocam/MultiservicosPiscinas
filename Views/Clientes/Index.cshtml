@@ -1,4 +1,4 @@
-﻿@model IEnumerable<MultiserviciosPiscinas.Models.Cliente>
+@model IEnumerable<MultiserviciosPiscinas.Models.Cliente>
 
 @{
     ViewData["Title"] = "Clientes";
@@ -8,7 +8,7 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="a-title">Gestión de Clientes</h1>
         <a asp-action="Crear" asp-controller="Clientes" class="btn btn-primary">
-            Nuevo Cliente
+            <i class="bi bi-person-plus me-1"></i>Nuevo Cliente
         </a>
     </div>
 
@@ -36,18 +36,18 @@
                             <a asp-action="Detalle"
                                asp-route-id="@cliente.Id"
                                class="c-btn-sm c-btn-sm-outline" title="Ver detalle">
-                                 Ver
+                                <i class="bi bi-eye me-1"></i>Ver
                             </a>
                             <a asp-action="Editar"
                                asp-route-id="@cliente.Id"
-                               class="btn btn-sm text-decoration-none" title="Editar cliente">
-                                Editar
+                               class="c-btn-sm c-btn-sm-primary ms-1" title="Editar cliente">
+                                <i class="bi bi-pencil me-1"></i>Editar
                             </a>
                             <a asp-action="Crear"
                                asp-controller="Piscinas"
                                asp-route-clienteId="@cliente.Id"
-                               class="c-btn-sm c-btn-sm-primary" title="Crear piscina">
-                                Crear Piscina
+                               class="c-btn-sm c-btn-sm-primary ms-1" title="Crear piscina">
+                                <i class="bi bi-plus-circle me-1"></i>Crear Piscina
                             </a>
                         </td>
                     </tr>

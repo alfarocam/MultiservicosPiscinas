@@ -1,4 +1,4 @@
-﻿@model MultiserviciosPiscinas.DTOs.Factura.ComprarCarritoViewModel
+@model MultiserviciosPiscinas.DTOs.Factura.ComprarCarritoViewModel
 
 @{
     ViewData["Title"] = "Confirmar Compra";
@@ -76,8 +76,12 @@
                         <small class="d-block mt-1">Formatos: JPG, JPEG, PNG (máx. 5MB)</small>
                     </div>
 
-                    <button type="submit" class="btn btn-success w-100">Realizar Compra</button>
-                    <a href="@Url.Action("Carrito", "Tienda")" class="btn btn-outline-secondary w-100 mt-2">Cancelar</a>
+                    <button type="submit" class="btn btn-success w-100">
+                        <i class="bi bi-check-circle-fill me-1"></i>Realizar Compra
+                    </button>
+                    <a href="@Url.Action("Carrito", "Tienda")" class="btn btn-outline-secondary w-100 mt-2">
+                        <i class="bi bi-x-circle me-1"></i>Cancelar
+                    </a>
                 </form>
             </div>
         </div>

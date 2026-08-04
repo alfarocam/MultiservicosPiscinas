@@ -114,8 +114,10 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-success"><i class="bi bi-save"></i> Guardar Vehiculo</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle me-1"></i>Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-success"><i class="bi bi-save me-1"></i>Guardar Vehiculo</button>
                 </div>
             </form>
         </div>
@@ -134,27 +136,29 @@
                 <input type="hidden" id="editId" name="Id" />
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label class="form-label fw-bold">Placa:</label>
+                        <label class="form-label fw-semibold">Placa:</label>
                         <input type="text" id="editPlaca" name="Placa" class="form-control" required />
                     </div>
                     <div class="mb-3">
-                        <label class="form-label fw-bold">Marca:</label>
+                        <label class="form-label fw-semibold">Marca:</label>
                         <input type="text" id="editMarca" name="Marca" class="form-control" required />
                     </div>
                     <div class="mb-3">
-                        <label class="form-label fw-bold">Modelo:</label>
+                        <label class="form-label fw-semibold">Modelo:</label>
                         <input type="text" id="editModelo" name="Modelo" class="form-control" />
                     </div>
                     <div class="mb-3">
-                        <label class="form-label fw-bold">Técnico Asignado:</label>
+                        <label class="form-label fw-semibold">Técnico Asignado:</label>
                         <select id="editTecnicoId" name="TecnicoId" class="form-select" asp-items="ViewBag.Tecnicos" required>
                             <option value="">-- Seleccionar Técnico --</option>
                         </select>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> Guardar Cambios</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle me-1"></i>Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-save me-1"></i>Guardar Cambios</button>
                 </div>
             </form>
         </div>
