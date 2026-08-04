@@ -1,0 +1,182 @@
+﻿@model IEnumerable<MultiserviciosPiscinas.Models.GastoOperativo>
+
+@{
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    ViewData["Title"] = "Gestión de Gastos";
+
+    bool esAdmin = User.Identity?.Name != null && User.Identity.Name.StartsWith("admin", StringComparison.OrdinalIgnoreCase);
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0"><i class="bi bi-receipt me-2"></i>Gestión de Gastos (Viáticos / Materiales)</h2>
+    <a asp-action="Registrar" class="btn btn-primary">+ Registrar Nuevo Gasto</a>
+</div>
+
+@if (TempData["MensajeExito"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show mb-3">
+        <i class="bi bi-check-circle-fill me-2"></i>@TempData["MensajeExito"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+@if (TempData["MensajeError"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show mb-3">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["MensajeError"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="card shadow-sm border-0">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Categoría</th>
+                        <th>Monto</th>
+                        <th>Descripción</th>
+                        <th>Comprobante</th>
+                        <th>Estado</th>
+                        <th>Motivo Rechazo</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!Model.Any())
+                    {
+                        <tr><td colspan="8" class="text-center text-muted py-4">No hay gastos registrados.</td></tr>
+                    }
+                    else
+                    {
+                        @foreach (var g in Model)
+                        {
+                            <tr>
+                                <td>@g.Fecha.ToString("dd/MM/yyyy")</td>
+                                <td>@(g.Categoria?.NombreCategoria ?? "General")</td>
+                                <td><strong>₡@g.Monto.ToString("N2")</strong></td>
+                                <td>@(g.Descripcion ?? "—")</td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(g.ComprobanteRuta))
+                                    {
+                                        <a href="@g.ComprobanteRuta" target="_blank" class="btn btn-sm btn-outline-info">
+                                            <i class="bi bi-paperclip me-1"></i>Ver
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted small">Sin archivo</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (g.Estado == "Aprobado")
+                                    {
+                                        <span class="badge bg-success">Aprobado</span>
+                                    }
+                                    else if (g.Estado == "Pendiente")
+                                    {
+                                        <span class="badge bg-warning text-dark">Pendiente</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger">Rechazado</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (g.Estado == "Rechazado")
+                                    {
+                                        <span class="text-danger small fw-bold"><i class="bi bi-exclamation-circle me-1"></i>@g.MotivoRechazo</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">—</span>
+                                    }
+                                </td>
+
+                                <td class="text-center">
+                                    @if (g.Estado == "Pendiente")
+                                    {
+                                        if (esAdmin)
+                                        {
+                                            <div class="d-flex justify-content-center gap-1">
+                                                <form asp-action="Aprobar" method="post" style="display:inline;">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="id" value="@g.Id" />
+                                                    <button type="submit" class="btn btn-sm btn-success" title="Aprobar">
+                                                        <i class="bi bi-check-lg"></i>
+                                                    </button>
+                                                </form>
+
+                                                <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#modalRechazar-@g.Id" title="Rechazar">
+                                                    <i class="bi bi-x-lg"></i>
+                                                </button>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted small"><i class="bi bi-clock me-1"></i>En espera</span>
+                                        }
+                                    }
+                                    else if (g.Estado == "Aprobado")
+                                    {
+                                        <span class="text-success small fw-bold"><i class="bi bi-check-circle-fill me-1"></i>Aprobado</span>
+                                    }
+                                    else if (g.Estado == "Rechazado")
+                                    {
+                                        if (esAdmin)
+                                        {
+                                            <span class="text-danger small fw-bold"><i class="bi bi-x-circle-fill me-1"></i>Rechazado</span>
+                                        }
+                                        else
+                                        {
+                                            <a asp-action="Corregir" asp-route-id="@g.Id" class="btn btn-sm btn-warning">
+                                                <i class="bi bi-pencil-square me-1"></i>Corregir
+                                            </a>
+                                        }
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@* seccion de modales *@
+@if (Model != null && Model.Any())
+{
+    @foreach (var g in Model)
+    {
+        @if (g.Estado == "Pendiente")
+        {
+            <div class="modal fade" id="modalRechazar-@g.Id" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content text-start">
+                        <form asp-action="Rechazar" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@g.Id" />
+
+                            <div class="modal-header bg-danger text-white">
+                                <h5 class="modal-title fs-6"><i class="bi bi-exclamation-triangle-fill me-2"></i>Motivo de Rechazo</h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+
+                            <div class="modal-body">
+                                <label class="form-label fw-bold text-dark">Escriba la justificación:</label>
+                                <textarea name="motivoRechazo" class="form-control" rows="3" required placeholder="Ej: La foto del comprobante no es legible..."></textarea>
+                            </div>
+
+                            <div class="modal-footer bg-light">
+                                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                                <button type="submit" class="btn btn-danger btn-sm">Confirmar Rechazo</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+}
