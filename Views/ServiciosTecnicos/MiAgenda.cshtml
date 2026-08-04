@@ -1,4 +1,4 @@
-﻿@model MultiserviciosPiscinas.Models.MiAgendaViewModel
+@model MultiserviciosPiscinas.Models.MiAgendaViewModel
 
 @{
     Layout = "~/Views/Shared/_LayoutTecnico.cshtml";
@@ -78,9 +78,11 @@
     </div>
 </div>
 
-<div class="c-data-card">
-    <table class="table table-hover">
-        <thead class="table-light">
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table id="tablaMiAgenda" class="table table-hover align-middle">
+                <thead class="table-light">
             <tr>
                 <th>Hora</th>
                 <th>Cliente</th>
@@ -170,5 +172,11 @@
                 }
             }
         </tbody>
-    </table>
+            </table>
+        </div>
+    </div>
 </div>
+
+@section Scripts {
+    <script src="~/js/servicios-tecnicos-tabla.js" asp-append-version="true"></script>
+}

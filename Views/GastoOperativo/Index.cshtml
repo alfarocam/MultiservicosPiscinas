@@ -1,4 +1,4 @@
-﻿@model List<MultiserviciosPiscinas.Models.GastoOperativo>
+@model List<MultiserviciosPiscinas.Models.GastoOperativo>
 @{
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
     ViewData["Title"] = "Gastos Operativos";
@@ -17,9 +17,11 @@
     </div>
 }
 
-<div class="c-data-card">
-    <table class="table table-hover">
-        <thead class="table-light">
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table id="tablaGastosOperativos" class="table table-hover align-middle">
+                <thead class="table-light">
             <tr>
                 <th>#</th>
                 <th>Fecha</th>
@@ -79,5 +81,12 @@
                 }
             }
         </tbody>
-    </table>
+            </table>
+        </div>
+    </div>
 </div>
+
+@section Scripts {
+    <script src="~/js/gasto-operativo-tabla.js" asp-append-version="true"></script>
+}
+

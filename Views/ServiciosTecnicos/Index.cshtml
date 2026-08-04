@@ -1,4 +1,4 @@
-﻿@model List<MultiserviciosPiscinas.Models.Servicio>
+@model List<MultiserviciosPiscinas.Models.Servicio>
 
 @{
     Layout = User.IsInRole("2")
@@ -63,9 +63,11 @@
     </form>
 </div>
 
-<div class="c-data-card">
-    <table class="table table-hover">
-        <thead class="table-light">
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table id="tablaServiciosTecnicos" class="table table-hover align-middle">
+                <thead class="table-light">
             <tr>
                 <th>#</th>
                 <th>Usuario / Cliente</th>
@@ -200,7 +202,12 @@
                 }
             }
         </tbody>
-    </table>
+            </table>
+        </div>
+    </div>
 </div>
 
-<script src="~/js/sweetalerts.js" asp-append-version="true"></script>
+@section Scripts {
+    <script src="~/js/sweetalerts.js" asp-append-version="true"></script>
+    <script src="~/js/servicios-tecnicos-tabla.js" asp-append-version="true"></script>
+}

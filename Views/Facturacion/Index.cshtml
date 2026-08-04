@@ -1,4 +1,4 @@
-﻿@{
+@{
     ViewData["Title"] = "Nombre del módulo";
 }
 
@@ -7,25 +7,31 @@
     <a asp-action="Crear" class="btn btn-primary">+ Nuevo</a>
 </div>
 
-<div class="card border-0 shadow-sm">
-    <div class="card-body p-0">
-        <table class="table table-hover align-middle">
-            <thead class="table-dark">
-                <tr>
-                    <th>#</th>
-                    <th>Campo 1</th>
-                    <th>Campo 2</th>
-                    <th>Campo 3</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td colspan="5" class="text-center text-muted py-4">
-                        No hay registros aún.
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table id="tablaFacturas" class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>#</th>
+                        <th>Campo 1</th>
+                        <th>Campo 2</th>
+                        <th>Campo 3</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td colspan="5" class="text-center text-muted py-4">
+                            No hay registros aún.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
+
+@section Scripts {
+    <script src="~/js/facturacion-tabla.js" asp-append-version="true"></script>
+}

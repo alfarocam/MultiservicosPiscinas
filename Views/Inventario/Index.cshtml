@@ -1,4 +1,4 @@
-﻿@model List<MultiserviciosPiscinas.Models.Producto>
+@model List<MultiserviciosPiscinas.Models.Producto>
 @{
     ViewData["Title"] = "Inventario";
 }
@@ -30,9 +30,11 @@
     </form>
 </div>
 
-<div class="c-data-card">
-    <table class="table table-hover">
-        <thead class="table-light">
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table id="tablaInventario" class="table table-hover align-middle">
+                <thead class="table-light">
             <tr>
                 <th>#</th>
                 <th>Producto</th>
@@ -98,7 +100,9 @@
                 }
             }
         </tbody>
-    </table>
+            </table>
+        </div>
+    </div>
 </div>
 
 @section Scripts {

@@ -1,4 +1,4 @@
-﻿@model IEnumerable<MultiserviciosPiscinas.Models.Rol>
+@model IEnumerable<MultiserviciosPiscinas.Models.Rol>
 
 @{
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
@@ -29,30 +29,36 @@
     </div>
 </div>
 
-<div class="card border-0 shadow-sm">
-    <div class="card-body p-0">
-        <table class="table table-hover align-middle">
-            <thead class="table-dark">
-                <tr>
-                    <th># ID</th>
-                    <th>Rol</th>
-                    <th>Descripción</th>
-                    <th>Usuarios asignados</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var rol in Model)
-                {
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table id="tablaRoles" class="table table-hover align-middle">
+                <thead class="table-light">
                     <tr>
-                        <td>@rol.Id</td>
-                        <td><strong>@rol.Nombre</strong></td>
-                        <td>@(rol.Descripcion ?? "Sin descripción asignada en este momento.")</td>
-                        <td>
-                            <span class="badge bg-secondary px-2 py-1">@rol.Usuario.Count usuarios</span>
-                        </td>
+                        <th># ID</th>
+                        <th>Rol</th>
+                        <th>Descripción</th>
+                        <th>Usuarios asignados</th>
                     </tr>
-                }
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @foreach (var rol in Model)
+                    {
+                        <tr>
+                            <td>@rol.Id</td>
+                            <td><strong>@rol.Nombre</strong></td>
+                            <td>@(rol.Descripcion ?? "Sin descripción asignada en este momento.")</td>
+                            <td>
+                                <span class="badge bg-secondary px-2 py-1">@rol.Usuario.Count usuarios</span>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
+
+@section Scripts {
+    <script src="~/js/roles-tabla.js" asp-append-version="true"></script>
+}

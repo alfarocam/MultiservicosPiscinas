@@ -1,4 +1,4 @@
-﻿@model IEnumerable<MultiserviciosPiscinas.Models.Vehiculo>
+@model IEnumerable<MultiserviciosPiscinas.Models.Vehiculo>
 
 @{
     ViewData["Title"] = "Registar Vehiculos de la empresa";
@@ -30,13 +30,11 @@
     }
 
     
-    <div class="card shadow">
-        <div class="card-header bg-dark text-white">
-            <h5 class="mb-0">Control Centralizado de Flotilla</h5>
-        </div>
-        <div class="card-body p-0">
-            <table class="table table-hover align-middle">
-                <thead class="table-light">
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table id="tablaVehiculoDani" class="table table-hover align-middle">
+                    <thead class="table-light">
                     <tr>
                         <th>ID Interno</th>
                         <th>Placa</th>
@@ -164,17 +162,5 @@
 </div>
 
 @section Scripts {
-    <script>
-        
-        var modalEditar = document.getElementById('modalEditarVehiculo');
-        modalEditar.addEventListener('show.bs.modal', function (event) {
-            var button = event.relatedTarget;
-
-            document.getElementById('editId').value = button.getAttribute('data-id');
-            document.getElementById('editPlaca').value = button.getAttribute('data-placa');
-            document.getElementById('editMarca').value = button.getAttribute('data-marca');
-            document.getElementById('editModelo').value = button.getAttribute('data-modelo') || "";
-            document.getElementById('editTecnicoId').value = button.getAttribute('data-tecnicoid');
-        });
-    </script>
-}
+    <script src="~/js/vehiculo-dani-tabla.js" asp-append-version="true"></script>
+}

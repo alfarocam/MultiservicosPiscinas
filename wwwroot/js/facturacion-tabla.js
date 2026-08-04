@@ -1,0 +1,11 @@
+$(document).ready(function () {
+    if ($('#tablaFacturas').length > 0) {
+        $('#tablaFacturas').DataTable({
+            language: {
+                url: 'https://cdn.datatables.net/plug-ins/1.13.8/i18n/es-ES.json'
+            },
+            pageLength: 10,
+            order: [[0, 'desc']]
+        });
+    }
+});
