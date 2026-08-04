@@ -5,7 +5,7 @@
 
 <div class="c-page-header">
     <h2><i class="bi bi-box-seam me-2"></i>Inventario</h2>
-    <a asp-action="Crear" class="btn">+ Nuevo producto</a>
+    <a asp-action="Crear" class="btn"><i class="bi bi-plus-circle me-1"></i>Nuevo producto</a>
 </div>
 
 @if (TempData["MensajeExito"] != null)
@@ -19,20 +19,22 @@
 <div class="c-filter-bar mb-3">
     <form method="get" asp-action="Index" class="d-flex gap-2 align-items-center flex-wrap w-100">
         <input type="text" name="busqueda" value="@ViewBag.Busqueda"
-               class="form-control" style="max-width:300px" placeholder="Buscar por nombre..." />
+               class="form-control c-filter-input" placeholder="Buscar por nombre..." />
         <button type="submit" class="btn">
             <i class="bi bi-search me-1"></i>Buscar
         </button>
         @if (!string.IsNullOrWhiteSpace(ViewBag.Busqueda as string))
         {
-            <a asp-action="Index" class="btn btn-outline-secondary">Limpiar</a>
+            <a asp-action="Index" class="btn btn-outline-secondary"><i class="bi bi-x-lg me-1"></i>Limpiar</a>
         }
     </form>
 </div>
 
-<div class="c-data-card">
-    <table class="c-data-table">
-        <thead>
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table id="tablaInventario" class="table table-hover align-middle">
+                <thead class="table-light">
             <tr>
                 <th>#</th>
                 <th>Producto</th>
@@ -44,11 +46,7 @@
             </tr>
         </thead>
         <tbody>
-            @if (!Model.Any())
-            {
-                <tr><td colspan="7" class="text-center text-muted py-4">No se encontraron productos.</td></tr>
-            }
-            else
+            @if (Model.Any())
             {
                 int c = 1;
                 foreach (var p in Model)
@@ -79,7 +77,7 @@
                             @if (p.Activo)
                             {
                                 <form asp-action="Eliminar" asp-route-id="@p.Id" method="post" class="d-inline">
-                                    <button type="button" class="c-btn-sm btn-danger text-white border-0 btn-eliminar" style="padding: 0.25rem 0.5rem; border-radius: 4px;">
+                                    <button type="button" class="c-btn-sm btn-danger text-white border-0 btn-eliminar">
                                         <i class="bi bi-trash me-1"></i>Eliminar
                                     </button>
                                 </form>
@@ -87,7 +85,7 @@
                             else
                             {
                                 <form asp-action="Activar" asp-route-id="@p.Id" method="post" class="d-inline">
-                                    <button type="button" class="c-btn-sm btn-success text-white border-0 btn-activar" style="padding: 0.25rem 0.5rem; border-radius: 4px;">
+                                    <button type="button" class="c-btn-sm btn-success text-white border-0 btn-activar">
                                         <i class="bi bi-check-circle me-1"></i>Activar
                                     </button>
                                 </form>
@@ -98,7 +96,9 @@
                 }
             }
         </tbody>
-    </table>
+            </table>
+        </div>
+    </div>
 </div>
 
 @section Scripts {

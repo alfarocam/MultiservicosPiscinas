@@ -11,9 +11,9 @@
 
     <div class="o-form-card">
         <div class="table-responsive">
-            <table id="tablaPiscinas" class="table align-middle w-100" style="color: var(--color-text-dark);">
-                <thead>
-                    <tr style="border-bottom: 2px solid #e1ecf4;">
+            <table id="tablaPiscinas" class="table table-hover align-middle w-100">
+                <thead class="table-light">
+                    <tr>
                         <th class="a-text-muted small text-uppercase" hidden>ID</th>
                         <th class="a-text-muted small text-uppercase">Cliente</th>
                         <th class="a-text-muted small text-uppercase">Dirección</th>
@@ -26,7 +26,7 @@
                 <tbody>
                     @foreach (var piscina in Model)
                     {
-                        <tr style="border-bottom: 1px solid #e1ecf4;">
+                        <tr>
                             <td hidden>@piscina.Id</td>
                             <td>@piscina.Cliente.Usuario.Nombre @piscina.Cliente.Usuario.ApellidoPaterno</td>
                             <td>@piscina.Direccion.Detalles, @piscina.Direccion.Distrito.Nombre</td>
@@ -34,35 +34,32 @@
                             <td>@piscina.VolumenM3.ToString("0.##") m³</td>
                             <td>
                                 @{
-                                    var colorEstado = piscina.Estado switch
+                                    var badgeClass = piscina.Estado switch
                                     {
-                                        "Activa"           => "var(--color-success)",
-                                        "En mantenimiento" => "var(--color-accent-orange)",
-                                        "En construcción"  => "var(--color-link)",
-                                        _                  => "var(--color-text-muted)"
+                                        "Activa"           => "c-badge-green",
+                                        "En mantenimiento" => "c-badge-amber",
+                                        "En construcción"  => "c-badge-blue",
+                                        _                  => "c-badge-gray"
                                     };
                                 }
-                                <span class="badge"
-                                      style="background-color: @colorEstado; padding: 0.4rem 0.6rem; border-radius: var(--border-radius-sm);">
+                                <span class="c-badge @badgeClass">
                                     @piscina.Estado
                                 </span>
                             </td>
                             <td>
                                 <div class="d-flex gap-1 justify-content-end">
-                                    <a asp-action="Detalle" asp-controller="Piscinas" asp-route-id="@piscina.Id"
-                                       class="btn btn-sm"
-                                       style="background-color: transparent !important; color: var(--color-navbar-bg) !important; border: 1px solid var(--color-navbar-bg) !important; box-shadow: none !important;">
-                                        Ver
-                                    </a>
-                                    <a asp-action="Editar" asp-controller="Piscinas" asp-route-id="@piscina.Id"
-                                       class="btn btn-sm text-decoration-none">
-                                        Editar
-                                    </a>
-                                    <a asp-action="Historial" asp-controller="Piscinas" asp-route-id="@piscina.Id"
-                                       class="btn btn-sm text-decoration-none"
-                                       style="background-color: var(--color-footer-bg) !important;">
-                                        Historial
-                                    </a>
+                                     <a asp-action="Detalle" asp-controller="Piscinas" asp-route-id="@piscina.Id"
+                                        class="c-btn-sm c-btn-sm-outline">
+                                         <i class="bi bi-eye me-1"></i>Ver
+                                     </a>
+                                     <a asp-action="Editar" asp-controller="Piscinas" asp-route-id="@piscina.Id"
+                                        class="c-btn-sm c-btn-sm-primary">
+                                         <i class="bi bi-pencil me-1"></i>Editar
+                                     </a>
+                                     <a asp-action="Historial" asp-controller="Piscinas" asp-route-id="@piscina.Id"
+                                        class="c-btn-sm c-btn-sm-primary">
+                                         <i class="bi bi-clock-history me-1"></i>Historial
+                                     </a>
                                 </div>
                             </td>
                         </tr>

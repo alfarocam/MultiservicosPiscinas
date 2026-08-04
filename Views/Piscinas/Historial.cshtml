@@ -1,11 +1,11 @@
-@model MultiserviciosPiscinas.Models.Piscina
+﻿@model MultiserviciosPiscinas.Models.Piscina
 
 @{
     ViewData["Title"] = "Historial de Mantenimientos";
     var citas = Model.Cita.OrderByDescending(c => c.FechaHora).ToList();
 }
 
-<div class="container my-4" style="max-width: 860px;">
+<div class="container my-4 u-container-max-md">
 
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
@@ -16,8 +16,7 @@
             </p>
         </div>
         <a asp-action="Index" asp-controller="Piscinas"
-           class="btn a-btn-outline"
-           style="color: var(--color-navbar-bg) !important; border-color: var(--color-navbar-bg) !important;">
+           class="btn btn-outline-secondary">
             Volver
         </a>
     </div>
@@ -32,43 +31,41 @@
     {
         foreach (var cita in citas)
         {
-            var colorTipo = cita.Tipo switch
+            var badgeTipo = cita.Tipo switch
             {
-                "Mantenimiento" => "var(--color-btn-bg)",
-                "Inspección"    => "var(--color-link)",
-                "Reparación"    => "var(--color-accent-orange)",
-                "Construcción"  => "var(--color-text-muted)",
-                _               => "var(--color-text-muted)"
+                "Mantenimiento" => "c-badge-teal",
+                "Inspección"    => "c-badge-blue",
+                "Reparación"    => "c-badge-amber",
+                "Construcción"  => "c-badge-gray",
+                _               => "c-badge-gray"
             };
 
-            var colorEstado = cita.Estado switch
+            var badgeEstado = cita.Estado switch
             {
-                "Completada"  => "var(--color-success)",
-                "En progreso" => "var(--color-accent-orange)",
-                "En camino"   => "var(--color-link)",
-                "Cancelada"   => "var(--color-danger)",
-                _             => "var(--color-text-muted)"
+                "Completada"  => "c-badge-green",
+                "En progreso" => "c-badge-amber",
+                "En camino"   => "c-badge-blue",
+                "Cancelada"   => "c-badge-red",
+                _             => "c-badge-gray"
             };
             <div class="o-form-card mb-4">
 
                 <div class="d-flex justify-content-between align-items-start mb-3">
                     <div>
-                        <span class="badge me-2"
-                              style="background-color: @colorTipo; padding: 0.35rem 0.65rem; border-radius: var(--border-radius-sm); font-size: 0.8rem;">
+                        <span class="c-badge @badgeTipo me-2">
                             @cita.Tipo
                         </span>
-                        <span class="badge"
-                              style="background-color: @colorEstado; padding: 0.35rem 0.65rem; border-radius: var(--border-radius-sm); font-size: 0.8rem;">
+                        <span class="c-badge @badgeEstado me-2">
                             @cita.Estado
                         </span>
                         <p class="a-text-muted small mt-1 mb-0">
-                            Técnico: <strong style="color: var(--color-text-dark);">
+                            Técnico: <strong>
                                 @cita.Tecnico.Nombre @cita.Tecnico.ApellidoPaterno
                             </strong>
                         </p>
                     </div>
                     <div class="text-end">
-                        <p class="fw-bold mb-0" style="color: var(--color-text-dark);">
+                        <p class="fw-bold mb-0">
                             @cita.FechaHora.ToString("dd/MM/yyyy")
                         </p>
                         <p class="a-text-muted small mb-0">@cita.FechaHora.ToString("HH:mm")</p>
@@ -77,7 +74,7 @@
 
                 @if (!string.IsNullOrWhiteSpace(cita.Notas))
                 {
-                    <p class="a-text-muted small mb-3" style="border-left: 3px solid var(--color-accent); padding-left: 0.75rem;">
+                    <p class="a-text-muted small c-timeline-quote mb-3">
                         @cita.Notas
                     </p>
                 }
@@ -86,9 +83,9 @@
                 {
                     var servicio = cita.Servicio;
 
-                    <hr style="border-color: #e1ecf4;" />
+                    <hr class="c-hr-accent" />
 
-                    <p class="mb-2" style="color: var(--color-text-dark);">
+                    <p class="mb-2">
                         <strong>Trabajo realizado:</strong> @servicio.TrabajoRealizado
                     </p>
                     <p class="a-text-muted small mb-3">
@@ -99,8 +96,7 @@
                         }
                         else
                         {
-                            <span class="badge ms-2"
-                                  style="background-color: var(--color-accent-orange); padding: 0.2rem 0.5rem; border-radius: var(--border-radius-sm); font-size: 0.75rem;">
+                            <span class="c-badge c-badge-amber ms-2">
                                 Abierto
                             </span>
                         }
@@ -108,7 +104,7 @@
 
                     @if (servicio.TareaServicio.Any())
                     {
-                        <p class="fw-bold small mb-2" style="color: var(--color-text-dark);">Tareas</p>
+                        <p class="fw-bold small mb-2">Tareas</p>
                         <div class="mb-3">
                             @foreach (var tarea in servicio.TareaServicio)
                             {
@@ -119,16 +115,9 @@
                                     "Cancelada"   => "✕",
                                     _             => "○"
                                 };
-                                var colorTarea = tarea.Estado switch
-                                {
-                                    "Completada"  => "var(--color-success)",
-                                    "En progreso" => "var(--color-accent-orange)",
-                                    "Cancelada"   => "var(--color-danger)",
-                                    _             => "var(--color-text-muted)"
-                                };
                                 <div class="d-flex align-items-center gap-2 mb-1">
-                                    <span style="color: @colorTarea; font-weight: 700; width: 1rem; text-align: center;">@iconTarea</span>
-                                    <span class="small" style="color: var(--color-text-dark);">@tarea.Descripcion</span>
+                                    <span class="fw-bold me-1">@iconTarea</span>
+                                    <span class="small">@tarea.Descripcion</span>
                                     <span class="a-text-muted small ms-auto">@tarea.Estado</span>
                                 </div>
                             }
@@ -138,18 +127,18 @@
                     @if (servicio.Inspeccion.Any())
                     {
                         var inspeccion = servicio.Inspeccion.First();
-                        <p class="fw-bold small mb-2" style="color: var(--color-text-dark);">
+                        <p class="fw-bold small mb-2">
                             Mediciones Químicas &mdash; @inspeccion.FechaInspeccion.ToString("dd/MM/yyyy")
                         </p>
                         <div class="table-responsive mb-2">
-                            <table class="table table-sm" style="font-size: 0.85rem; color: var(--color-text-dark);">
-                                <thead>
-                                    <tr style="border-bottom: 1px solid #e1ecf4;">
-                                        <th class="a-text-muted" style="font-weight:600;">Cloro (ppm)</th>
-                                        <th class="a-text-muted" style="font-weight:600;">Alcalinidad</th>
-                                        <th class="a-text-muted" style="font-weight:600;">pH</th>
-                                        <th class="a-text-muted" style="font-weight:600;">Calcio</th>
-                                        <th class="a-text-muted" style="font-weight:600;">Ác. Cianúrico</th>
+                            <table class="table table-hover table-sm">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Cloro (ppm)</th>
+                                        <th>Alcalinidad</th>
+                                        <th>pH</th>
+                                        <th>Calcio</th>
+                                        <th>Ác. Cianúrico</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -165,8 +154,7 @@
                         </div>
                         @if (!string.IsNullOrWhiteSpace(inspeccion.Observaciones))
                         {
-                            <p class="a-text-muted small mb-0"
-                               style="border-left: 3px solid var(--color-btn-bg); padding-left: 0.75rem;">
+                            <p class="a-text-muted small c-detail-field mb-0">
                                 @inspeccion.Observaciones
                             </p>
                         }

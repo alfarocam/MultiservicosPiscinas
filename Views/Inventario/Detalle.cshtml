@@ -7,11 +7,11 @@
     <h2><i class="bi bi-box-seam me-2"></i>@Model.Nombre</h2>
     @if (Model.Activo)
     {
-        <span class="c-badge c-badge-green" style="font-size:0.85rem;padding:6px 16px">✓ Disponible</span>
+        <span class="c-badge c-badge-lg c-badge-green">✓ Disponible</span>
     }
     else
     {
-        <span class="c-badge c-badge-gray" style="font-size:0.85rem;padding:6px 16px">Inactivo</span>
+        <span class="c-badge c-badge-lg c-badge-gray">Inactivo</span>
     }
 </div>
 
@@ -20,7 +20,7 @@
         @if (!string.IsNullOrEmpty(Model.ImagenRuta))
         {
             <div class="col-md-12 mb-3">
-                <img src="@Model.ImagenRuta" alt="Imagen del producto" class="img-fluid img-thumbnail" style="max-height: 300px; width: auto; object-fit: contain; background-color: #f8f9fa;" />
+                <img src="@Model.ImagenRuta" alt="Imagen del producto" class="img-fluid img-thumbnail c-prod-img-lg" />
             </div>
         }
         <div class="col-md-6">
@@ -46,7 +46,7 @@
             <div class="col-12">
                 <div class="c-detail-field c-field-gray">
                     <label>Descripción</label>
-                    <p style="font-weight:400">@Model.Descripcion</p>
+                    <p>@Model.Descripcion</p>
                 </div>
             </div>
         }

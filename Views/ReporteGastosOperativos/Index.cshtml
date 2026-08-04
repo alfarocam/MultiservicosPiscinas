@@ -8,18 +8,18 @@
 </div>
 
 <!-- Formulario de filtros -->
-<div class="c-data-card mb-3" style="padding:20px 24px">
+<div class="c-data-card mb-3 p-4">
     <form method="get" asp-action="Index" class="row g-3 align-items-end">
         <div class="col-md-3">
-            <label class="form-label fw-semibold small text-muted text-uppercase" style="letter-spacing:.05em">Fecha desde</label>
+            <label class="form-label c-kpi-label">Fecha desde</label>
             <input type="date" name="fechaDesde" value="@ViewBag.FechaDesde" class="form-control" />
         </div>
         <div class="col-md-3">
-            <label class="form-label fw-semibold small text-muted text-uppercase" style="letter-spacing:.05em">Fecha hasta</label>
+            <label class="form-label c-kpi-label">Fecha hasta</label>
             <input type="date" name="fechaHasta" value="@ViewBag.FechaHasta" class="form-control" />
         </div>
         <div class="col-md-3">
-            <label class="form-label fw-semibold small text-muted text-uppercase" style="letter-spacing:.05em">Categoría</label>
+            <label class="form-label c-kpi-label">Categoría</label>
             <select name="categoriaId" class="form-control">
                 <option value="">Todas</option>
                 @if (ViewBag.Categorias != null)
@@ -39,8 +39,8 @@
             </select>
         </div>
         <div class="col-md-3 d-flex gap-2">
-            <button type="submit" class="btn w-100">Ver Resumen</button>
-            <a asp-action="Index" class="btn btn-outline-secondary w-100">Limpiar</a>
+            <button type="submit" class="btn w-100"><i class="bi bi-filter me-1"></i>Ver Resumen</button>
+            <a asp-action="Index" class="btn btn-outline-secondary w-100"><i class="bi bi-x-lg me-1"></i>Limpiar</a>
         </div>
     </form>
 </div>
@@ -57,12 +57,14 @@ else
 {
     <!-- Totales por categoría -->
     <div class="c-data-card mb-3">
-        <div style="background-color:var(--color-navbar-bg);padding:14px 20px;display:flex;align-items:center;gap:8px">
-            <i class="bi bi-bar-chart text-white"></i>
-            <span class="fw-bold text-white" style="font-family:var(--font-family-heading)">Totales por Categoría</span>
+        <div class="c-card-header">
+            <div class="c-card-header-title">
+                <i class="bi bi-bar-chart text-white"></i>
+                <span>Totales por Categoría</span>
+            </div>
         </div>
-        <table class="c-data-table">
-            <thead>
+        <table class="table table-hover">
+            <thead class="table-light">
                 <tr>
                     <th>Categoría</th>
                     <th>Total</th>
@@ -75,14 +77,14 @@ else
                 {
                     <tr>
                         <td class="fw-semibold">@categoria.NombreCategoria</td>
-                        <td><span class="fw-bold" style="color:var(--color-btn-bg)">₡@categoria.Total.ToString("N2")</span></td>
+                        <td><span class="c-price">₡@categoria.Total.ToString("N2")</span></td>
                         <td>@categoria.Cantidad</td>
                         <td>@categoria.Porcentaje.ToString("F2")%</td>
                     </tr>
                 }
-                <tr style="background-color:#f8f9fa;font-weight:bold">
+                <tr class="fw-bold table-light">
                     <td>TOTAL GENERAL</td>
-                    <td style="color:var(--color-btn-bg)">₡@Model.TotalGeneral.ToString("N2")</td>
+                    <td class="c-price">₡@Model.TotalGeneral.ToString("N2")</td>
                     <td>@Model.Detalle.Count()</td>
                     <td>100.00%</td>
                 </tr>
@@ -92,21 +94,23 @@ else
 
     <!-- Gráfico de distribución -->
     <div class="c-data-card mb-3">
-        <div style="background-color:var(--color-navbar-bg);padding:14px 20px;display:flex;align-items:center;gap:8px">
-            <i class="bi bi-pie-chart text-white"></i>
-            <span class="fw-bold text-white" style="font-family:var(--font-family-heading)">Distribución de Gastos</span>
+        <div class="c-card-header">
+            <div class="c-card-header-title">
+                <i class="bi bi-pie-chart text-white"></i>
+                <span>Distribución de Gastos</span>
+            </div>
         </div>
-        <div style="padding:20px;display:flex;justify-content:center;align-items:center">
-            <canvas id="graficoDistribucion" style="max-width:400px;max-height:400px"></canvas>
+        <div class="c-card-body-centered">
+            <canvas id="graficoDistribucion" class="c-chart-canvas-pie"></canvas>
         </div>
     </div>
 
     <!-- Listado detallado -->
     <div class="c-data-card mb-3">
-        <div style="background-color:var(--color-navbar-bg);padding:14px 20px;display:flex;align-items:center;gap:8px;justify-content:space-between">
-            <div style="display:flex;align-items:center;gap:8px">
+        <div class="c-card-header">
+            <div class="c-card-header-title">
                 <i class="bi bi-list-ul text-white"></i>
-                <span class="fw-bold text-white" style="font-family:var(--font-family-heading)">Detalle de Gastos</span>
+                <span>Detalle de Gastos</span>
             </div>
             <!-- Botón exportar con parámetros actuales -->
             <a asp-action="ExportarExcel"
@@ -117,8 +121,8 @@ else
                 <i class="bi bi-download me-1"></i>Exportar Reporte de Gastos
             </a>
         </div>
-        <table class="c-data-table">
-            <thead>
+        <table class="table table-hover">
+            <thead class="table-light">
                 <tr>
                     <th>Fecha</th>
                     <th>Categoría</th>
@@ -133,7 +137,7 @@ else
                         <td>@gasto.Fecha.ToString("dd/MM/yyyy")</td>
                         <td>@gasto.NombreCategoria</td>
                         <td>@(gasto.Descripcion ?? "-")</td>
-                        <td><span class="fw-bold" style="color:var(--color-btn-bg)">₡@gasto.Monto.ToString("N2")</span></td>
+                        <td><span class="c-price">₡@gasto.Monto.ToString("N2")</span></td>
                     </tr>
                 }
             </tbody>

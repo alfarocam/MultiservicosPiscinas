@@ -8,7 +8,7 @@
     var telefono = Model.TelefonosCliente.FirstOrDefault()?.NumeroTelefono ?? "—";
     var direccion = Model.DireccionCliente.FirstOrDefault()?.Detalles ?? "—";
     var estadoTexto = Model.Usuario.Activo ? "Activo" : "Inactivo";
-    var estadoClase = Model.Usuario.Activo ? "text-bg-success" : "text-bg-danger";
+    var estadoClase = Model.Usuario.Activo ? "c-badge-green" : "c-badge-red";
 }
 
 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -26,10 +26,10 @@
     <div class="col-md-6">
         <div class="card h-100">
             <div class="card-body">
-                <h5 class="fw-bold mb-3" style="color: var(--color-btn-bg);">
+                <h5 class="fw-bold mb-3 c-section-title">
                     <i class="bi bi-person-fill me-2"></i>Información Personal
                 </h5>
-                <hr style="border-color: var(--color-accent);" />
+                <hr class="c-hr-accent" />
 
                 <div class="mb-3">
                     <div class="a-text-muted small mb-1">Nombre completo</div>
@@ -53,7 +53,7 @@
 
                 <div>
                     <div class="a-text-muted small mb-1">Estado</div>
-                    <span class="badge @estadoClase px-3 py-2">@estadoTexto</span>
+                    <span class="c-badge @estadoClase">@estadoTexto</span>
                 </div>
             </div>
 
@@ -73,27 +73,25 @@
     <div class="col-md-6">
         <div class="card h-100">
             <div class="card-body">
-                <h5 class="fw-bold mb-3" style="color: var(--color-btn-bg);">
+                <h5 class="fw-bold mb-3 c-section-title">
                     <i class="bi bi-water me-2"></i>Piscinas Registradas
-                    <span class="badge ms-2" style="background-color: var(--color-btn-bg);">
+                    <span class="c-badge c-badge-blue ms-2">
                         @Model.Piscina.Count()
                     </span>
                 </h5>
-                <hr style="border-color: var(--color-accent);" />
+                <hr class="c-hr-accent" />
 
                 @if (Model.Piscina.Any())
                 {
                     <div class="d-flex flex-column gap-3">
                         @foreach (var piscina in Model.Piscina)
                         {
-                            <div class="d-flex align-items-center justify-content-between p-3 rounded"
-                                 style="background: var(--color-body-bg); border: 1px solid #e1ecf4;">
+                            <div class="d-flex align-items-center justify-content-between c-subcard-item">
                                 <div>
                                     <div class="fw-semibold">Piscina #@piscina.Id</div>
                                     <div class="a-text-muted small">@piscina.Tipo</div>
                                 </div>
-                                <span class="badge"
-                                      style="background-color: @(piscina.Estado == "Activo" ? "var(--color-success)" : "var(--color-text-muted)")">
+                                <span class="c-badge @(piscina.Estado == "Activo" ? "c-badge-green" : "c-badge-gray")">
                                     @piscina.Estado
                                 </span>
                             </div>

@@ -1,4 +1,4 @@
-﻿@model MultiserviciosPiscinas.Models.MiAgendaViewModel
+@model MultiserviciosPiscinas.Models.MiAgendaViewModel
 
 @{
     Layout = "~/Views/Shared/_LayoutTecnico.cshtml";
@@ -41,8 +41,7 @@
         <input type="date"
                name="fecha"
                value="@Model.FechaConsulta.ToString("yyyy-MM-dd")"
-               class="form-control"
-               style="max-width:220px" />
+               class="form-control c-filter-input-sm" />
 
         <button type="submit" class="btn">
             <i class="bi bi-search me-1"></i>Consultar
@@ -79,9 +78,11 @@
     </div>
 </div>
 
-<div class="c-data-card">
-    <table class="c-data-table">
-        <thead>
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table id="tablaMiAgenda" class="table table-hover align-middle">
+                <thead class="table-light">
             <tr>
                 <th>Hora</th>
                 <th>Cliente</th>
@@ -94,15 +95,7 @@
         </thead>
 
         <tbody>
-            @if (!Model.Citas.Any())
-            {
-                <tr>
-                    <td colspan="7" class="text-center text-muted py-4">
-                        No hay citas programadas para el día consultado.
-                    </td>
-                </tr>
-            }
-            else
+            @if (Model.Citas.Any())
             {
                 foreach (var cita in Model.Citas)
                 {
@@ -134,7 +127,7 @@
                             @cita.Piscina
                         </td>
 
-                        <td style="max-width:340px">
+                        <td class="c-table-col-md">
                             @cita.Direccion
                         </td>
 
@@ -171,5 +164,11 @@
                 }
             }
         </tbody>
-    </table>
+            </table>
+        </div>
+    </div>
 </div>
+
+@section Scripts {
+    <script src="~/js/servicios-tecnicos-tabla.js" asp-append-version="true"></script>
+}

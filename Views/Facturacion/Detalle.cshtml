@@ -1,4 +1,4 @@
-@model MultiserviciosPiscinas.DTOs.Factura.CompraDetalleViewModel
+﻿@model MultiserviciosPiscinas.DTOs.Factura.CompraDetalleViewModel
 
 @{
     Layout = "~/Views/Shared/_LayoutCliente.cshtml";
@@ -33,7 +33,7 @@
                 <hr />
 
                 <h5 class="mb-3">Artículos Comprados</h5>
-                <table class="table table-hover">
+                <table class="table table-hover align-middle">
                     <thead class="table-light">
                         <tr>
                             <th>Producto</th>
@@ -78,14 +78,14 @@
                 <hr />
                 <div class="d-flex justify-content-between mb-3">
                     <strong>Total:</strong>
-                    <strong class="text-success" style="font-size: 1.2em;">₡@Model.Total.ToString("N2")</strong>
+                    <strong class="fs-5 text-success">₡@Model.Total.ToString("N2")</strong>
                 </div>
 
                 @if (!string.IsNullOrEmpty(Model.ComprobanteSinpeRuta))
                 {
                     <hr />
                     <h6>Comprobante de Pago</h6>
-                    <img src="@Model.ComprobanteSinpeRuta" alt="Comprobante" class="img-fluid border rounded" style="max-height: 300px;">
+                    <img src="@Model.ComprobanteSinpeRuta" alt="Comprobante" class="img-fluid border rounded c-prod-img-lg">
                 }
             </div>
         </div>

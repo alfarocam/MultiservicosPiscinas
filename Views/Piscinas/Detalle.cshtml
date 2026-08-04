@@ -10,13 +10,13 @@
     var provincia = Model.Direccion?.Distrito?.Canton?.Provincia?.Nombre ?? "—";
     var detallesDireccion = Model.Direccion?.Detalles ?? "—";
 
-    var colorEstado = Model.Estado switch
+    var badgeClass = Model.Estado switch
     {
-        "Activa"              => "var(--color-success)",
-        "Inactiva"            => "var(--color-text-muted)",
-        "En mantenimiento"    => "var(--color-accent-orange)",
-        "En construcción"     => "var(--color-link)",
-        _                     => "var(--color-text-muted)"
+        "Activa"              => "c-badge-green",
+        "Inactiva"            => "c-badge-gray",
+        "En mantenimiento"    => "c-badge-amber",
+        "En construcción"     => "c-badge-blue",
+        _                     => "c-badge-gray"
     };
 }
 
@@ -35,10 +35,10 @@
     <div class="col-md-6">
         <div class="card h-100">
             <div class="card-body">
-                <h5 class="fw-bold mb-3" style="color: var(--color-btn-bg);">
+                <h5 class="fw-bold mb-3 c-section-title">
                     <i class="bi bi-clipboard-data me-2"></i>Ficha Técnica
                 </h5>
-                <hr style="border-color: var(--color-accent);" />
+                <hr class="c-hr-accent" />
 
                 <div class="mb-3">
                     <div class="a-text-muted small mb-1">ID Piscina</div>
@@ -68,8 +68,7 @@
 
                 <div>
                     <div class="a-text-muted small mb-1">Condición operativa</div>
-                    <span class="badge px-3 py-2"
-                          style="background-color: @colorEstado; font-size: 13px; border-radius: var(--border-radius-sm);">
+                    <span class="c-badge @badgeClass">
                         @Model.Estado
                     </span>
                 </div>
@@ -92,10 +91,10 @@
     <div class="col-md-6">
         <div class="card h-100">
             <div class="card-body">
-                <h5 class="fw-bold mb-3" style="color: var(--color-btn-bg);">
+                <h5 class="fw-bold mb-3 c-section-title">
                     <i class="bi bi-geo-alt-fill me-2"></i>Ubicación
                 </h5>
-                <hr style="border-color: var(--color-accent);" />
+                <hr class="c-hr-accent" />
 
                 <div class="mb-3">
                     <div class="a-text-muted small mb-1">Provincia</div>
@@ -114,7 +113,7 @@
 
                 <div>
                     <div class="a-text-muted small mb-1">Señas exactas</div>
-                    <div class="p-2 rounded" style="background: var(--color-body-bg); border: 1px solid #e1ecf4;">
+                    <div class="c-subcard-item">
                         @detallesDireccion
                     </div>
                 </div>

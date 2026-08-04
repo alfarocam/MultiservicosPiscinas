@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="utf-8" />
@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css" />
 </head>
 
 <body>
@@ -47,7 +48,7 @@
                   method="post"
                   onsubmit="localStorage.removeItem('activeSidebarLink')">
                 <button type="submit" class="btn btn-outline-light btn-sm">
-                    Salir
+                    <i class="bi bi-box-arrow-right me-1"></i>Salir
                 </button>
             </form>
         </div>
@@ -68,7 +69,7 @@
 
                 <li><hr class="border-secondary my-1" /></li>
 
-                <li class="px-2 text-secondary" style="font-size:11px">
+                <li class="px-2 text-secondary c-sidebar-category">
                     Mis Servicios
                 </li>
 
@@ -101,7 +102,7 @@
 
                 <li><hr class="border-secondary my-1" /></li>
 
-                <li class="px-2 text-secondary" style="font-size:11px">
+                <li class="px-2 text-secondary c-sidebar-category">
                     Piscinas
                 </li>
 
@@ -116,7 +117,7 @@
 
                 <li><hr class="border-secondary my-1" /></li>
 
-                <li class="px-2 text-secondary" style="font-size:11px">
+                <li class="px-2 text-secondary c-sidebar-category">
                     Inventario y Gastos
                 </li>
 
@@ -140,7 +141,7 @@
 
                 <li><hr class="border-secondary my-1" /></li>
 
-                <li class="px-2 text-secondary" style="font-size:11px">
+                <li class="px-2 text-secondary c-sidebar-category">
                     Comunicación
                 </li>
 
@@ -163,6 +164,8 @@
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="~/js/notificaciones.js" asp-append-version="true"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
