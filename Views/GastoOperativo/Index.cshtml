@@ -34,11 +34,7 @@
             </tr>
         </thead>
         <tbody>
-            @if (!Model.Any())
-            {
-                <tr><td colspan="8" class="text-center text-muted py-4">No hay gastos registrados.</td></tr>
-            }
-            else
+            @if (Model.Any())
             {
                 int c = 1;
                 foreach (var g in Model)

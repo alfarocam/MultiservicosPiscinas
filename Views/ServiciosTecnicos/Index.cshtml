@@ -81,17 +81,7 @@
         </thead>
 
         <tbody>
-            @if (!Model.Any())
-            {
-                <tr>
-                    <td colspan="8" class="text-center text-muted py-4">
-                        @(User.IsInRole("2")
-                                            ? "No tienes servicios asignados actualmente."
-                                            : "No hay servicios técnicos registrados.")
-                </td>
-            </tr>
-                        }
-            else
+            @if (Model.Any())
             {
                 foreach (var servicio in Model)
                 {

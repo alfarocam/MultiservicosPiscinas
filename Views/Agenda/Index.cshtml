@@ -35,11 +35,7 @@
             </tr>
         </thead>
         <tbody>
-            @if (!Model.Any())
-            {
-                <tr><td colspan="7" class="text-center text-muted py-4">No hay citas programadas.</td></tr>
-            }
-            else
+            @if (Model.Any())
             {
                 foreach (var cita in Model)
                 {

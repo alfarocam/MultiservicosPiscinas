@@ -95,15 +95,7 @@
         </thead>
 
         <tbody>
-            @if (!Model.Citas.Any())
-            {
-                <tr>
-                    <td colspan="7" class="text-center text-muted py-4">
-                        No hay citas programadas para el día consultado.
-                    </td>
-                </tr>
-            }
-            else
+            @if (Model.Citas.Any())
             {
                 foreach (var cita in Model.Citas)
                 {
