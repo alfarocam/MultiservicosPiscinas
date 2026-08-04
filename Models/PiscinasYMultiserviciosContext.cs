@@ -395,6 +395,12 @@ public partial class PiscinasYMultiserviciosContext : DbContext
                 .IsUnicode(false)
                 .HasColumnName("detalles");
             entity.Property(e => e.DistritoId).HasColumnName("distrito_id");
+            entity.Property(e => e.Latitud)
+                .HasColumnType("float")
+                .HasColumnName("latitud");
+            entity.Property(e => e.Longitud)
+                .HasColumnType("float")
+                .HasColumnName("longitud");
             entity.Property(e => e.EsPrincipal).HasColumnName("es_principal");
             entity.Property(e => e.TipoDireccion)
                 .HasMaxLength(50)
