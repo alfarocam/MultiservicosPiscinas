@@ -61,6 +61,7 @@ builder.Services.AddScoped<IReportesGeneralesRepository, ReportesGeneralesReposi
 builder.Services.AddScoped<BitacoraService>();
 builder.Services.AddScoped<GastoOperativoExcelService>();
 builder.Services.AddScoped<ReportesGeneralesExcelService>();
+builder.Services.AddScoped<ReporteEficienciaRutasExcelService>();
 
 // Cotización Manual
 builder.Services.AddScoped<ICotizacionRepository, CotizacionRepository>();
