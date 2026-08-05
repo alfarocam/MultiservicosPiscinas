@@ -51,7 +51,7 @@ function cargarProductos(categoriaId) {
                            </button>
                        </div>`;
 
-                const imagenHtml = prod.imagenRuta 
+                const imagenHtml = prod.imagenRuta
                     ? `<img src="${prod.imagenRuta}" class="card-img-top p-2" alt="${prod.nombre}" style="height: 180px; object-fit: contain; background-color: #f8f9fa;">`
                     : `<div class="bg-light d-flex align-items-center justify-content-center card-img-top" style="height: 180px;"><i class="bi bi-image text-muted" style="font-size: 3rem;"></i></div>`;
 
@@ -84,7 +84,7 @@ function cargarRecomendaciones() {
         data: { limite: 3 },
         success: function (data) {
             if (data && data.length > 0) {
-                let html = '<div class="col-12 mb-3"><h4 class="text-primary"><i class="bi bi-star-fill text-warning"></i> Recomendados para ti</h4></div>';
+                let html = '<div class="col-12 mb-3"><h4><i class="bi bi-star-fill text-warning"></i> Recomendados para ti</h4></div>';
                 data.forEach(function (prod) {
                     const esServicio = prod.nombreCategoria && prod.nombreCategoria.toLowerCase().includes('servicio');
                     const btnDisabled = (!esServicio && prod.stock === 0) ? 'disabled' : '';
@@ -104,7 +104,7 @@ function cargarRecomendaciones() {
                                </button>
                            </div>`;
 
-                    const imagenHtml = prod.imagenRuta 
+                    const imagenHtml = prod.imagenRuta
                         ? `<img src="${prod.imagenRuta}" class="card-img-top p-2" alt="${prod.nombre}" style="height: 180px; object-fit: contain; background-color: #f8f9fa;">`
                         : `<div class="bg-light d-flex align-items-center justify-content-center card-img-top" style="height: 180px;"><i class="bi bi-image text-muted" style="font-size: 3rem;"></i></div>`;
 

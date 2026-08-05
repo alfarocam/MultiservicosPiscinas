@@ -5,8 +5,8 @@
     Layout = "_LayoutCliente";
 }
 
-<div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+
+    <div class="c-page-header d-flex justify-content-between align-items-center">
         <h2>Mis Cotizaciones</h2>
     </div>
 
@@ -76,8 +76,8 @@
                                         }
                                     </td>
                                     <td>
-                                        <a asp-action="Detalle" asp-route-id="@cotizacion.Id" class="btn btn-sm btn-outline-primary">
-                                            <i class="bi bi-eye"></i> Ver Detalle
+                                        <a asp-action="Detalle" asp-route-id="@cotizacion.Id" class="c-btn-sm btn-info">
+                                            <i class="bi bi-eye me-1"></i>Ver Detalle
                                         </a>
                                     </td>
                                 </tr>
@@ -88,7 +88,7 @@
             }
         </div>
     </div>
-</div>
+
 
 @section Scripts {
     <script src="~/js/cotizaciones-cliente-tabla.js" asp-append-version="true"></script>

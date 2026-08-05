@@ -1,13 +1,11 @@
 @model MultiserviciosPiscinas.Models.CambiarTecnicoServicioViewModel
 
 @{
-    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
     ViewData["Title"] = "Cambiar técnico asignado";
 }
 
 <div class="c-page-header">
     <h2>
-        <i class="bi bi-pencil-fill me-2"></i>
         Cambiar técnico asignado — Servicio #@Model.ServicioId
     </h2>
 </div>
@@ -47,24 +45,20 @@
         <div class="row g-3 mb-4">
             <div class="col-md-6">
                 <label asp-for="TecnicoId" class="form-label fw-semibold"></label>
-                <select asp-for="TecnicoId" class="form-select">
+                <select asp-for="TecnicoId" asp-items="ViewBag.Tecnicos" class="form-select">
                     <option value="">Seleccione un técnico...</option>
-                    @foreach (var t in ViewBag.Tecnicos)
-                    {
-                        <option value="@t.id">@t.nombre</option>
-                    }
                 </select>
                 <span asp-validation-for="TecnicoId" class="text-danger small"></span>
             </div>
         </div>
 
-        <div class="d-flex gap-2">
-            <button type="submit" class="btn">
-                <i class="bi bi-check-circle-fill me-1"></i>Guardar cambios
-            </button>
+        <div class="d-flex justify-content-end gap-2 mt-4">
             <a asp-action="Detalle" asp-route-id="@Model.ServicioId" class="btn btn-outline-secondary">
-                Volver
+                <i class="bi bi-x-circle me-1"></i>Cancelar
             </a>
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-floppy me-1"></i>Guardar cambios
+            </button>
         </div>
     </form>
 </div>

@@ -312,46 +312,56 @@ namespace MultiserviciosPiscinas.Controllers
 
         private async Task CargarViewBagCrearAsync(int clienteSeleccionado = 0)
         {
-            ViewBag.Clientes = await _context.Cliente
+            var clientes = await _context.Cliente
                 .Include(c => c.Usuario)
                 .OrderBy(c => c.Usuario.ApellidoPaterno)
                 .Select(c => new
                 {
-                    id = c.Id,
-                    nombre = c.Usuario.Nombre + " " + c.Usuario.ApellidoPaterno + " " + c.Usuario.ApellidoMaterno
+                    Id = c.Id,
+                    NombreCompleto = c.Usuario.Nombre + " " + c.Usuario.ApellidoPaterno + " " + c.Usuario.ApellidoMaterno
                 })
                 .ToListAsync();
 
+            ViewBag.Clientes = new Microsoft.AspNetCore.Mvc.Rendering.SelectList(clientes, "Id", "NombreCompleto", clienteSeleccionado);
+
             ViewBag.ClienteSeleccionado = clienteSeleccionado;
 
-            ViewBag.Piscinas = clienteSeleccionado > 0
-                ? (await _context.Piscina
+            System.Collections.IEnumerable piscinas;
+            if (clienteSeleccionado > 0)
+            {
+                piscinas = await _context.Piscina
                     .Where(p => p.ClienteId == clienteSeleccionado)
                     .OrderBy(p => p.Tipo)
                     .Select(p => new
                     {
-                        id = p.Id,
-                        texto = p.Tipo + " — " + p.VolumenM3 + " m³"
+                        Id = p.Id,
+                        Texto = p.Tipo + " — " + p.VolumenM3 + " m³"
                     })
-                    .ToListAsync())
-                    .Cast<object>()
-                    .ToList()
-                : new List<object>();
+                    .ToListAsync();
+            }
+            else
+            {
+                piscinas = new List<object>();
+            }
+
+            ViewBag.Piscinas = new Microsoft.AspNetCore.Mvc.Rendering.SelectList(piscinas, "Id", "Texto");
 
             await CargarTecnicosAsync();
         }
 
         private async Task CargarTecnicosAsync()
         {
-            ViewBag.Tecnicos = await _context.Usuario
+            var tecnicos = await _context.Usuario
                 .Where(u => u.RolId == 2 && u.Activo)
                 .OrderBy(u => u.ApellidoPaterno)
                 .Select(u => new
                 {
-                    id = u.Id,
-                    nombre = u.Nombre + " " + u.ApellidoPaterno + " " + u.ApellidoMaterno
+                    Id = u.Id,
+                    NombreCompleto = u.Nombre + " " + u.ApellidoPaterno + " " + u.ApellidoMaterno
                 })
                 .ToListAsync();
+
+            ViewBag.Tecnicos = new Microsoft.AspNetCore.Mvc.Rendering.SelectList(tecnicos, "Id", "NombreCompleto");
         }
 
         private async Task CargarHistorialAsync(int citaId)
