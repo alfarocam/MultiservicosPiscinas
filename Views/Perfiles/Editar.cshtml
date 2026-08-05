@@ -2,13 +2,12 @@
 
 @{
     ViewData["Title"] = "Editar perfil";
-    Layout = "~/Views/Shared/_LayoutCliente.cshtml";
 }
 
 <input type="hidden" id="urlCantones" value="@Url.Action("GetCantones", "Perfiles")" />
 <input type="hidden" id="urlDistritos" value="@Url.Action("GetDistritos", "Perfiles")" />
 
-<div class="d-flex justify-content-between align-items-center mb-3">
+<div class="c-page-header d-flex justify-content-between align-items-center">
     <h2 class="mb-0">Editar perfil</h2>
 
     <a asp-action="Detalle"
@@ -139,16 +138,15 @@
                 }
             </div>
 
-            <div class="mt-4">
-                <button type="submit"
-                        class="btn btn-warning">
-                    Guardar cambios
-                </button>
-
+            <div class="d-flex justify-content-end gap-2 mt-4">
                 <a asp-action="Detalle"
                    class="btn btn-secondary">
                     Cancelar
                 </a>
+                <button type="submit"
+                        class="btn btn-warning">
+                    Guardar cambios
+                </button>
             </div>
         </form>
     </div>
@@ -198,7 +196,7 @@
                 </div>
             </div>
 
-            <div class="mt-4">
+            <div class="d-flex justify-content-end gap-2 mt-4">
                 <button type="submit"
                         class="btn btn-warning">
                     Cambiar contraseña
