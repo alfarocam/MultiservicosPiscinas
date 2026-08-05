@@ -101,18 +101,27 @@
                     <span asp-validation-for="Direccion" class="text-danger small"></span>
                 </div>
 
+                <div class="col-12">
+                    <label class="form-label fw-semibold">Ubicación en el mapa</label>
+                    <div class="form-text mb-2">
+                        Hacé clic en el mapa (o arrastrá el marcador) para marcar la ubicación exacta.
+                        Es opcional, pero se necesita para incluir esta dirección en rutas optimizadas.
+                    </div>
+                    <div id="mapaCliente" style="height: 320px; width: 100%; border-radius: 8px;"
+                         class="border mb-2"></div>
+                </div>
+
                 <div class="col-md-6">
                     <label asp-for="Latitud" class="form-label fw-semibold"></label>
-                    <input asp-for="Latitud" type="number" step="any" class="form-control"
-                           placeholder="Ej: 9.9325" />
+                    <input asp-for="Latitud" type="number" step="any" class="form-control" readonly
+                           placeholder="Se completa al marcar el pin en el mapa" />
                     <span asp-validation-for="Latitud" class="text-danger small"></span>
-                    <small class="text-muted">Opcional. Necesaria para incluir esta dirección en rutas optimizadas.</small>
                 </div>
 
                 <div class="col-md-6">
                     <label asp-for="Longitud" class="form-label fw-semibold"></label>
-                    <input asp-for="Longitud" type="number" step="any" class="form-control"
-                           placeholder="Ej: -84.0795" />
+                    <input asp-for="Longitud" type="number" step="any" class="form-control" readonly
+                           placeholder="Se completa al marcar el pin en el mapa" />
                     <span asp-validation-for="Longitud" class="text-danger small"></span>
                 </div>
             </div>
@@ -133,4 +142,7 @@
 
 @section Scripts {
     <script src="~/js/ubicaciones.js"></script>
+    <script src="~/js/clientes-mapa.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=@ViewBag.GoogleMapsApiKey&callback=iniciarMapaCliente&loading=async"
+            async defer></script>
 }
