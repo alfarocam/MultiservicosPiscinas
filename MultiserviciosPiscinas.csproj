@@ -27,4 +27,9 @@
     <PackageReference Include="System.IO.Packaging" Version="8.0.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\comprobantes\facturas\" />
+    <Folder Include="wwwroot\imagenes\productos\" />
+  </ItemGroup>
+
 </Project>

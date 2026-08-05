@@ -51,7 +51,8 @@ namespace MultiserviciosPiscinas.Services
                             Descripcion = p.Descripcion,
                             Precio = p.Precio,
                             Stock = p.Stock,
-                            NombreCategoria = p.Categoria.NombreCategoria
+                            NombreCategoria = p.Categoria.NombreCategoria,
+                            ImagenRuta = p.ImagenRuta
                         })
                         .ToListAsync();
                     
@@ -75,7 +76,8 @@ namespace MultiserviciosPiscinas.Services
                             Descripcion = p.Descripcion,
                             Precio = p.Precio,
                             Stock = p.Stock,
-                            NombreCategoria = p.Categoria.NombreCategoria
+                            NombreCategoria = p.Categoria.NombreCategoria,
+                            ImagenRuta = p.ImagenRuta
                         })
                         .ToListAsync();
 
@@ -113,7 +115,8 @@ namespace MultiserviciosPiscinas.Services
                         Descripcion = p.Descripcion,
                         Precio = p.Precio,
                         Stock = p.Stock,
-                        NombreCategoria = p.Categoria.NombreCategoria
+                        NombreCategoria = p.Categoria.NombreCategoria,
+                        ImagenRuta = p.ImagenRuta
                     })
                     .ToListAsync();
                 
@@ -143,7 +146,8 @@ namespace MultiserviciosPiscinas.Services
                         Descripcion = p.Descripcion,
                         Precio = p.Precio,
                         Stock = p.Stock,
-                        NombreCategoria = p.Categoria.NombreCategoria
+                        NombreCategoria = p.Categoria.NombreCategoria,
+                        ImagenRuta = p.ImagenRuta
                     })
                     .ToListAsync();
 
