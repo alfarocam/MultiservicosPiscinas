@@ -83,7 +83,12 @@ public partial class PiscinasYMultiserviciosContext : DbContext
 
     // Fallback solo si no se inyecta configuración desde Program.cs
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        => optionsBuilder.UseSqlServer("Server=localhost; Database=Piscinas_Y_Multiservicios; Integrated Security=True; TrustServerCertificate=True;");
+    {
+        if (!optionsBuilder.IsConfigured)
+        {
+            optionsBuilder.UseSqlServer("Server=localhost; Database=Piscinas_Y_Multiservicios; Integrated Security=True; TrustServerCertificate=True;");
+        }
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
