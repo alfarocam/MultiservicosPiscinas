@@ -1,4 +1,4 @@
-﻿@model List<MultiserviciosPiscinas.Models.Cita>
+@model List<MultiserviciosPiscinas.Models.Cita>
 @{
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
     ViewData["Title"] = "Agenda";
@@ -15,13 +15,17 @@
         <a asp-controller="RutaOptimizada" asp-action="Index" class="btn">
             <i class="bi bi-signpost-split-fill me-1"></i>Ruta Optimizada
         </a>
-        <a asp-action="Crear" class="btn">+ Nueva cita</a>
+        <a asp-action="Crear" class="btn">
+            <i class="bi bi-plus-circle me-1"></i>Nueva cita
+        </a>
     </div>
 </div>
 
-<div class="c-data-card">
-    <table class="c-data-table">
-        <thead>
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table id="tablaAgenda" class="table table-hover align-middle">
+                <thead class="table-light">
             <tr>
                 <th>Cliente</th>
                 <th>Piscina</th>
@@ -33,11 +37,7 @@
             </tr>
         </thead>
         <tbody>
-            @if (!Model.Any())
-            {
-                <tr><td colspan="7" class="text-center text-muted py-4">No hay citas programadas.</td></tr>
-            }
-            else
+            @if (Model.Any())
             {
                 foreach (var cita in Model)
                 {
@@ -67,5 +67,11 @@
                 }
             }
         </tbody>
-    </table>
+            </table>
+        </div>
+    </div>
 </div>
+
+@section Scripts {
+    <script src="~/js/agenda-tabla.js" asp-append-version="true"></script>
+}

@@ -35,7 +35,7 @@
                 <div class="o-form-card">
                     <h5>Productos en el Carrito</h5>
                     <div class="table-responsive">
-                        <table class="table table-sm table-hover align-middle">
+                        <table class="table table-hover table-sm align-middle">
                             <thead class="table-light">
                                 <tr>
                                     <th>Producto</th>
@@ -78,8 +78,12 @@
                         <p><strong>IVA (13%):</strong> <span id="totalIVA">₡@Model.Sum(i => i.LineaImpuesto).ToString("N2")</span></p>
                         <h5><strong>Total:</strong> <strong id="totalGeneral">₡@Model.Sum(i => i.LineaTotal).ToString("N2")</strong></h5>
                     </div>
-                    <a href="@Url.Action("Comprar", "Tienda")" class="btn btn-success w-100">Comprar</a>
-                    <a href="@Url.Action("Index", "Tienda")" class="btn btn-outline-secondary w-100 mt-2">Continuar Comprando</a>
+                    <a href="@Url.Action("Comprar", "Tienda")" class="btn btn-success w-100">
+                        <i class="bi bi-credit-card me-1"></i>Comprar
+                    </a>
+                    <a href="@Url.Action("Index", "Tienda")" class="btn btn-outline-secondary w-100 mt-2">
+                        <i class="bi bi-arrow-left me-1"></i>Continuar Comprando
+                    </a>
                 </div>
             </div>
         </div>

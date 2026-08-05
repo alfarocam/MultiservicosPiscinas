@@ -1,32 +1,107 @@
-﻿@model MultiserviciosPiscinas.Models.ContactoViewModel
+@model MultiserviciosPiscinas.Models.ContactoViewModel
 
-<h2>Contacto y Soporte</h2>
+@{
+    ViewData["Title"] = "Contacto y Soporte";
+}
+
+<div class="c-page-header">
+    <div>
+        <h2><i class="bi bi-headset me-2"></i>Contacto y Soporte Técnico</h2>
+        <p class="a-text-light mb-0 small opacity-75">
+            ¿Tenés alguna duda o consulta sobre nuestros servicios? Envianos tu mensaje y te responderemos a la brevedad.
+        </p>
+    </div>
+</div>
 
 @if (TempData["Mensaje"] != null)
 {
-    // Recuperamos el tipo de mensaje (si no viene, por defecto será 'success')
     var tipoAlert = TempData["TipoMensaje"]?.ToString() ?? "success";
 
-    <div class="alert alert-@tipoAlert alert-dismissible fade show text-center small" role="alert">
+    <div class="alert alert-@tipoAlert alert-dismissible fade show shadow-sm mb-4" role="alert">
+        <i class="bi bi-info-circle-fill me-2"></i>
         @TempData["Mensaje"]
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 }
 
-<form asp-action="Enviar" method="post">
+<div class="row g-4">
+    <!-- Formulario de Consulta -->
+    <div class="col-lg-7">
+        <div class="o-form-card">
+            <h5 class="fw-bold mb-3 c-section-title">
+                <i class="bi bi-envelope-paper me-2"></i>Enviar una Consulta
+            </h5>
+            <hr class="c-hr-accent" />
 
-    <div class="mb-3">
-        <label>Asunto</label>
-        <input asp-for="Asunto" class="form-control" required />
+            <form asp-action="Enviar" method="post">
+                @Html.AntiForgeryToken()
+
+                <div class="m-form-field">
+                    <label asp-for="Asunto" class="form-label fw-semibold">
+                        <i class="bi bi-bookmark-star me-1 text-muted"></i>Asunto de la consulta
+                    </label>
+                    <input asp-for="Asunto" class="a-input form-control" placeholder="Ej. Consulta sobre mantenimiento preventivo" required />
+                    <span asp-validation-for="Asunto" class="text-danger small"></span>
+                </div>
+
+                <div class="m-form-field">
+                    <label asp-for="Mensaje" class="form-label fw-semibold">
+                        <i class="bi bi-chat-left-text me-1 text-muted"></i>Mensaje o detalle
+                    </label>
+                    <textarea asp-for="Mensaje" class="a-input form-control" rows="5" placeholder="Escribí aquí los detalles de tu requerimiento o consulta..." required></textarea>
+                    <span asp-validation-for="Mensaje" class="text-danger small"></span>
+                </div>
+
+                <div class="d-flex justify-content-end align-items-center gap-2 mt-4">
+                    <button type="submit" class="a-btn px-4 py-2">
+                        <i class="bi bi-send me-1"></i>Enviar Consulta
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 
-    <div class="mb-3">
-        <label>Mensaje</label>
-        <textarea asp-for="Mensaje" class="form-control" required></textarea>
+    <!-- Panel Informativo Lateral -->
+    <div class="col-lg-5">
+        <div class="c-detail-card h-100">
+            <h5 class="fw-bold mb-3 c-section-title">
+                <i class="bi bi-shield-check me-2"></i>Atención al Cliente
+            </h5>
+            <hr class="c-hr-accent" />
+
+            <div class="c-subcard-item mb-3">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="fs-3 text-primary"><i class="bi bi-clock-history"></i></div>
+                    <div>
+                        <div class="c-kpi-label">Tiempo estimado de respuesta</div>
+                        <div class="fw-bold fs-6">Menos de 24 horas hábiles</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="c-subcard-item mb-3">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="fs-3 text-success"><i class="bi bi-telephone-outbound"></i></div>
+                    <div>
+                        <div class="c-kpi-label">Línea Telefónica Directa</div>
+                        <div class="fw-bold fs-6">+(506) 2234-5678</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="c-subcard-item mb-3">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="fs-3 text-info"><i class="bi bi-envelope-at"></i></div>
+                    <div>
+                        <div class="c-kpi-label">Correo Electrónico Oficial</div>
+                        <div class="fw-bold fs-6">info@multiserviciospiscinas.com</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-3 bg-light rounded border border-light-subtle text-muted small mt-4">
+                <i class="bi bi-info-circle me-1"></i> Para emergencias fuera de horario comercial o visitas de mantenimiento urgente, por favor contactar directamente con el equipo técnico asignado.
+            </div>
+        </div>
     </div>
-
-    <button type="submit" class="btn btn-success">
-        Enviar Consulta
-    </button>
-
-</form>
+</div>

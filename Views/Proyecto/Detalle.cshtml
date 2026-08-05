@@ -15,14 +15,14 @@
 
     var esEditable = Model.Estado != "Completado" && Model.Estado != "Cancelado";
 
-    var colorEstado = Model.Estado switch
+    var badgeClass = Model.Estado switch
     {
-        "En Planificación" => "var(--color-link)",
-        "En ejecución" => "var(--color-success)",
-        "Pausado" => "var(--color-accent-orange)",
-        "Completado" => "var(--color-btn-bg)",
-        "Cancelado" => "var(--color-text-muted)",
-        _ => "var(--color-text-muted)"
+        "En Planificación" => "c-badge-blue",
+        "En ejecución" => "c-badge-green",
+        "Pausado" => "c-badge-amber",
+        "Completado" => "c-badge-green",
+        "Cancelado" => "c-badge-red",
+        _ => "c-badge-gray"
     };
 }
 
@@ -57,11 +57,11 @@
     <div class="col-md-6">
         <div class="card h-100">
             <div class="card-body">
-                <h5 class="fw-bold mb-3" style="color: var(--color-btn-bg);">
+                <h5 class="fw-bold mb-3 c-section-title">
                     <i class="bi bi-clipboard-data me-2"></i>Información del proyecto
                 </h5>
 
-                <hr style="border-color: var(--color-accent);" />
+                <hr class="c-hr-accent" />
 
                 <div class="mb-3">
                     <div class="a-text-muted small mb-1">Nombre</div>
@@ -70,8 +70,7 @@
 
                 <div class="mb-3">
                     <div class="a-text-muted small mb-1">Estado</div>
-                    <span class="badge px-3 py-2"
-                          style="background-color: @colorEstado; font-size: 13px; border-radius: var(--border-radius-sm);">
+                    <span class="c-badge @badgeClass">
                         @Model.Estado
                     </span>
                 </div>
@@ -120,13 +119,13 @@
                     </div>
                 }
 
-                <h5 class="fw-bold mt-4 mb-3" style="color: var(--color-btn-bg);">
+                <h5 class="fw-bold mt-4 mb-3 c-section-title">
                     <i class="bi bi-file-text-fill me-2"></i>Descripción
                 </h5>
 
-                <hr style="border-color: var(--color-accent);" />
+                <hr class="c-hr-accent" />
 
-                <p class="mb-0" style="white-space: pre-line;">
+                <p class="mb-0 u-pre-line">
                     @(string.IsNullOrWhiteSpace(Model.Descripcion) ? "Sin descripción." : Model.Descripcion)
                 </p>
             </div>
@@ -144,9 +143,8 @@
                 else
                 {
                     <button type="button"
-                            class="btn btn-sm"
-                            disabled
-                            style="background-color: var(--color-text-muted) !important;">
+                            class="c-btn-sm c-btn-sm-outline opacity-50"
+                            disabled>
                         <i class="bi bi-lock-fill me-1"></i> Proyecto cerrado
                     </button>
                 }
@@ -157,11 +155,11 @@
     <div class="col-md-6">
         <div class="card h-100">
             <div class="card-body">
-                <h5 class="fw-bold mb-3" style="color: var(--color-btn-bg);">
+                <h5 class="fw-bold mb-3 c-section-title">
                     <i class="bi bi-person-fill me-2"></i>Cliente
                 </h5>
 
-                <hr style="border-color: var(--color-accent);" />
+                <hr class="c-hr-accent" />
 
                 <div class="mb-2">
                     <div class="a-text-muted small mb-1">Nombre completo</div>
@@ -173,11 +171,11 @@
                     <div>@Model.Cliente.Usuario.Correo</div>
                 </div>
 
-                <h5 class="fw-bold mb-3" style="color: var(--color-btn-bg);">
+                <h5 class="fw-bold mb-3 c-section-title">
                     <i class="bi bi-geo-alt-fill me-2"></i>Ubicación del cliente
                 </h5>
 
-                <hr style="border-color: var(--color-accent);" />
+                <hr class="c-hr-accent" />
 
                 <div class="mb-2">
                     <div class="a-text-muted small mb-1">Provincia</div>
@@ -196,7 +194,7 @@
 
                 <div>
                     <div class="a-text-muted small mb-1">Señas exactas</div>
-                    <div class="p-2 rounded" style="background: var(--color-body-bg); border: 1px solid #e1ecf4;">
+                    <div class="c-subcard-item">
                         @senasExactas
                     </div>
                 </div>

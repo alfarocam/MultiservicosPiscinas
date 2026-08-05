@@ -167,10 +167,10 @@
     <!-- Tareas -->
     <div class="info-card">
         <div class="info-card-header">✅ Tareas del Servicio</div>
-        <div class="info-card-body" style="padding-top:8px; padding-bottom:8px;">
+        <div class="info-card-body py-2">
             @if (!Model.Tareas.Any())
             {
-                <p class="text-muted" style="padding:12px 0; margin:0; font-size:0.9rem;">No hay tareas registradas.</p>
+                <p class="text-muted py-2 mb-0 small">No hay tareas registradas.</p>
             }
             else
             {
@@ -248,7 +248,7 @@
                 @if (!string.IsNullOrEmpty(Model.Inspeccion.Observaciones))
                 {
                     <div class="obs-box">
-                        <strong style="font-size:0.78rem; text-transform:uppercase; letter-spacing:0.05em; color:#0d9488;">Observaciones</strong><br />
+                        <strong class="c-kpi-label">Observaciones</strong><br />
                         @Model.Inspeccion.Observaciones
                     </div>
                 }
@@ -265,13 +265,13 @@
 
             @if (ViewBag.YaCalificado == true)
             {
-                <div class="alert alert-success" style="border-radius:12px;">
+                <div class="alert alert-success rounded-3">
                     Este servicio ya ha sido calificado, gracias.
                 </div>
             }
             else if (Model.EstadoServicio == "Cerrado")
             {
-                <p style="color:#6b7280; margin-bottom:16px;">
+                <p class="a-text-muted mb-3">
                     ¿Cómo fue tu experiencia con este mantenimiento?
                 </p>
 
@@ -284,7 +284,7 @@
             }
             else
             {
-                <div class="alert alert-warning" style="border-radius:12px;">
+                <div class="alert alert-warning rounded-3">
                     La encuesta estará disponible cuando el servicio esté cerrado.
                 </div>
             }

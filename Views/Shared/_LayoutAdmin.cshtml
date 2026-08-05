@@ -46,6 +46,7 @@
                   method="post"
                   onsubmit="localStorage.removeItem('activeSidebarLink')">
                 <button type="submit" class="btn btn-outline-light btn-sm">
+                    <i class="bi bi-box-arrow-right me-1"></i>
                     Salir
                 </button>
             </form>
@@ -65,7 +66,7 @@
                 </li>
 
                 <li><hr class="border-secondary my-1" /></li>
-                <li class="px-2 text-secondary" style="font-size:11px">OPERACIONES</li>
+                <li class="px-2 text-secondary c-sidebar-category">OPERACIONES</li>
 
                 <li>
                     <a asp-controller="Clientes"
@@ -140,7 +141,7 @@
                 </li>
 
                 <li><hr class="border-secondary my-1" /></li>
-                <li class="px-2 text-secondary" style="font-size:11px">FINANZAS</li>
+                <li class="px-2 text-secondary c-sidebar-category">FINANZAS</li>
 
                 <li>
                     <a asp-controller="GastoOperativo"
@@ -167,6 +168,7 @@
                 </li>
 
                 <li>
+
                     <a asp-controller="Facturacion"
                        asp-action="Index"
                        class="nav-link text-white">

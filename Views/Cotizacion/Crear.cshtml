@@ -16,7 +16,7 @@
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h2 class="mb-0">Nueva cotización</h2>
     <button type="button" class="btn btn-info" id="btnAbrirCarrito" data-bs-toggle="modal" data-bs-target="#modalCarrito">
-        <i class="bi bi-cart"></i> Carrito <span class="badge bg-danger" id="badgeCarrito" style="display:none;">0</span>
+        <i class="bi bi-cart"></i> Carrito <span class="badge bg-danger d-none" id="badgeCarrito">0</span>
     </button>
 </div>
 
@@ -53,7 +53,7 @@
                     <div class="mb-3 position-relative">
                         <label class="form-label">Buscar cliente existente</label>
                         <input type="text" id="busquedaCliente" class="form-control" placeholder="Nombre, correo o teléfono..." autocomplete="off" />
-                        <div id="resultadosClientes" class="list-group position-absolute w-100 shadow-sm" style="z-index: 1000; display:none; max-height: 220px; overflow-y: auto;"></div>
+                        <div id="resultadosClientes" class="list-group position-absolute w-100 shadow-sm c-autocomplete-dropdown"></div>
                         <small class="text-muted">Escribe para buscar, o completa los campos si es un cliente nuevo</small>
                     </div>
 
@@ -100,7 +100,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <div id="contenidoCarrito" style="min-height: 200px;">
+                <div id="contenidoCarrito" class="c-card-body-centered">
                     <p class="text-muted">Cargando carrito...</p>
                 </div>
             </div>
