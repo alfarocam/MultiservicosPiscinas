@@ -11,10 +11,10 @@ namespace MultiserviciosPiscinas.Models
     public class ReporteDetalleServicioDto
     {
         public int Id { get; set; }
-        public string Cliente { get; set; }
-        public string TipoServicio { get; set; }
-        public string Tecnico { get; set; }
-        public string Estado { get; set; }
+        public string Cliente { get; set; } = string.Empty;
+        public string TipoServicio { get; set; } = string.Empty;
+        public string Tecnico { get; set; } = string.Empty;
+        public string Estado { get; set; } = string.Empty;
         public DateTime FechaHora { get; set; }
     }
 
@@ -26,9 +26,9 @@ namespace MultiserviciosPiscinas.Models
     public class DetalleProyectoDto
     {
         public int Id { get; set; }
-        public string Nombre { get; set; }
-        public string Cliente { get; set; }
-        public string Estado { get; set; }
+        public string Nombre { get; set; } = string.Empty;
+        public string Cliente { get; set; } = string.Empty;
+        public string Estado { get; set; } = string.Empty;
         public DateOnly FechaInicio { get; set; }
         public DateOnly? FechaFinEstimada { get; set; }
         public decimal Presupuesto { get; set; }
@@ -44,7 +44,7 @@ namespace MultiserviciosPiscinas.Models
 
     public class DetalleRentabilidadDto
     {
-        public string Mes { get; set; }
+        public string Mes { get; set; } = string.Empty;
         public decimal Ingresos { get; set; }
         public decimal Gastos { get; set; }
         public decimal Rentabilidad => Ingresos - Gastos;

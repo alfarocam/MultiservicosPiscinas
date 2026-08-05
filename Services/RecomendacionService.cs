@@ -123,7 +123,7 @@ namespace MultiserviciosPiscinas.Services
                 // Ordenar según el orden de populares
                 productosGlobalesRecomendados = productosMasVendidos
                     .Select(id => queryProductos.FirstOrDefault(p => p.Id == id))
-                    .Where(p => p != null)
+                    .OfType<ProductoBusquedaDto>()
                     .ToList();
             }
 

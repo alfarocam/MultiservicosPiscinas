@@ -33,7 +33,7 @@
                     <label asp-for="CategoriaId" class="form-label">Categoría</label>
                     <select asp-for="CategoriaId" class="form-select">
                         <option value="">-- Seleccione una categoría --</option>
-                        @foreach (var cat in ViewBag.Categorias as List<MultiserviciosPiscinas.Models.CategoriaProducto>)
+                        @foreach (var cat in (ViewBag.Categorias as List<MultiserviciosPiscinas.Models.CategoriaProducto>) ?? new List<MultiserviciosPiscinas.Models.CategoriaProducto>())
                         {
                             <option value="@cat.Id"
                                     selected="@(cat.Id == (int)ViewBag.CategoriaSeleccionada ? "selected" : null)">

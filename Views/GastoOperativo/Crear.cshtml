@@ -21,7 +21,7 @@
                     <label asp-for="CategoriaId" class="form-label">Categoría</label>
                     <select asp-for="CategoriaId" class="form-select">
                         <option value="">-- Seleccione una categoría --</option>
-                        @foreach (var cat in ViewBag.Categorias as List<MultiserviciosPiscinas.Models.CategoriaGastoOperativo>)
+                        @foreach (var cat in (ViewBag.Categorias as List<MultiserviciosPiscinas.Models.CategoriaGastoOperativo>) ?? new List<MultiserviciosPiscinas.Models.CategoriaGastoOperativo>())
                         {
                             <option value="@cat.Id">@cat.NombreCategoria</option>
                         }
