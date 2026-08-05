@@ -26,14 +26,14 @@ public class DivisionTerritorialSeeder(
     {
         logger.LogInformation("=== [SEEDER] Verificando base de datos de ubicación ===");
 
-        if (await dbContext.Provincia.CountAsync() >= TotalProvinciasCostaRica)
-        {
-            logger.LogInformation("[SEEDER] Las 7 provincias ya están cargadas. Omitiendo.");
-            return;
-        }
-
         try
         {
+            if (await dbContext.Provincia.CountAsync() >= TotalProvinciasCostaRica)
+            {
+                logger.LogInformation("[SEEDER] Las 7 provincias ya están cargadas. Omitiendo.");
+                return;
+            }
+
             logger.LogInformation("[SEEDER] Descargando provincias de la API...");
             var provRaw = await httpClient.GetStringAsync($"{BaseUrl}/provincias");
 
