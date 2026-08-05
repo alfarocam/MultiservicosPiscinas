@@ -33,21 +33,23 @@ function cargarProductos(categoriaId) {
         success: function (data) {
             let html = '';
             data.forEach(function (prod) {
-                const esServicio = prod.nombreCategoria && prod.nombreCategoria.toLowerCase().includes('servicio');
+                const nombreCat = (prod.nombreCategoria || '').trim().toLowerCase();
+                const esServicio = nombreCat.includes('servicio');
                 const btnDisabled = (!esServicio && prod.stock === 0) ? 'disabled' : '';
                 const btnText = (!esServicio && prod.stock === 0) ? 'Sin Stock' : 'Agregar al Carrito';
+                const btnIcon = (!esServicio && prod.stock === 0) ? '<i class="bi bi-x-circle me-1"></i>' : '<i class="bi bi-cart-plus me-1"></i>';
                 const stockHtml = esServicio ? '' : `<p class="card-text"><small class="text-muted">Stock: ${prod.stock}</small></p>`;
                 const actionHtml = esServicio
                     ? `<div class="mb-3">
                            <input type="hidden" id="qty-${prod.id}" value="1">
                            <button class="btn btn-primary w-100" type="button" onclick="agregarAlCarrito(${prod.id})" ${btnDisabled}>
-                               ${btnText}
+                               ${btnIcon}${btnText}
                            </button>
                        </div>`
                     : `<div class="input-group mb-3">
                            <input type="number" class="form-control" id="qty-${prod.id}" min="1" value="1" style="max-width: 80px;">
                            <button class="btn btn-primary" type="button" onclick="agregarAlCarrito(${prod.id})" ${btnDisabled}>
-                               ${btnText}
+                               ${btnIcon}${btnText}
                            </button>
                        </div>`;
 
@@ -84,23 +86,25 @@ function cargarRecomendaciones() {
         data: { limite: 3 },
         success: function (data) {
             if (data && data.length > 0) {
-                let html = '<div class="col-12 mb-3"><h4><i class="bi bi-star-fill text-warning"></i> Recomendados para ti</h4></div>';
+                let html = '<div class="col-12 mb-3"><h4><i class="bi bi-star-fill text-warning me-1"></i> Recomendados para ti</h4></div>';
                 data.forEach(function (prod) {
-                    const esServicio = prod.nombreCategoria && prod.nombreCategoria.toLowerCase().includes('servicio');
+                    const nombreCat = (prod.nombreCategoria || '').trim().toLowerCase();
+                    const esServicio = nombreCat.includes('servicio');
                     const btnDisabled = (!esServicio && prod.stock === 0) ? 'disabled' : '';
                     const btnText = (!esServicio && prod.stock === 0) ? 'Sin Stock' : 'Agregar al Carrito';
+                    const btnIcon = (!esServicio && prod.stock === 0) ? '<i class="bi bi-x-circle me-1"></i>' : '<i class="bi bi-cart-plus me-1"></i>';
                     const stockHtml = esServicio ? '' : `<p class="card-text"><small class="text-muted">Stock: ${prod.stock}</small></p>`;
                     const actionHtml = esServicio
                         ? `<div class="mb-3">
                                <input type="hidden" id="qty-${prod.id}" value="1">
                                <button class="btn btn-primary w-100" type="button" onclick="agregarAlCarrito(${prod.id})" ${btnDisabled}>
-                                   ${btnText}
+                                   ${btnIcon}${btnText}
                                </button>
                            </div>`
                         : `<div class="input-group mb-3">
                                <input type="number" class="form-control" id="qty-${prod.id}" min="1" value="1" style="max-width: 80px;">
                                <button class="btn btn-primary" type="button" onclick="agregarAlCarrito(${prod.id})" ${btnDisabled}>
-                                   ${btnText}
+                                   ${btnIcon}${btnText}
                                </button>
                            </div>`;
 
@@ -112,7 +116,7 @@ function cargarRecomendaciones() {
                         <div class="col-md-6 col-lg-4 mb-4">
                             <div class="card h-100 border-warning shadow-sm">
                                 <div class="card-header bg-warning text-dark fw-bold text-center py-1">
-                                    <small><i class="bi bi-stars"></i> Recomendación</small>
+                                    <small><i class="bi bi-stars me-1"></i> Recomendación</small>
                                 </div>
                                 ${imagenHtml}
                                 <div class="card-body d-flex flex-column">
@@ -137,7 +141,7 @@ function cargarRecomendaciones() {
 }
 
 function agregarAlCarrito(productoId) {
-    const cantidad = parseInt($(`#qty-${productoId}`).val());
+    const cantidad = parseInt($(`#qty-${productoId}`).val()) || 1;
 
     $.ajax({
         url: '/Tienda/AgregarAlCarrito',
