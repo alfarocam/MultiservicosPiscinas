@@ -5,24 +5,17 @@
     ViewData["Title"] = "Registrar Parámetros del Agua";
 }
 
-<div class="container my-4 u-container-max-lg">
+<div class="c-page-header d-flex justify-content-between align-items-center">
+    <h2>
+        Registro de Parámetros del Agua
+    </h2>
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h1 class="a-title mb-1">
-                <i class="bi bi-droplet-half me-2"></i>Registrar Parámetros del Agua
-            </h1>
-            <p class="a-text-muted mb-0">
-                Ingrese los valores obtenidos durante la visita técnica.
-            </p>
-        </div>
-
-        <a asp-action="RegistroParametros"
-           asp-controller="Piscinas"
-           class="btn btn-outline-secondary">
-            <i class="bi bi-arrow-left me-1"></i> Volver
-        </a>
-    </div>
+    <a asp-action="RegistroParametros"
+       asp-controller="Piscinas"
+       class="btn btn-success">
+        <i class="bi bi-arrow-left me-1"></i> Volver
+    </a>
+</div>
 
     <div class="row g-4">
 
@@ -167,10 +160,11 @@
                         <a asp-action="RegistroParametros"
                            asp-controller="Piscinas"
                            class="btn btn-outline-secondary">
+                           <i class="bi bi-x-circle me-1"></i>
                             Cancelar
                         </a>
 
-                        <button type="submit" class="a-btn">
+                        <button type="submit" class="btn btn-primary">
                             <i class="bi bi-save me-1"></i> Guardar Registro
                         </button>
                     </div>

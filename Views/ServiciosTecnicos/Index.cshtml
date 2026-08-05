@@ -41,27 +41,6 @@
     }
 </div>
 
-<div class="c-filter-bar mb-3">
-    <form method="get" asp-action="Index" class="d-flex gap-2 align-items-center flex-wrap w-100">
-        <input type="text"
-               name="busqueda"
-               value="@ViewBag.Busqueda"
-               class="form-control c-filter-input"
-               placeholder="Buscar por cliente, piscina, tipo, fecha o estado..." />
-
-        <button type="submit" class="btn">
-            <i class="bi bi-search me-1"></i>Buscar
-        </button>
-
-        @if (!string.IsNullOrWhiteSpace(ViewBag.Busqueda as string))
-        {
-            <a asp-action="Index" class="btn btn-outline-secondary">
-                <i class="bi bi-x-lg me-1"></i>Limpiar
-            </a>
-        }
-    </form>
-</div>
-
 <div class="card shadow-sm">
     <div class="card-body">
         <div class="table-responsive">

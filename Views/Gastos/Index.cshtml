@@ -1,7 +1,6 @@
 @model IEnumerable<MultiserviciosPiscinas.Models.GastoOperativo>
 
 @{
-    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
     ViewData["Title"] = "Gestión de Gastos";
 
     bool esAdmin = User.Identity?.Name != null && User.Identity.Name.StartsWith("admin", StringComparison.OrdinalIgnoreCase);

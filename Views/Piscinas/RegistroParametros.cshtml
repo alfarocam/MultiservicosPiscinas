@@ -5,18 +5,11 @@
     ViewData["Title"] = "Registro de Parámetros";
 }
 
-<div class="container my-4">
-
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h1 class="a-title mb-1">
-                <i class="bi bi-droplet-half me-2"></i>Registro de Parámetros
-            </h1>
-            <p class="a-text-muted mb-0">
-                Selecciona una visita de mantenimiento o inspección para registrar la calidad del agua.
-            </p>
-        </div>
-    </div>
+<div class="c-page-header d-flex justify-content-between align-items-center">
+    <h2>
+        Registro de Parámetros
+    </h2>
+</div>
 
     @if (TempData["Exito"] != null)
     {
@@ -119,7 +112,8 @@
                                         <a asp-action="RegistrarParametro"
                                            asp-controller="Piscinas"
                                            asp-route-citaId="@visita.CitaId"
-                                           class="btn btn-sm text-decoration-none">
+                                           class="btn btn-primary">
+                                           <i class="bi bi-plus-circle me-1"></i>
                                             Registrar parámetros
                                         </a>
                                     </div>
