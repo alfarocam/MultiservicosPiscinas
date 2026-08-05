@@ -48,17 +48,18 @@
                             <td>
                                 <div class="d-flex gap-1 justify-content-end">
                                      <a asp-action="Detalle" asp-controller="Piscinas" asp-route-id="@piscina.Id"
-                                        class="c-btn-sm c-btn-sm-outline">
+                                         class="c-btn-sm btn-info">
                                          <i class="bi bi-eye me-1"></i>Ver
-                                     </a>
-                                     <a asp-action="Editar" asp-controller="Piscinas" asp-route-id="@piscina.Id"
-                                        class="c-btn-sm c-btn-sm-primary">
-                                         <i class="bi bi-pencil me-1"></i>Editar
                                      </a>
                                      <a asp-action="Historial" asp-controller="Piscinas" asp-route-id="@piscina.Id"
                                         class="c-btn-sm c-btn-sm-primary">
                                          <i class="bi bi-clock-history me-1"></i>Historial
                                      </a>
+                                     <a asp-action="Editar" asp-controller="Piscinas" asp-route-id="@piscina.Id"
+                                        class="c-btn-sm btn-warning">
+                                         <i class="bi bi-pencil me-1"></i>Editar
+                                     </a>
+                                     
                                 </div>
                             </td>
                         </tr>

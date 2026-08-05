@@ -89,9 +89,9 @@
                                     <td><code class="text-dark font-weight-bold">@item.TablaAfectada</code></td>
                                     <td>@item.RegistroId</td>
                                     <td class="text-center">
-                                        <a asp-action="Detalle" asp-route-id="@item.Id" class="btn btn-outline-info btn-sm">
-                                            <i class="bi bi-eye"></i> Ver detalle
-                                        </a>
+                                         <a asp-action="Detalle" asp-route-id="@item.Id" class="c-btn-sm btn-info">
+                                             <i class="bi bi-eye me-1"></i>Ver detalle
+                                         </a>
                                     </td>
                                 </tr>
                             }
@@ -103,4 +103,4 @@
     </div>
 @section Scripts {
     <script src="~/js/bitacora-tabla.js" asp-append-version="true"></script>
-}
+}

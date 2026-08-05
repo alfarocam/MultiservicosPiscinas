@@ -8,7 +8,7 @@
 
 <div class="c-page-header d-flex justify-content-between align-items-center">
     <h2>Dashboard General</h2>
-    <a asp-controller="Reportes" asp-action="Index" class="btn btn-primary c-btn-action">
+    <a asp-controller="Reportes" asp-action="Index" class="btn c-btn-sm-primary">
         <i class="bi bi-file-earmark-bar-graph me-1"></i>Generar Reportes
     </a>
 </div>
@@ -19,6 +19,7 @@
         <div class="c-data-card c-card-padded h-100">
             <div class="d-flex align-items-center gap-3">
                 <div class="c-kpi-icon-box c-kpi-icon-blue">
+                <i class="bi bi-people-fill"></i>
                 </div>
                 <div>
                     <p class="c-kpi-label">Clientes activos</p>
@@ -31,6 +32,7 @@
         <div class="c-data-card c-card-padded h-100">
             <div class="d-flex align-items-center gap-3">
                 <div class="c-kpi-icon-box c-kpi-icon-green">
+                <i class="bi bi-wrench-adjustable-circle-fill"></i>
                 </div>
                 <div>
                     <p class="c-kpi-label">Servicios este mes</p>
@@ -43,6 +45,7 @@
         <div class="c-data-card c-card-padded h-100">
             <div class="d-flex align-items-center gap-3">
                 <div class="c-kpi-icon-box c-kpi-icon-red">
+                <i class="bi bi-receipt-cutoff"></i>
                 </div>
                 <div>
                     <p class="c-kpi-label">Facturas pendientes</p>
@@ -55,6 +58,7 @@
         <div class="c-data-card c-card-padded h-100">
             <div class="d-flex align-items-center gap-3">
                 <div class="c-kpi-icon-box c-kpi-icon-purple">
+                 <i class="bi bi-person-badge-fill"></i>
                 </div>
                 <div>
                     <p class="c-kpi-label">Técnicos</p>
@@ -169,7 +173,7 @@
         <div class="c-card-header-title">
             <span>Actividad Reciente</span>
         </div>
-        <a asp-controller="Agenda" asp-action="Index" class="c-btn-sm c-btn-sm-outline">
+        <a asp-controller="Agenda" asp-action="Index" class="c-btn-sm c-btn-sm-success">
             Ver más <i class="bi bi-arrow-right ms-1"></i>
         </a>
     </div>
