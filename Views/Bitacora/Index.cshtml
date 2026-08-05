@@ -4,103 +4,89 @@
     ViewData["Title"] = "Bitácora";
 }
 
+<div class="c-page-header">
+    <h2><i class="bi bi-shield-check me-2"></i>Bitácora</h2>
+</div>
 
-    <div class="c-page-header d-flex justify-content-between align-items-center">
-        <h2 class="mb-0">Bitácora</h2>
-    </div>
+<div class="c-filter-bar mb-3">
+    <form method="get" asp-action="Index" class="d-flex gap-2 align-items-center flex-wrap w-100">
+        <select name="accion" class="form-select" style="max-width: 220px;">
+            <option value="">-- Todas las acciones --</option>
+            <option value="INSERT" selected="@(ViewBag.FiltroAccion == "INSERT")">Registro nuevo</option>
+            <option value="UPDATE" selected="@(ViewBag.FiltroAccion == "UPDATE")">Modificación</option>
+            <option value="DELETE" selected="@(ViewBag.FiltroAccion == "DELETE")">Eliminación</option>
+        </select>
 
-    <div class="card shadow-sm mb-4">
-        <div class="card-body bg-light">
-            <form asp-action="Index" method="get" class="row g-3 align-items-end">
-                
-                <div class="col-md-3">
-                    <label class="form-label font-weight-bold">Filtrar por Acción</label>
-                    <select name="accion" class="form-select">
-                        <option value="">-- Todas --</option>
-                        <option value="INSERT" selected="@(ViewBag.FiltroAccion == "INSERT")">INSERT</option>
-                        <option value="UPDATE" selected="@(ViewBag.FiltroAccion == "UPDATE")">UPDATE</option>
-                        <option value="DELETE" selected="@(ViewBag.FiltroAccion == "DELETE")">DELETE</option>
-                    </select>
-                </div>
+        <select name="orden" class="form-select" style="max-width: 220px;">
+            <option value="recientes" selected="@(ViewBag.FiltroOrden != "antiguos")">Más recientes primero</option>
+            <option value="antiguos" selected="@(ViewBag.FiltroOrden == "antiguos")">Más antiguos primero</option>
+        </select>
 
-                <div class="col-md-3">
-                    <label class="form-label font-weight-bold">Buscar por Tabla SQL</label>
-                    <input type="text" name="tabla" class="form-control" placeholder="Ej: USUARIO" value="@ViewBag.FiltroTabla" />
-                </div>
+        <button type="submit" class="btn">
+            <i class="bi bi-funnel me-1"></i>Aplicar
+        </button>
 
-                <div class="col-md-3">
-                    <label class="form-label font-weight-bold">Ordenar por Fecha</label>
-                    <select name="orden" class="form-select">
-                        <option value="recientes" selected="@(ViewBag.FiltroOrden == "recientes")">Mais recientes primero</option>
-                        <option value="antiguos" selected="@(ViewBag.FiltroOrden == "antiguos")">Mas antiguos primero</option>
-                    </select>
-                </div>
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-x-lg me-1"></i>Limpiar
+        </a>
+    </form>
+</div>
 
-                <div class="col-md-3 d-flex gap-2">
-                    <button type="submit" class="btn btn-info text-white w-100">
-                        <i class="bi bi-funnel"></i> Aplicar
-                    </button>
-                    <a href="@Url.Action("Index", "Bitacora")" class="btn btn-secondary w-100">
-                        <i class="bi bi-arrow-counterclockwise"></i> Limpiar
-                    </a>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <div class="card shadow-sm">
-        <div class="card-body">
-            <div class="table-responsive">
-                <table id="tablaBitacora" class="table table-hover align-middle">
-                    <thead class="table-light">
-                        <tr>
-                            <th class="ps-3">#</th>
-                            <th>Fecha y Hora</th>
-                            <th>Colaborador / Usuario</th>
-                            <th>Operación</th>
-                            <th>Tabla SQL</th>
-                            <th>ID Reg.</th>
-                            <th class="text-center">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @if (Model.Any())
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table id="tablaBitacora" class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>#</th>
+                        <th>Fecha y Hora</th>
+                        <th>Colaborador / Usuario</th>
+                        <th>Operación</th>
+                        <th>ID Reg.</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Any())
+                    {
+                        foreach (var item in Model)
                         {
-                            @foreach (var item in Model)
+                            var badgeClass = item.Accion switch
                             {
-                                <tr>
-                                    <td class="ps-3 font-weight-bold">@item.Id</td>
-                                    <td>@item.FechaHora.ToString("dd/MM/yyyy HH:mm")</td>
-                                    <td>@(item.Usuario != null ? $"{item.Usuario.Nombre} {item.Usuario.ApellidoPaterno}" : $"ID: {item.UsuarioId}")</td>
-                                    <td>
-                                        @if (item.Accion == "INSERT")
-                                        {
-                                            <span class="badge bg-success bg-opacity-75 text-white">Registro nuevo</span>
-                                        }
-                                        else if (item.Accion == "UPDATE")
-                                        {
-                                            <span class="badge bg-warning bg-opacity-75 text-dark">Modificacion</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="badge bg-danger bg-opacity-75 text-white">@item.Accion</span>
-                                        }
-                                    </td>
-                                    <td><code class="text-dark font-weight-bold">@item.TablaAfectada</code></td>
-                                    <td>@item.RegistroId</td>
-                                    <td class="text-center">
-                                         <a asp-action="Detalle" asp-route-id="@item.Id" class="c-btn-sm btn-info">
-                                             <i class="bi bi-eye me-1"></i>Ver detalle
-                                         </a>
-                                    </td>
-                                </tr>
-                            }
+                                "INSERT" => "c-badge-green",
+                                "UPDATE" => "c-badge-amber",
+                                "DELETE" => "c-badge-red",
+                                _ => "c-badge-gray"
+                            };
+
+                            var textoAccion = item.Accion switch
+                            {
+                                "INSERT" => "Registro nuevo",
+                                "UPDATE" => "Modificación",
+                                "DELETE" => "Eliminación",
+                                _ => item.Accion
+                            };
+
+                            <tr>
+                                <td class="c-num">@item.Id</td>
+                                <td>@item.FechaHora.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td class="fw-semibold">@(item.Usuario != null ? $"{item.Usuario.Nombre} {item.Usuario.ApellidoPaterno}" : $"ID: {item.UsuarioId}")</td>
+                                <td><span class="c-badge @badgeClass">@textoAccion</span></td>
+                                <td>@item.RegistroId</td>
+                                <td class="text-center">
+                                    <a asp-action="Detalle" asp-route-id="@item.Id" class="c-btn-sm btn-info">
+                                        <i class="bi bi-eye me-1"></i>Ver detalle
+                                    </a>
+                                </td>
+                            </tr>
                         }
-                    </tbody>
-                </table>
-            </div>
+                    }
+                </tbody>
+            </table>
         </div>
     </div>
+</div>
+
 @section Scripts {
     <script src="~/js/bitacora-tabla.js" asp-append-version="true"></script>
 }

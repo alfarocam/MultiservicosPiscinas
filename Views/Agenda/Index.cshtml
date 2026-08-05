@@ -1,7 +1,34 @@
+@using System.Text.Json
 @model List<MultiserviciosPiscinas.Models.Cita>
 @{
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
     ViewData["Title"] = "Agenda";
+
+    // Mapa Estado -> clase de badge, ya existía para la tabla; se reutiliza también
+    // para colorear los eventos del calendario y que ambas vistas se vean consistentes.
+    string BadgeClass(string estado) => estado switch
+    {
+        "Pendiente" => "c-badge-gray",
+        "Confirmada" => "c-badge-blue",
+        "En camino" => "c-badge-blue",
+        "En progreso" => "c-badge-amber",
+        "Completada" => "c-badge-green",
+        "Cancelada" => "c-badge-red",
+        _ => "c-badge-gray"
+    };
+
+    // Se arma acá, a partir de las mismas citas que ya trajo el controlador desde
+    // la base de datos (sin datos inventados), la lista de eventos que va a leer
+    // FullCalendar en el navegador.
+    var eventosCalendario = Model.Select(c => new
+    {
+        id = c.Id,
+        title = $"{c.Piscina.Cliente.Usuario.Nombre} {c.Piscina.Cliente.Usuario.ApellidoPaterno} — {c.Tipo}",
+        start = c.FechaHora.ToString("s"),
+        estado = c.Estado,
+        tecnico = $"{c.Tecnico.Nombre} {c.Tecnico.ApellidoPaterno}",
+        url = Url.Action("Editar", "Agenda", new { id = c.Id })
+    });
 }
 
 @if (TempData["MensajeExito"] != null)
@@ -9,8 +36,8 @@
     <div class="alert alert-success">@TempData["MensajeExito"]</div>
 }
 
-<div class="c-page-header d-flex justify-content-between align-items-center">
-    <h2>Agenda</h2>
+<div class="c-page-header">
+    <h2><i class="bi bi-calendar3 me-2"></i>Agenda</h2>
     <div class="d-flex gap-2">
         <a asp-controller="RutaOptimizada" asp-action="Index" class="btn btn-success">
             <i class="bi bi-signpost-split-fill me-1"></i>Ruta Optimizada
@@ -21,57 +48,82 @@
     </div>
 </div>
 
-<div class="card shadow-sm">
-    <div class="card-body">
-        <div class="table-responsive">
-            <table id="tablaAgenda" class="table table-hover align-middle">
-                <thead class="table-light">
-            <tr>
-                <th>Cliente</th>
-                <th>Piscina</th>
-                <th>Técnico</th>
-                <th>Fecha y hora</th>
-                <th>Tipo</th>
-                <th>Estado</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            @if (Model.Any())
-            {
-                foreach (var cita in Model)
-                {
-                    var badgeClass = cita.Estado switch
-                    {
-                        "Pendiente" => "c-badge-gray",
-                        "Confirmada" => "c-badge-blue",
-                        "En camino" => "c-badge-blue",
-                        "En progreso" => "c-badge-amber",
-                        "Completada" => "c-badge-green",
-                        "Cancelada" => "c-badge-red",
-                        _ => "c-badge-gray"
-                    };
-                    <tr>
-                        <td class="fw-semibold">@cita.Piscina.Cliente.Usuario.Nombre @cita.Piscina.Cliente.Usuario.ApellidoPaterno</td>
-                        <td>@cita.Piscina.Tipo — @cita.Piscina.VolumenM3 m³</td>
-                        <td>@cita.Tecnico.Nombre @cita.Tecnico.ApellidoPaterno</td>
-                        <td>@cita.FechaHora.ToString("dd/MM/yyyy HH:mm")</td>
-                        <td>@cita.Tipo</td>
-                        <td><span class="c-badge @badgeClass">@cita.Estado</span></td>
-                        <td>
-                            <a asp-action="Editar" asp-route-id="@cita.Id" class="c-btn-sm btn-warning">
-                                <i class="bi bi-pencil me-1"></i>Editar
-                            </a>
-                        </td>
-                    </tr>
-                }
-            }
-        </tbody>
-            </table>
+<ul class="nav nav-tabs mb-3">
+    <li class="nav-item">
+        <a class="nav-link active" data-bs-toggle="tab" href="#tabTabla">
+            <i class="bi bi-table me-1"></i>Vista de Tabla
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" data-bs-toggle="tab" href="#tabCalendario">
+            <i class="bi bi-calendar-week me-1"></i>Vista de Calendario
+        </a>
+    </li>
+</ul>
+
+<div class="tab-content">
+    <div class="tab-pane fade show active" id="tabTabla">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table id="tablaAgenda" class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Cliente</th>
+                                <th>Piscina</th>
+                                <th>Técnico</th>
+                                <th>Fecha y hora</th>
+                                <th>Tipo</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.Any())
+                            {
+                                foreach (var cita in Model)
+                                {
+                                    <tr>
+                                        <td class="fw-semibold">@cita.Piscina.Cliente.Usuario.Nombre @cita.Piscina.Cliente.Usuario.ApellidoPaterno</td>
+                                        <td>@cita.Piscina.Tipo — @cita.Piscina.VolumenM3 m³</td>
+                                        <td>@cita.Tecnico.Nombre @cita.Tecnico.ApellidoPaterno</td>
+                                        <td>@cita.FechaHora.ToString("dd/MM/yyyy HH:mm")</td>
+                                        <td>@cita.Tipo</td>
+                                        <td><span class="c-badge @BadgeClass(cita.Estado)">@cita.Estado</span></td>
+                                        <td>
+                                            <a asp-action="Editar" asp-route-id="@cita.Id" class="c-btn-sm btn-warning">
+                                                <i class="bi bi-pencil me-1"></i>Editar
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="tab-pane fade" id="tabCalendario">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div id="calendarioAgenda"></div>
+            </div>
         </div>
     </div>
 </div>
 
+@* Datos reales de las citas (ya cargadas por AgendaController.Index) para que el
+   calendario los lea; no se inventa ni hardcodea ninguna cita acá. *@
+<script id="datosAgendaCalendario" type="application/json">@Html.Raw(JsonSerializer.Serialize(eventosCalendario))</script>
+
 @section Scripts {
+    @* FullCalendar 6: la hoja de estilos ya no es un archivo aparte, la propia
+       librería la inyecta en el <head> al cargarse (así lo indica su documentación
+       oficial de migración a v6), por eso acá solo hacen falta los <script>. *@
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/locales/es.global.min.js"></script>
     <script src="~/js/agenda-tabla.js" asp-append-version="true"></script>
+    <script src="~/js/agenda-calendario.js" asp-append-version="true"></script>
 }

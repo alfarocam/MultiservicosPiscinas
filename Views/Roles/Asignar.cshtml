@@ -16,16 +16,25 @@
             <div class="row g-3">
                 <div class="col-md-6">
                     <label class="form-label fw-bold">Seleccione el Usuario</label>
-                    <select name="usuarioId" class="form-select" asp-items="ViewBag.Usuarios" required>
+                    <select name="usuarioId" id="usuarioSelect" class="form-select" required>
                         <option value="" disabled selected>-- Seleccionar por Correo --</option>
+                        @foreach (var usuario in (IEnumerable<MultiserviciosPiscinas.Models.Usuario>)ViewBag.Usuarios)
+                        {
+                            <option value="@usuario.Id" data-rolid="@usuario.RolId">@usuario.Correo</option>
+                        }
                     </select>
                 </div>
 
                 <div class="col-md-6">
                     <label class="form-label fw-bold">Seleccione el Nuevo Rol</label>
-                    <select name="rolId" class="form-select" asp-items="ViewBag.Roles" required>
+                    <select name="rolId" id="rolSelect" class="form-select" required>
                         <option value="" disabled selected>-- Asignar nuevo rol --</option>
+                        @foreach (var rol in (IEnumerable<MultiserviciosPiscinas.Models.Rol>)ViewBag.Roles)
+                        {
+                            <option value="@rol.Id" data-rol-option="@rol.Id">@rol.Nombre</option>
+                        }
                     </select>
+                    <small class="text-muted">El rol actual del usuario seleccionado no aparecerá en esta lista.</small>
                 </div>
             </div>
 
@@ -36,3 +45,7 @@
         </form>
     </div>
 </div>
+
+@section Scripts {
+    <script src="~/js/roles-asignar.js" asp-append-version="true"></script>
+}

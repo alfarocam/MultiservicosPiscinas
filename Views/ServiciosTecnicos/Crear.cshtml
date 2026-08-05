@@ -1,37 +1,64 @@
-﻿@{
-    ViewData["Title"] = "Nuevo registro";
+﻿@model MultiserviciosPiscinas.Models.ServicioCreateViewModel
+
+@{
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    ViewData["Title"] = "Nuevo Servicio Técnico";
 }
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h2 class="mb-0">Nuevo registro</h2>
-    <a asp-action="Index" class="btn btn-success"><i class="bi bi-arrow-left me-1"></i>Volver</a>
+<div class="c-page-header">
+    <h2>Nuevo Servicio Técnico</h2>
+
+    <a asp-action="Index" class="btn btn-success">
+        <i class="bi bi-arrow-left me-1"></i> Volver
+    </a>
 </div>
 
-<div class="card border-0 shadow-sm">
+<div class="card">
     <div class="card-body">
-        <form method="post">
+        <form asp-action="Crear" method="post">
             @Html.AntiForgeryToken()
 
-            <div class="row g-3">
-                <div class="col-md-6">
-                    <label class="form-label">Campo 1</label>
-                    <input class="form-control" />
-                </div>
+            <div asp-validation-summary="All" class="text-danger mb-3"></div>
 
-                <div class="col-md-6">
-                    <label class="form-label">Campo 2</label>
-                    <input class="form-control" />
-                </div>
+            <h5 class="fw-bold mb-3 c-section-title">
+                <i class="bi bi-calendar-event me-2"></i>Cita asociada
+            </h5>
+            <hr class="c-hr-accent" />
 
-                <div class="col-md-12">
-                    <label class="form-label">Observaciones</label>
-                    <textarea class="form-control" rows="3"></textarea>
+            <div class="row g-3 mb-4">
+                <div class="col-12">
+                    <label asp-for="CitaId" class="form-label fw-semibold"></label>
+                    <select asp-for="CitaId" class="form-select" required>
+                        <option value="">Seleccione la cita para la que se abre este servicio...</option>
+                        @foreach (var c in ViewBag.Citas)
+                        {
+                            <option value="@c.id">@c.texto</option>
+                        }
+                    </select>
+                    <span asp-validation-for="CitaId" class="text-danger small"></span>
+                    <div class="form-text">
+                        Solo se listan citas confirmadas que todavía no tienen un servicio técnico abierto.
+                    </div>
+                </div>
+            </div>
+
+            <h5 class="fw-bold mb-3 c-section-title">
+                <i class="bi bi-clipboard-check me-2"></i>Detalle del trabajo
+            </h5>
+            <hr class="c-hr-accent" />
+
+            <div class="row g-3 mb-4">
+                <div class="col-12">
+                    <label asp-for="TrabajoRealizado" class="form-label fw-semibold"></label>
+                    <textarea asp-for="TrabajoRealizado" class="form-control" rows="4"
+                              placeholder="Describa el trabajo que el técnico va a realizar en esta visita"></textarea>
+                    <span asp-validation-for="TrabajoRealizado" class="text-danger small"></span>
                 </div>
             </div>
 
             <div class="d-flex justify-content-end gap-2 mt-4">
                 <a asp-action="Index" class="btn btn-outline-secondary"><i class="bi bi-x-circle me-1"></i>Cancelar</a>
-                <button type="submit" class="btn btn-primary"><i class="bi bi-floppy me-1"></i>Guardar</button>
+                <button type="submit" class="btn btn-primary"><i class="bi bi-floppy me-1"></i>Guardar servicio</button>
             </div>
         </form>
     </div>
