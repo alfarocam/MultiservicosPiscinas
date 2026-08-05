@@ -1,8 +1,11 @@
-@model Usuario
+@model MultiserviciosPiscinas.Models.UsuarioRegistroViewModel
 @{
     Layout = "~/Views/Shared/_LayoutExterno.cshtml";
     ViewData["Title"] = "Registro";
 }
+
+<input type="hidden" id="urlCantones" value="@Url.Action("GetCantones", "Perfiles")" />
+<input type="hidden" id="urlDistritos" value="@Url.Action("GetDistritos", "Perfiles")" />
 
 <div class="card o-form-card shadow-sm u-container-max-sm">
     <div class="card-body p-4">
@@ -19,27 +22,106 @@
         <div asp-validation-summary="ModelOnly" class="text-danger mb-3 small"></div>
 
         <form asp-controller="Auth" asp-action="Registrar" method="post">
+            @Html.AntiForgeryToken()
+
             <div class="m-form-field">
-                <label for="Nombre" class="form-label fw-semibold">Nombre</label>
-                <input asp-for="Nombre" name="Nombre" type="text" class="form-control form-control-lg a-input" placeholder="Ingresa tu nombre" required>
+                <label asp-for="Nombre" class="form-label fw-semibold">Nombre</label>
+                <input asp-for="Nombre" class="form-control form-control-lg a-input" placeholder="Ingresa tu nombre" required>
+                <span asp-validation-for="Nombre" class="text-danger small"></span>
             </div>
             <div class="row">
                 <div class="col-sm-6 m-form-field">
-                    <label for="ApellidoPaterno" class="form-label fw-semibold">Apellido Paterno</label>
-                    <input asp-for="ApellidoPaterno" name="ApellidoPaterno" type="text" class="form-control form-control-lg a-input" placeholder="Primer apellido" required>
+                    <label asp-for="ApellidoPaterno" class="form-label fw-semibold">Apellido Paterno</label>
+                    <input asp-for="ApellidoPaterno" class="form-control form-control-lg a-input" placeholder="Primer apellido" required>
+                    <span asp-validation-for="ApellidoPaterno" class="text-danger small"></span>
                 </div>
                 <div class="col-sm-6 m-form-field">
-                    <label for="ApellidoMaterno" class="form-label fw-semibold">Apellido Materno</label>
-                    <input asp-for="ApellidoMaterno" name="ApellidoMaterno" type="text" class="form-control form-control-lg a-input" placeholder="Segundo apellido" required>
+                    <label asp-for="ApellidoMaterno" class="form-label fw-semibold">Apellido Materno</label>
+                    <input asp-for="ApellidoMaterno" class="form-control form-control-lg a-input" placeholder="Segundo apellido" required>
+                    <span asp-validation-for="ApellidoMaterno" class="text-danger small"></span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-6 m-form-field">
+                    <label asp-for="Correo" class="form-label fw-semibold">Correo Electrónico</label>
+                    <input asp-for="Correo" type="email" class="form-control form-control-lg a-input" placeholder="correo@ejemplo.com" required>
+                    <span asp-validation-for="Correo" class="text-danger small"></span>
+                </div>
+                <div class="col-sm-6 m-form-field">
+                    <label asp-for="Telefono" class="form-label fw-semibold">Teléfono</label>
+                    <input asp-for="Telefono" class="form-control form-control-lg a-input" placeholder="Ej: 8888-0000" required>
+                    <span asp-validation-for="Telefono" class="text-danger small"></span>
                 </div>
             </div>
             <div class="m-form-field">
-                <label for="Correo" class="form-label fw-semibold">Correo Electrónico</label>
-                <input asp-for="Correo" name="Correo" type="email" class="form-control form-control-lg a-input" placeholder="correo@ejemplo.com" required>
+                <label asp-for="Contrasena" class="form-label fw-semibold">Contraseña</label>
+                <input asp-for="Contrasena" type="password" class="form-control form-control-lg a-input" placeholder="Crea una contraseña" required>
+                <span asp-validation-for="Contrasena" class="text-danger small"></span>
             </div>
-            <div class="m-form-field">
-                <label for="Contrasena" class="form-label fw-semibold">Contraseña</label>
-                <input asp-for="Contrasena" name="Contrasena" type="password" class="form-control form-control-lg a-input" placeholder="Crea una contraseña" required>
+
+            <hr class="c-hr-accent my-4" />
+
+            <h6 class="fw-bold mb-3 c-section-title">
+                <i class="bi bi-geo-alt-fill me-2"></i>Dirección
+            </h6>
+
+            <div class="row g-3 mb-2">
+                <div class="col-md-4 m-form-field">
+                    <label class="form-label fw-semibold">Provincia</label>
+                    <select id="provinciaSelect" name="provinciaId" class="form-select" required>
+                        <option value="">Seleccione una provincia...</option>
+                        @foreach (var provincia in ViewBag.Provincias)
+                        {
+                            <option value="@provincia.Id">@provincia.Nombre</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-4 m-form-field">
+                    <label class="form-label fw-semibold">Cantón</label>
+                    <select id="cantonSelect" name="cantonId" class="form-select" disabled required>
+                        <option value="">Seleccione un cantón...</option>
+                    </select>
+                </div>
+
+                <div class="col-md-4 m-form-field">
+                    <label class="form-label fw-semibold">Distrito</label>
+                    <select id="distritoSelect" asp-for="DistritoId" class="form-select" disabled required>
+                        <option value="">Seleccione un distrito...</option>
+                    </select>
+                    <span asp-validation-for="DistritoId" class="text-danger small"></span>
+                </div>
+
+                <div class="col-12 m-form-field">
+                    <label asp-for="Direccion" class="form-label fw-semibold">Dirección</label>
+                    <textarea asp-for="Direccion" class="form-control" rows="2"
+                              placeholder="Otras señas exactas de la dirección..." required></textarea>
+                    <span asp-validation-for="Direccion" class="text-danger small"></span>
+                </div>
+
+                <div class="col-12 m-form-field">
+                    <label class="form-label fw-semibold">Ubicación en el mapa</label>
+                    <div class="form-text mb-2">
+                        Hacé clic en el mapa (o arrastrá el marcador) para marcar tu ubicación exacta.
+                        Es opcional, pero se necesita para poder incluir tu dirección en rutas de servicio.
+                    </div>
+                    <div id="mapaCliente" style="height: 280px; width: 100%; border-radius: 8px;"
+                         class="border mb-2"></div>
+                </div>
+
+                <div class="col-md-6 m-form-field">
+                    <label asp-for="Latitud" class="form-label fw-semibold"></label>
+                    <input asp-for="Latitud" type="number" step="any" class="form-control" readonly
+                           placeholder="Se completa al marcar el pin en el mapa" />
+                    <span asp-validation-for="Latitud" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-6 m-form-field">
+                    <label asp-for="Longitud" class="form-label fw-semibold"></label>
+                    <input asp-for="Longitud" type="number" step="any" class="form-control" readonly
+                           placeholder="Se completa al marcar el pin en el mapa" />
+                    <span asp-validation-for="Longitud" class="text-danger small"></span>
+                </div>
             </div>
 
             <div class="d-grid gap-2 mt-4">
@@ -52,3 +134,10 @@
         </form>
     </div>
 </div>
+
+@section Scripts {
+    <script src="~/js/ubicaciones.js"></script>
+    <script src="~/js/clientes-mapa.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=@ViewBag.GoogleMapsApiKey&callback=iniciarMapaCliente&loading=async"
+            async defer></script>
+}

@@ -304,7 +304,11 @@ namespace MultiserviciosPiscinas.Controllers
             }
         }
 
+        // [AllowAnonymous]: estos dos endpoints solo devuelven el catálogo público
+        // de cantones/distritos (sin datos de usuario), y los necesita también el
+        // registro público de clientes (Auth/Registrar), que se llena sin sesión.
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> GetCantones(int provinciaId)
         {
             var cantones = await _context.Canton
@@ -316,6 +320,7 @@ namespace MultiserviciosPiscinas.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> GetDistritos(int cantonId)
         {
             var distritos = await _context.Distrito

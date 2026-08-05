@@ -7,10 +7,12 @@ namespace MultiserviciosPiscinas.Controllers
     public class ClientesController : Controller
     {
         private readonly PiscinasYMultiserviciosContext _context;
+        private readonly IConfiguration _configuration;
 
-        public ClientesController(PiscinasYMultiserviciosContext context)
+        public ClientesController(PiscinasYMultiserviciosContext context, IConfiguration configuration)
         {
             _context = context;
+            _configuration = configuration;
         }
 
         public async Task<IActionResult> Index()
@@ -49,6 +51,10 @@ namespace MultiserviciosPiscinas.Controllers
         public async Task<IActionResult> Crear()
         {
             await CargarProvinciasAsync();
+            // Mismo patrón que ya usa RutaOptimizadaController para pasarle la
+            // API key de Google Maps a la vista (nunca hardcodeada, sale de
+            // configuración: appsettings.Development.json / User Secrets en local).
+            ViewBag.GoogleMapsApiKey = _configuration["GoogleMaps:ApiKey"] ?? string.Empty;
             return View();
         }
 

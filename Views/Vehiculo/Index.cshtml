@@ -24,84 +24,82 @@
         }
 </style>
 
-<div class="container mt-4">
-    <div class="c-page-header">
-        <h2>Vehículos de la Empresa</h2>
-        <button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#modalNuevoVehiculo">
-            <i class="bi bi-plus-circle me-1"></i>Registrar Vehículo
-        </button>
+<div class="c-page-header">
+    <h2>Vehículos de la Empresa</h2>
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalNuevoVehiculo">
+        <i class="bi bi-plus-circle me-1"></i>Registrar Vehículo
+    </button>
+</div>
+
+@if (TempData["MensajeExito"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle-fill"></i> @TempData["MensajeExito"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
+}
 
-    @if (TempData["MensajeExito"] != null)
-    {
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <i class="bi bi-check-circle-fill"></i> @TempData["MensajeExito"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    }
+@if (TempData["MensajeError"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle-fill"></i> @TempData["MensajeError"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
 
-    @if (TempData["MensajeError"] != null)
-    {
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="bi bi-exclamation-triangle-fill"></i> @TempData["MensajeError"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    }
-
-
-    <div class="card shadow-sm">
-        <div class="card-body">
-            <div class="table-responsive">
-                <table id="tablaVehiculo" class="table table-hover align-middle">
-                    <thead class="table-light">
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table id="tablaVehiculo" class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>ID Interno</th>
+                        <th>Placa</th>
+                        <th>Marca</th>
+                        <th>Modelo</th>
+                        <th>Técnico Asignado</th>
+                        <th>Estado</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var v in Model)
+                    {
                         <tr>
-                            <th>ID Interno</th>
-                            <th>Placa</th>
-                            <th>Marca</th>
-                            <th>Modelo</th>
-                            <th>Técnico Asignado</th>
-                            <th>Estado</th>
-                            <th class="text-center">Acciones</th>
+                            <td><strong>#@v.Id</strong></td>
+                            <td><span class="badge bg-secondary fs-6">@v.Placa</span></td>
+                            <td>@v.Marca</td>
+                            <td>@(string.IsNullOrEmpty(v.Modelo) ? "N/A" : v.Modelo)</td>
+                            <td>
+                                <span class="fw-bold text-dark">
+                                    <i class="bi bi-person-badge"></i>
+                                    @(v.Tecnico != null
+                                        ? $"{v.Tecnico.Nombre} {v.Tecnico.ApellidoPaterno} {v.Tecnico.ApellidoMaterno}"
+                                        : "Sin Asignar")
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge bg-success">@v.Estado</span>
+                            </td>
+                            <td class="text-center">
+                                <button type="button" class="c-btn-sm btn-warning"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#modalEditarVehiculo"
+                                        data-id="@v.Id"
+                                        data-placa="@v.Placa"
+                                        data-marca="@v.Marca"
+                                        data-modelo="@v.Modelo"
+                                        data-tecnicoid="@v.TecnicoId">
+                                    <i class="bi bi-pencil-square me-1"></i>Editar
+                                </button>
+                            </td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var v in Model)
-                        {
-                            <tr>
-                                <td><strong>#@v.Id</strong></td>
-                                <td><span class="badge bg-secondary fs-6">@v.Placa</span></td>
-                                <td>@v.Marca</td>
-                                <td>@(string.IsNullOrEmpty(v.Modelo) ? "N/A" : v.Modelo)</td>
-                                <td>
-                                    <span class="fw-bold text-dark">
-                                        <i class="bi bi-person-badge"></i>
-                                        @(v.Tecnico != null
-                                            ? $"{v.Tecnico.Nombre} {v.Tecnico.ApellidoPaterno} {v.Tecnico.ApellidoMaterno}"
-                                            : "Sin Asignar")
-                                    </span>
-                                </td>
-                                <td>
-                                    <span class="badge bg-success">@v.Estado</span>
-                                </td>
-                                <td class="text-center">
-                                    <button type="button" class="btn btn-sm btn-warning"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#modalEditarVehiculo"
-                                            data-id="@v.Id"
-                                            data-placa="@v.Placa"
-                                            data-marca="@v.Marca"
-                                            data-modelo="@v.Modelo"
-                                            data-tecnicoid="@v.TecnicoId">
-                                        <i class="bi bi-pencil-square"></i> Editar
-                                    </button>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
+                    }
+                </tbody>
+            </table>
         </div>
     </div>
+</div>
 
     <div class="modal fade" id="modalNuevoVehiculo" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">

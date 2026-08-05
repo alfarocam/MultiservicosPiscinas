@@ -8,7 +8,7 @@ using System.Security.Claims;
 
 namespace MultiserviciosPiscinas.Controllers
 {
-    public class AuthController(PiscinasYMultiserviciosContext _contexto, Generales _generales, IWebHostEnvironment _entornoWeb) : Controller
+    public class AuthController(PiscinasYMultiserviciosContext _contexto, Generales _generales, IWebHostEnvironment _entornoWeb, IConfiguration _configuration) : Controller
     {
         #region Iniciar Sesión
         // =========================
@@ -78,39 +78,57 @@ namespace MultiserviciosPiscinas.Controllers
         // =========================
 
         [HttpGet]
-        public IActionResult Registrar()
+        public async Task<IActionResult> Registrar()
         {
+            await CargarDatosUbicacionAsync();
             return View();
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Registrar(Usuario usuario)
+        // Provincias + API key de Google Maps para el selector de ubicación del
+        // registro público. Mismo patrón que ClientesController.CargarProvinciasAsync,
+        // reutilizado acá porque este formulario ahora pide la misma dirección.
+        private async Task CargarDatosUbicacionAsync()
         {
+            ViewBag.Provincias = await _contexto.Provincia.OrderBy(p => p.Nombre).ToListAsync();
+            ViewBag.GoogleMapsApiKey = _configuration["GoogleMaps:ApiKey"] ?? string.Empty;
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Registrar(UsuarioRegistroViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                await CargarDatosUbicacionAsync();
+                return View(model);
+            }
+
             bool correoExiste = await _contexto.Usuario
-                .AnyAsync(u => u.Correo == usuario.Correo);
+                .AnyAsync(u => u.Correo == model.Correo);
 
             if (correoExiste)
             {
                 ViewBag.Mensaje = "El correo ya está registrado. Por favor, elige otro.";
                 ViewBag.TipoMensaje = "danger";
-                return View(usuario);
+                await CargarDatosUbicacionAsync();
+                return View(model);
             }
 
-            usuario.RolId = 3;
-            usuario.FechaCreacion = DateTime.Now;
+            const int rolCliente = 3;
+            var fechaCreacion = DateTime.Now;
 
             try
             {
                 var usuarioIdResult = await _contexto.Database
                     .SqlQueryRaw<int>(
                         "EXEC seg.InsertarUsuarioYCliente @p0, @p1, @p2, @p3, @p4, @p5, @p6",
-                        usuario.RolId,
-                        usuario.Nombre,
-                        usuario.ApellidoPaterno,
-                        usuario.ApellidoMaterno,
-                        usuario.Correo,
-                        usuario.Contrasena,
-                        usuario.FechaCreacion
+                        rolCliente,
+                        model.Nombre,
+                        model.ApellidoPaterno,
+                        model.ApellidoMaterno,
+                        model.Correo,
+                        model.Contrasena,
+                        fechaCreacion
                     )
                     .ToListAsync();
 
@@ -120,33 +138,53 @@ namespace MultiserviciosPiscinas.Controllers
                 {
                     ViewBag.Mensaje = "Error al registrar el usuario.";
                     ViewBag.TipoMensaje = "danger";
-                    return View();
+                    await CargarDatosUbicacionAsync();
+                    return View(model);
                 }
 
-                string notasCliente = "Cliente registrado desde registro de usuario.";
-
-                var clienteResult = await _contexto.Database.ExecuteSqlRawAsync(
-                    "INSERT INTO cli.CLIENTE (usuario_id, notas) VALUES (@p0, @p1)",
-                    nuevoUsuarioId,
-                    (object)notasCliente ?? DBNull.Value
-                );
-
-                if (clienteResult <= 0)
+                // A partir de acá se usa EF directamente (en vez de más INSERT en
+                // SQL crudo) porque se necesita el Id autogenerado del cliente
+                // para poder guardar su teléfono y dirección a continuación.
+                var cliente = new Cliente
                 {
-                    ViewBag.Mensaje = "Usuario creado, pero hubo un error al crear el perfil de cliente.";
-                    ViewBag.TipoMensaje = "warning";
-                    return View();
-                }
-                
+                    UsuarioId = nuevoUsuarioId,
+                    Notas = "Cliente registrado desde registro de usuario."
+                };
+                _contexto.Cliente.Add(cliente);
+                await _contexto.SaveChangesAsync();
+
+                _contexto.TelefonosCliente.Add(new TelefonosCliente
+                {
+                    ClienteId = cliente.Id,
+                    TipoTelefono = "Principal",
+                    NumeroTelefono = model.Telefono,
+                    EsPrincipal = 1
+                });
+
+                _contexto.DireccionCliente.Add(new DireccionCliente
+                {
+                    ClienteId = cliente.Id,
+                    DistritoId = model.DistritoId,
+                    TipoDireccion = "Principal",
+                    Detalles = model.Direccion,
+                    EsPrincipal = 1,
+                    Latitud = model.Latitud,
+                    Longitud = model.Longitud
+                });
+
+                await _contexto.SaveChangesAsync();
+
                 ViewBag.Mensaje = "Usuario creado correctamente.";
                 ViewBag.TipoMensaje = "success";
+                await CargarDatosUbicacionAsync();
                 return View();
             }
             catch (Exception)
             {
                 ViewBag.Mensaje = "Ocurrió un error inesperado en el servidor.";
                 ViewBag.TipoMensaje = "danger";
-                return View();
+                await CargarDatosUbicacionAsync();
+                return View(model);
             }
         }
         #endregion
