@@ -2,13 +2,12 @@
 
 @{
     ViewData["Title"] = "Detalle de Cotización";
-    Layout = "_LayoutCliente";
 }
 
-<div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Detalle de Cotización <span class="text-primary">@Model.NumeroCotizacion</span></h2>
-        <a asp-action="Index" class="btn btn-outline-secondary">
+
+    <div class="c-page-header d-flex justify-content-between align-items-center">
+        <h2>Detalle de Cotización <span class="text-info">@Model.NumeroCotizacion</span></h2>
+        <a asp-action="Index" class="btn btn-success">
             <i class="bi bi-arrow-left"></i> Volver
         </a>
     </div>
@@ -134,7 +133,6 @@
             </form>
         </div>
     }
-</div>
 
 @section Scripts {
     <script>

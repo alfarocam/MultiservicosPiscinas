@@ -3,8 +3,8 @@
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
 }
 
-<div class="c-page-header">
-    <h2><i class="bi bi-pie-chart me-2"></i>Resumen de Gastos Operativos</h2>
+<div class="c-page-header d-flex justify-content-between align-items-center">
+    <h2>Resumen de Gastos Operativos</h2>
 </div>
 
 <!-- Formulario de filtros -->
@@ -39,7 +39,7 @@
             </select>
         </div>
         <div class="col-md-3 d-flex gap-2">
-            <button type="submit" class="btn w-100"><i class="bi bi-filter me-1"></i>Ver Resumen</button>
+            <button type="submit" class="btn btn-info w-100"><i class="bi bi-filter me-1"></i>Ver Resumen</button>
             <a asp-action="Index" class="btn btn-outline-secondary w-100"><i class="bi bi-x-lg me-1"></i>Limpiar</a>
         </div>
     </form>
@@ -59,7 +59,6 @@ else
     <div class="c-data-card mb-3">
         <div class="c-card-header">
             <div class="c-card-header-title">
-                <i class="bi bi-bar-chart text-white"></i>
                 <span>Totales por Categoría</span>
             </div>
         </div>
@@ -96,7 +95,6 @@ else
     <div class="c-data-card mb-3">
         <div class="c-card-header">
             <div class="c-card-header-title">
-                <i class="bi bi-pie-chart text-white"></i>
                 <span>Distribución de Gastos</span>
             </div>
         </div>
@@ -106,10 +104,9 @@ else
     </div>
 
     <!-- Listado detallado -->
-    <div class="c-data-card mb-3">
-        <div class="c-card-header">
+    <div class="o-form-card mb-3">
+        <div class="c-card-header mb-3">
             <div class="c-card-header-title">
-                <i class="bi bi-list-ul text-white"></i>
                 <span>Detalle de Gastos</span>
             </div>
             <!-- Botón exportar con parámetros actuales -->
@@ -117,37 +114,42 @@ else
                asp-route-fechaDesde="@ViewBag.FechaDesde"
                asp-route-fechaHasta="@ViewBag.FechaHasta"
                asp-route-categoriaId="@(ViewBag.CategoriaId ?? "")"
-               class="btn btn-sm btn-success">
+               class="btn btn-sm btn-primary">
                 <i class="bi bi-download me-1"></i>Exportar Reporte de Gastos
             </a>
         </div>
-        <table class="table table-hover">
-            <thead class="table-light">
-                <tr>
-                    <th>Fecha</th>
-                    <th>Categoría</th>
-                    <th>Descripción</th>
-                    <th>Monto</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var gasto in Model.Detalle)
-                {
+        <div class="table-responsive">
+            <table id="tablaDetalleGastos" class="table table-hover align-middle w-100">
+                <thead class="table-light">
                     <tr>
-                        <td>@gasto.Fecha.ToString("dd/MM/yyyy")</td>
-                        <td>@gasto.NombreCategoria</td>
-                        <td>@(gasto.Descripcion ?? "-")</td>
-                        <td><span class="c-price">₡@gasto.Monto.ToString("N2")</span></td>
+                        <th class="a-text-muted small text-uppercase">Fecha</th>
+                        <th class="a-text-muted small text-uppercase">Categoría</th>
+                        <th class="a-text-muted small text-uppercase">Descripción</th>
+                        <th class="a-text-muted small text-uppercase">Monto</th>
                     </tr>
-                }
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @foreach (var gasto in Model.Detalle)
+                    {
+                        <tr>
+                            <td>@gasto.Fecha.ToString("dd/MM/yyyy")</td>
+                            <td>@gasto.NombreCategoria</td>
+                            <td>@(gasto.Descripcion ?? "-")</td>
+                            <td><span class="c-price">₡@gasto.Monto.ToString("N2")</span></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <!-- Datos del gráfico en JSON (camelCase para que coincida con el JS) -->
     <script type="application/json" id="datosGrafico">
         @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.TotalesPorCategoria, new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase }))
     </script>
+}
 
+@section Scripts {
     <script src="~/js/reporteGastosOperativos.js"></script>
+    <script src="~/js/reporte-gastos-tabla.js"></script>
 }

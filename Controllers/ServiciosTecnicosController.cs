@@ -488,11 +488,13 @@ namespace MultiserviciosPiscinas.Controllers
 
         private async Task CargarTecnicosDisponiblesAsync()
         {
-            ViewBag.Tecnicos = await _context.Usuario
+            var tecnicos = await _context.Usuario
                 .Where(u => u.RolId == 2 && u.Activo)
                 .OrderBy(u => u.ApellidoPaterno)
-                .Select(u => new { id = u.Id, nombre = $"{u.Nombre} {u.ApellidoPaterno}" })
+                .Select(u => new { Id = u.Id, NombreCompleto = u.Nombre + " " + u.ApellidoPaterno })
                 .ToListAsync();
+
+            ViewBag.Tecnicos = new Microsoft.AspNetCore.Mvc.Rendering.SelectList(tecnicos, "Id", "NombreCompleto");
         }
 
         private RegistrarTareasViewModel CrearModeloRegistrarTareas(Servicio servicio)

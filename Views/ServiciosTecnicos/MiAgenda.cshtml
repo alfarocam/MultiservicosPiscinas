@@ -1,7 +1,6 @@
 @model MultiserviciosPiscinas.Models.MiAgendaViewModel
 
 @{
-    Layout = "~/Views/Shared/_LayoutTecnico.cshtml";
     ViewData["Title"] = "Mi Agenda";
 }
 
@@ -25,11 +24,10 @@
 
 <div class="c-page-header">
     <h2>
-        <i class="bi bi-calendar-day me-2"></i>
         Mi Agenda
     </h2>
 
-    <a asp-action="Index" class="btn btn-outline-secondary">
+    <a asp-action="Index" class="btn btn-success">
         <i class="bi bi-arrow-left me-1"></i>Servicios Asignados
     </a>
 </div>
@@ -43,13 +41,12 @@
                value="@Model.FechaConsulta.ToString("yyyy-MM-dd")"
                class="form-control c-filter-input-sm" />
 
-        <button type="submit" class="btn">
-            <i class="bi bi-search me-1"></i>Consultar
-        </button>
-
-        <a asp-action="MiAgenda" class="btn btn-outline-secondary">
+        <a asp-action="MiAgenda" class="btn btn-outline-info">
             Hoy
         </a>
+        <button type="submit" class="btn btn-info">
+            <i class="bi bi-search me-1"></i>Consultar
+        </button>
     </form>
 </div>
 
@@ -143,7 +140,7 @@
                                 {
                                     <a asp-action="Detalle"
                                        asp-route-id="@cita.ServicioId.Value"
-                                       class="c-btn-sm c-btn-sm-primary"
+                                       class="c-btn-sm btn-info"
                                        title="Ver servicio">
                                         <i class="bi bi-eye-fill me-1"></i>Ver
                                     </a>
@@ -171,4 +168,4 @@
 
 @section Scripts {
     <script src="~/js/servicios-tecnicos-tabla.js" asp-append-version="true"></script>
-}
+}

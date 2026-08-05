@@ -7,9 +7,9 @@
 }
 
 <div class="c-page-header d-flex justify-content-between align-items-center">
-    <h2><i class="bi bi-speedometer2 me-2"></i>Dashboard — Resumen General</h2>
-    <a asp-controller="Reportes" asp-action="Index" class="btn btn-primary c-btn-action">
-        <i class="bi bi-file-earmark-bar-graph me-2"></i>Generar Reportes
+    <h2>Dashboard General</h2>
+    <a asp-controller="Reportes" asp-action="Index" class="btn c-btn-sm-primary">
+        <i class="bi bi-file-earmark-bar-graph me-1"></i>Generar Reportes
     </a>
 </div>
 
@@ -19,7 +19,7 @@
         <div class="c-data-card c-card-padded h-100">
             <div class="d-flex align-items-center gap-3">
                 <div class="c-kpi-icon-box c-kpi-icon-blue">
-                    <i class="bi bi-people-fill"></i>
+                <i class="bi bi-people-fill"></i>
                 </div>
                 <div>
                     <p class="c-kpi-label">Clientes activos</p>
@@ -32,7 +32,7 @@
         <div class="c-data-card c-card-padded h-100">
             <div class="d-flex align-items-center gap-3">
                 <div class="c-kpi-icon-box c-kpi-icon-green">
-                    <i class="bi bi-wrench-adjustable-circle-fill"></i>
+                <i class="bi bi-wrench-adjustable-circle-fill"></i>
                 </div>
                 <div>
                     <p class="c-kpi-label">Servicios este mes</p>
@@ -45,7 +45,7 @@
         <div class="c-data-card c-card-padded h-100">
             <div class="d-flex align-items-center gap-3">
                 <div class="c-kpi-icon-box c-kpi-icon-red">
-                    <i class="bi bi-receipt-cutoff"></i>
+                <i class="bi bi-receipt-cutoff"></i>
                 </div>
                 <div>
                     <p class="c-kpi-label">Facturas pendientes</p>
@@ -58,7 +58,7 @@
         <div class="c-data-card c-card-padded h-100">
             <div class="d-flex align-items-center gap-3">
                 <div class="c-kpi-icon-box c-kpi-icon-purple">
-                    <i class="bi bi-person-badge-fill"></i>
+                 <i class="bi bi-person-badge-fill"></i>
                 </div>
                 <div>
                     <p class="c-kpi-label">Técnicos</p>
@@ -73,27 +73,24 @@
 <div class="c-data-card mb-4">
     <div class="c-card-header">
         <div class="c-card-header-title">
-            <i class="bi bi-bar-chart-line-fill text-white"></i>
             <span>Indicadores Operativos</span>
         </div>
         <span class="badge bg-secondary c-badge-sm">@Model.PeriodoKpi</span>
     </div>
     <div class="row g-0">
         <div class="col-md-4 p-4 text-center border-end">
-            <p class="c-op-kpi-label">
-                <i class="bi bi-check2-circle me-1 c-op-icon-green"></i>Servicios Realizados
+            <p class="c-op-kpi-label">Servicios Realizados
             </p>
             <h1 class="c-op-kpi-num c-op-kpi-num-green">@Model.ServiciosRealizados</h1>
         </div>
         <div class="col-md-4 p-4 text-center border-end">
-            <p class="c-op-kpi-label">
-                <i class="bi bi-hammer me-1 c-op-icon-amber"></i>Proyectos Activos
+            <p class="c-op-kpi-label">Proyectos Activos
             </p>
             <h1 class="c-op-kpi-num c-op-kpi-num-amber">@Model.ProyectosActivos</h1>
         </div>
         <div class="col-md-4 p-4 text-center">
             <p class="c-op-kpi-label">
-                <i class="bi bi-calendar-check me-1 c-op-icon-blue"></i>Visitas Técnicas
+                Visitas Técnicas
             </p>
             <h1 class="c-op-kpi-num c-op-kpi-num-blue">@Model.VisitasTecnicas</h1>
         </div>
@@ -108,7 +105,6 @@
         <div class="c-data-card h-100">
             <div class="c-card-header">
                 <div class="c-card-header-title">
-                    <i class="bi bi-graph-up text-white"></i>
                     <span>Servicios Últimos 6 Meses</span>
                 </div>
             </div>
@@ -130,7 +126,6 @@
         <div class="c-data-card h-100">
             <div class="c-card-header">
                 <div class="c-card-header-title">
-                    <i class="bi bi-pie-chart text-white"></i>
                     <span>Estado de Proyectos</span>
                 </div>
             </div>
@@ -155,7 +150,6 @@
         <div class="c-data-card">
             <div class="c-card-header">
                 <div class="c-card-header-title">
-                    <i class="bi bi-people text-white"></i>
                     <span>Visitas Técnicas por Técnico (Top 5)</span>
                 </div>
             </div>
@@ -177,10 +171,9 @@
 <div class="c-data-card mb-3">
     <div class="c-card-header">
         <div class="c-card-header-title">
-            <i class="bi bi-activity text-white"></i>
             <span>Actividad Reciente</span>
         </div>
-        <a asp-controller="Agenda" asp-action="Index" class="c-btn-sm c-btn-sm-outline">
+        <a asp-controller="Agenda" asp-action="Index" class="c-btn-sm c-btn-sm-success">
             Ver más <i class="bi bi-arrow-right ms-1"></i>
         </a>
     </div>
@@ -189,7 +182,7 @@
     {
         <div class="c-card-body-empty">
             <p class="text-muted mb-0 text-center">
-                <i class="bi bi-info-circle me-1"></i>No hay actividad reciente registrada.
+                No hay actividad reciente registrada.
             </p>
         </div>
     }

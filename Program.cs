@@ -13,7 +13,11 @@ var builder = WebApplication.CreateBuilder(args);
 // --- Servicios personalizados ---
 QuestPDF.Settings.License = LicenseType.Community;
 
-builder.Services.AddControllersWithViews(); // Mantenemos solo uno aquo
+var mvcBuilder = builder.Services.AddControllersWithViews();
+if (builder.Environment.IsDevelopment())
+{
+    mvcBuilder.AddRazorRuntimeCompilation();
+} // Mantenemos solo uno aquo
 
 // Registrar el HttpClient para el Seeder de Costa Rica
 builder.Services.AddHttpClient<DivisionTerritorialSeeder>();

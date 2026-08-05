@@ -108,61 +108,102 @@ p, .a-text-dark {
 }
 
 /* --- ÁTOMO: Enlaces de Formulario / Hipervínculos --- */
-.a-form-link, .o-form-card a, .p-login-view a {
+.a-form-link, 
+.o-form-card a:not(.btn):not(.c-btn-sm):not(.a-btn):not(.page-link):not(.dropdown-item):not(.nav-link), 
+.p-login-view a:not(.btn):not(.c-btn-sm):not(.a-btn):not(.page-link):not(.dropdown-item):not(.nav-link) {
     color: var(--color-link);
-    font-weight: 600 !important;
-    text-decoration: none !important;
+    font-weight: 600;
+    text-decoration: none;
     transition: var(--transition-smooth);
 }
 
-    .a-form-link:hover, .o-form-card a:hover, .p-login-view a:hover {
-        color: var(--color-link-hover) !important;
-        text-decoration: underline !important;
+    .a-form-link:hover, 
+    .o-form-card a:not(.btn):not(.c-btn-sm):not(.a-btn):not(.page-link):not(.dropdown-item):not(.nav-link):hover, 
+    .p-login-view a:not(.btn):not(.c-btn-sm):not(.a-btn):not(.page-link):not(.dropdown-item):not(.nav-link):hover {
+        color: var(--color-link-hover);
+        text-decoration: underline;
     }
 
 /* --- ÁTOMO: Botones --- */
 .a-btn, button, .btn {
     font-family: var(--font-family-btn);
-    background-color: var(--color-btn-bg) !important;
-    color: var(--color-btn-text) !important;
     font-weight: 600;
-    border: none;
     border-radius: var(--border-radius-sm);
     padding: 0.5rem 1.25rem;
-    box-shadow: 0 4px 10px rgba(10, 147, 150, 0.2);
     transition: var(--transition-smooth);
 }
 
-    .a-btn:hover, button:hover, .btn:hover {
-        background-color: var(--color-btn-hover) !important;
+/* Estilos para botones primarios de Bootstrap (Azul #0d6efd) */
+.btn-primary {
+    background-color: #0d6efd !important;
+    color: #ffffff !important;
+    border: none !important;
+    box-shadow: 0 4px 10px rgba(13, 110, 253, 0.25);
+}
+
+    .btn-primary:hover {
+        background-color: #0b5ed7 !important;
+        color: #ffffff !important;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(13, 110, 253, 0.35);
+    }
+
+    .btn-primary:active {
+        background-color: #0a58ca !important;
+        transform: translateY(0);
+        box-shadow: 0 2px 5px rgba(13, 110, 253, 0.2);
+    }
+
+/* Estilos para botones con el color turquesa del tema */
+.a-btn, .btn-theme {
+    background-color: var(--color-btn-bg);
+    color: var(--color-btn-text);
+    border: none;
+    box-shadow: 0 4px 10px rgba(10, 147, 150, 0.2);
+}
+
+    .a-btn:hover, .btn-theme:hover {
+        background-color: var(--color-btn-hover);
+        color: var(--color-btn-text);
         transform: translateY(-2px);
         box-shadow: 0 6px 15px rgba(0, 95, 115, 0.3);
     }
 
-    .a-btn:active, button:active, .btn:active {
-        transform: translateY(0);
-        box-shadow: 0 2px 5px rgba(0, 95, 115, 0.2);
+.btn-info {
+    background-color: #0dcaf0 !important;
+    color: #000000 !important;
+    border: none !important;
+}
+
+    .btn-info:hover {
+        background-color: #31d2f2 !important;
+        color: #000000 !important;
     }
+
+/* Efecto hover suave general para los botones */
+.btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+}
 
 .a-btn-outline, .btn-outline-light {
     font-family: var(--font-family-btn);
-    background-color: transparent !important;
-    color: var(--color-text-light) !important;
-    border: 1.5px solid rgba(255, 255, 255, 0.6) !important;
+    background-color: transparent;
+    color: var(--color-text-light);
+    border: 1.5px solid rgba(255, 255, 255, 0.6);
     box-shadow: none;
     transition: var(--transition-smooth);
 }
 
     .a-btn-outline:hover, .btn-outline-light:hover {
-        background-color: var(--color-text-light) !important;
-        color: var(--color-navbar-bg) !important;
-        border-color: var(--color-text-light) !important;
+        background-color: var(--color-text-light);
+        color: var(--color-navbar-bg);
+        border-color: var(--color-text-light);
         transform: translateY(-2px);
     }
 
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus,
 .form-control:focus, .form-check-input:focus {
-    box-shadow: 0 0 0 2px white, 0 0 0 4px var(--color-btn-bg) !important;
+    box-shadow: 0 0 0 2px white, 0 0 0 4px var(--color-btn-bg);
 }
 
 /* --- ÁTOMO: Inputs / Campos de Entrada --- */
@@ -839,14 +880,81 @@ main {
     cursor: pointer;
 }
 
-.c-btn-sm-primary {
-    background-color: var(--color-btn-bg) !important;
-    color: var(--color-text-light) !important;
+.c-btn-sm-primary, .c-btn-sm.btn-primary {
+    background-color: #0d6efd !important;
+    color: #ffffff !important;
+    border: none;
 }
 
-    .c-btn-sm-primary:hover {
+    .c-btn-sm-primary:hover, .c-btn-sm.btn-primary:hover {
+        background-color: #0b5ed7 !important;
+        color: #ffffff !important;
+    }
+
+.c-btn-sm-theme, .c-btn-sm-teal {
+    background-color: var(--color-btn-bg) !important;
+    color: var(--color-text-light) !important;
+    border: none;
+}
+
+    .c-btn-sm-theme:hover, .c-btn-sm-teal:hover {
         background-color: var(--color-btn-hover) !important;
         color: var(--color-text-light) !important;
+    }
+
+.c-btn-sm-warning, .c-btn-sm.btn-warning {
+    background-color: #ffc107 !important;
+    color: #000000 !important;
+    border: none;
+}
+
+    .c-btn-sm-warning:hover, .c-btn-sm.btn-warning:hover {
+        background-color: #ffca2c !important;
+        color: #000000 !important;
+    }
+
+.c-btn-sm-danger, .c-btn-sm.btn-danger {
+    background-color: #dc3545 !important;
+    color: #ffffff !important;
+    border: none;
+}
+
+    .c-btn-sm-danger:hover, .c-btn-sm.btn-danger:hover {
+        background-color: #bb2d3b !important;
+        color: #ffffff !important;
+    }
+
+.c-btn-sm-success, .c-btn-sm.btn-success {
+    background-color: #198754 !important;
+    color: #ffffff !important;
+    border: none;
+}
+
+    .c-btn-sm-success:hover, .c-btn-sm.btn-success:hover {
+        background-color: #157347 !important;
+        color: #ffffff !important;
+    }
+
+.c-btn-sm-secondary, .c-btn-sm.btn-secondary {
+    background-color: #6c757d !important;
+    color: #ffffff !important;
+    border: none;
+}
+
+    .c-btn-sm-secondary:hover, .c-btn-sm.btn-secondary:hover {
+        background-color: #5c636a !important;
+        color: #ffffff !important;
+    }
+
+.c-btn-sm-info, .c-btn-sm.btn-info {
+    background-color: #0dcaf0 !important;
+    color: #000000 !important;
+    border: none;
+}
+
+    .c-btn-sm-info:hover, .c-btn-sm.btn-info:hover {
+        background-color: #31d2f2 !important;
+        color: #000000 !important;
     }
 
 .c-btn-sm-outline {
@@ -859,6 +967,56 @@ main {
         background-color: #f0fdfa !important;
         color: var(--color-btn-bg) !important;
     }
+
+/* --- Ajuste Paginación DataTables --- */
+.page-item.active .page-link {
+    color: #ffffff !important;
+    background-color: #0d6efd !important;
+    border-color: #0d6efd !important;
+}
+
+/* --- Componente: Pestañas / Tabs Premium --- */
+.c-nav-tabs {
+    display: inline-flex;
+    background-color: #e8f1f5;
+    padding: 5px;
+    border-radius: var(--border-radius-md);
+    border: 1px solid #d4e3eb;
+    gap: 4px;
+    list-style: none;
+}
+
+    .c-nav-tabs .nav-link {
+        font-family: var(--font-family-heading);
+        font-size: 0.88rem;
+        font-weight: 600;
+        color: var(--color-text-dark) !important;
+        padding: 8px 20px;
+        border-radius: var(--border-radius-sm) !important;
+        border: none !important;
+        background-color: transparent !important;
+        transition: var(--transition-smooth);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        text-decoration: none;
+    }
+
+        .c-nav-tabs .nav-link:hover {
+            color: var(--color-navbar-bg) !important;
+            background-color: rgba(255, 255, 255, 0.6) !important;
+            transform: none !important;
+        }
+
+        .c-nav-tabs .nav-link.active {
+            background-color: var(--color-btn-bg) !important;
+            color: #ffffff !important;
+            box-shadow: 0 4px 12px rgba(10, 147, 150, 0.25);
+        }
+
+            .c-nav-tabs .nav-link.active:hover {
+                color: #ffffff !important;
+            }
 
 /* --- Stat cards (Reporte Satisfacción) --- */
 .c-stat-card {

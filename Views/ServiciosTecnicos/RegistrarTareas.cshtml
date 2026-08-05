@@ -1,7 +1,6 @@
 @model MultiserviciosPiscinas.Models.RegistrarTareasViewModel
 
 @{
-    Layout = "~/Views/Shared/_LayoutTecnico.cshtml";
     ViewData["Title"] = "Registrar tareas completadas";
 }
 
@@ -20,7 +19,7 @@
         Registrar tareas completadas
     </h2>
 
-    <a asp-action="Index" class="btn btn-outline-secondary">
+    <a asp-action="Index" class="btn btn-success">
         <i class="bi bi-arrow-left me-1"></i>Volver
     </a>
 </div>
@@ -107,7 +106,7 @@
         </div>
 
         <div class="d-flex justify-content-end gap-2">
-            <a asp-action="Detalle" asp-route-id="@Model.ServicioId" class="btn btn-outline-secondary">
+            <a asp-action="Detalle" asp-route-id="@Model.ServicioId" class="btn btn-info">
                 <i class="bi bi-eye-fill me-1"></i>Ver detalle
             </a>
 

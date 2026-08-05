@@ -47,7 +47,7 @@
                   asp-action="CerrarSesion"
                   method="post"
                   onsubmit="localStorage.removeItem('activeSidebarLink')">
-                <button type="submit" class="btn btn-outline-light btn-sm">
+                <button type="submit" class="btn btn-outline-danger btn-sm">
                     <i class="bi bi-box-arrow-right me-1"></i>Salir
                 </button>
             </form>
@@ -62,7 +62,6 @@
                     <a asp-controller="Perfiles"
                        asp-action="Detalle"
                        class="nav-link text-white">
-                        <i class="bi bi-person-circle me-2"></i>
                         Mi Perfil
                     </a>
                 </li>
@@ -77,7 +76,6 @@
                     <a asp-controller="ServiciosTecnicos"
                        asp-action="Index"
                        class="nav-link text-white">
-                        <i class="bi bi-tools me-2"></i>
                         Servicios Asignados
                     </a>
                 </li>
@@ -86,7 +84,6 @@
                     <a asp-controller="ServiciosTecnicos"
                        asp-action="MiAgenda"
                        class="nav-link text-white">
-                        <i class="bi bi-calendar-day me-2"></i>
                         Mi Agenda
                     </a>
                 </li>
@@ -95,7 +92,6 @@
                     <a asp-controller="RutaOptimizada"
                        asp-action="MiRutaDelDia"
                        class="nav-link text-white">
-                        <i class="bi bi-geo-alt-fill me-2"></i>
                         Rutas del Día
                     </a>
                 </li>
@@ -110,7 +106,6 @@
                     <a asp-controller="Piscinas"
                        asp-action="Index"
                        class="nav-link text-white">
-                        <i class="bi bi-water me-2"></i>
                         Registro de Parámetros
                     </a>
                 </li>
@@ -125,7 +120,6 @@
                     <a asp-controller="Inventario"
                        asp-action="Index"
                        class="nav-link text-white">
-                        <i class="bi bi-box-seam me-2"></i>
                         Inventario
                     </a>
                 </li>
@@ -134,7 +128,6 @@
                     <a asp-controller="Gastos"
                        asp-action="Index"
                        class="nav-link text-white">
-                        <i class="bi bi-cash-coin me-2"></i>
                         Mis Gastos
                     </a>
                 </li>
@@ -149,7 +142,6 @@
                     <a asp-controller="TablonAnuncios"
                        asp-action="Index"
                        class="nav-link text-white">
-                        <i class="bi bi-megaphone-fill me-2"></i>
                         Tablón de anuncios
                     </a>
                 </li>

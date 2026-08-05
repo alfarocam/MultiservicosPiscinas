@@ -5,9 +5,9 @@
     ViewData["Title"] = "Nuevo Colaborador";
 }
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h2 class="mb-0">Registrar Técnico o Administrador (HU-1.4)</h2>
-    <a asp-action="Index" class="btn btn-secondary">Volver</a>
+<div class="c-page-header d-flex justify-content-between align-items-center">
+    <h2 class="mb-0">Registrar Técnico o Administrador</h2>
+    <a asp-action="Index" class="btn btn-success"><i class="bi bi-arrow-left me-1"></i>Volver</a>
 </div>
 
 <div class="card border-0 shadow-sm">
@@ -57,11 +57,11 @@
                 </div>
             </div>
 
-            <div class="mt-4">
+            <div class="d-flex justify-content-end gap-2 mt-4">
+                <a asp-action="Index" class="btn btn-outline-secondary"><i class="bi bi-x-circle me-1"></i>Cancelar</a>
                 <button type="submit" class="btn btn-primary">
-                    <i class="bi bi-person-plus-fill me-1"></i> Guardar Colaborador
+                    <i class="bi bi-floppy me-1"></i>Guardar Colaborador
                 </button>
-                <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
             </div>
         </form>
     </div>
