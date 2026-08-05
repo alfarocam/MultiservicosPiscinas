@@ -1,0 +1,365 @@
+﻿@model MultiserviciosPiscinas.DTOs.ReporteEficienciaRutasDto
+@using System.Globalization
+
+@{
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    ViewData["Title"] = "Reporte de eficiencia de rutas";
+
+    var fechaDesde = Model.FechaDesde?.ToString("yyyy-MM-dd");
+    var fechaHasta = Model.FechaHasta?.ToString("yyyy-MM-dd");
+
+    var maxDistancia = Model.Tecnicos.Any()
+        ? Model.Tecnicos.Max(t => Math.Max(t.DistanciaOptimizadaKm, t.DistanciaRealKm))
+        : 1;
+
+    if (maxDistancia <= 0)
+    {
+        maxDistancia = 1;
+    }
+}
+
+<style>
+    .ruta-chart-row {
+        margin-bottom: 18px;
+    }
+
+    .ruta-chart-label {
+        font-weight: 700;
+        margin-bottom: 6px;
+        color: var(--color-navbar-bg);
+    }
+
+    .ruta-chart-bar-wrap {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 6px;
+    }
+
+    .ruta-chart-bar-name {
+        width: 135px;
+        font-size: 13px;
+        color: #475569;
+    }
+
+    .ruta-chart-bar-bg {
+        flex: 1;
+        height: 22px;
+        background: #e5e7eb;
+        border-radius: 999px;
+        overflow: hidden;
+    }
+
+    .ruta-chart-bar {
+        height: 100%;
+        border-radius: 999px;
+    }
+
+    .ruta-chart-bar-optimizada {
+        background: #0891b2;
+    }
+
+    .ruta-chart-bar-real {
+        background: #f59e0b;
+    }
+
+    .ruta-chart-value {
+        width: 80px;
+        text-align: right;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .ruta-legend {
+        display: flex;
+        gap: 18px;
+        flex-wrap: wrap;
+        margin-bottom: 18px;
+        font-size: 14px;
+    }
+
+        .ruta-legend span {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+    .ruta-legend-dot {
+        width: 14px;
+        height: 14px;
+        border-radius: 999px;
+        display: inline-block;
+    }
+</style>
+
+<div class="c-page-header">
+    <h2>
+        <i class="bi bi-signpost-split me-2"></i>
+        Reporte de eficiencia de rutas
+    </h2>
+</div>
+
+<div class="c-data-card mb-4" style="padding:20px 24px">
+    <form method="get" asp-action="Index" class="row g-3 align-items-end">
+        <div class="col-md-4">
+            <label class="form-label fw-semibold small text-muted text-uppercase" style="letter-spacing:.05em">
+                Fecha desde
+            </label>
+            <input type="date"
+                   name="fechaDesde"
+                   value="@fechaDesde"
+                   class="form-control" />
+        </div>
+
+        <div class="col-md-4">
+            <label class="form-label fw-semibold small text-muted text-uppercase" style="letter-spacing:.05em">
+                Fecha hasta
+            </label>
+            <input type="date"
+                   name="fechaHasta"
+                   value="@fechaHasta"
+                   class="form-control" />
+        </div>
+
+        <div class="col-md-4 d-flex gap-2">
+            <button type="submit" class="btn w-100">
+                <i class="bi bi-search me-1"></i>
+                Generar Reporte
+            </button>
+
+            <a asp-action="Index" class="btn btn-outline-secondary w-100">
+                Limpiar
+            </a>
+        </div>
+    </form>
+</div>
+
+@if (!Model.Tecnicos.Any())
+{
+    <div class="alert alert-info shadow-sm" role="alert">
+        <i class="bi bi-info-circle me-2"></i>
+        No hay datos disponibles de rutas en el período seleccionado.
+    </div>
+}
+else
+{
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="c-stat-card">
+                <div class="c-stat-num c-stat-num-blue">@Model.TotalRutas</div>
+                <div class="c-stat-label">Rutas generadas</div>
+                <div class="c-stat-icon" style="color:#0891b2">
+                    <i class="bi bi-signpost"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="c-stat-card">
+                <div class="c-stat-num c-stat-num-teal">@Model.TotalVisitas</div>
+                <div class="c-stat-label">Visitas registradas</div>
+                <div class="c-stat-icon" style="color:#0f766e">
+                    <i class="bi bi-geo-alt"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="c-stat-card">
+                <div class="c-stat-num c-stat-num-blue">
+                    @Model.TotalDistanciaOptimizadaKm.ToString("0.0")
+                    <span class="c-stat-sub">km</span>
+                </div>
+                <div class="c-stat-label">Distancia optimizada</div>
+                <div class="c-stat-icon" style="color:#2563eb">
+                    <i class="bi bi-route"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="c-stat-card">
+                <div class="c-stat-num c-stat-num-teal">
+                    @Model.EficienciaGeneralPorcentaje.ToString("0.0")
+                    <span class="c-stat-sub">%</span>
+                </div>
+                <div class="c-stat-label">Eficiencia general</div>
+                <div class="c-stat-icon" style="color:#10b981">
+                    <i class="bi bi-speedometer2"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="c-data-card mb-4">
+        <div style="background-color:var(--color-navbar-bg);padding:14px 20px;display:flex;align-items:center;gap:8px">
+            <i class="bi bi-bar-chart text-white"></i>
+            <span class="fw-bold text-white" style="font-family:var(--font-family-heading)">
+                Comparación de distancia optimizada vs real
+            </span>
+        </div>
+
+        <div class="p-4">
+            <div class="ruta-legend">
+                <span>
+                    <span class="ruta-legend-dot" style="background:#0891b2"></span>
+                    Distancia optimizada
+                </span>
+
+                <span>
+                    <span class="ruta-legend-dot" style="background:#f59e0b"></span>
+                    Distancia real estimada
+                </span>
+            </div>
+
+            @foreach (var tecnico in Model.Tecnicos)
+            {
+                var optimizadaWidth = ((tecnico.DistanciaOptimizadaKm / maxDistancia) * 100)
+                .ToString("0", CultureInfo.InvariantCulture);
+
+                var realWidth = ((tecnico.DistanciaRealKm / maxDistancia) * 100)
+                .ToString("0", CultureInfo.InvariantCulture);
+
+                <div class="ruta-chart-row">
+                    <div class="ruta-chart-label">@tecnico.Tecnico</div>
+
+                    <div class="ruta-chart-bar-wrap">
+                        <div class="ruta-chart-bar-name">Optimizada</div>
+                        <div class="ruta-chart-bar-bg">
+                            <div class="ruta-chart-bar ruta-chart-bar-optimizada"
+                                 style="width:@optimizadaWidth%">
+                            </div>
+                        </div>
+                        <div class="ruta-chart-value">
+                            @tecnico.DistanciaOptimizadaKm.ToString("0.0") km
+                        </div>
+                    </div>
+
+                    <div class="ruta-chart-bar-wrap">
+                        <div class="ruta-chart-bar-name">Real estimada</div>
+                        <div class="ruta-chart-bar-bg">
+                            <div class="ruta-chart-bar ruta-chart-bar-real"
+                                 style="width:@realWidth%">
+                            </div>
+                        </div>
+                        <div class="ruta-chart-value">
+                            @tecnico.DistanciaRealKm.ToString("0.0") km
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="c-data-card mb-4">
+        <div style="background-color:var(--color-navbar-bg);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;gap:8px">
+            <div>
+                <i class="bi bi-table text-white me-2"></i>
+                <span class="fw-bold text-white" style="font-family:var(--font-family-heading)">
+                    Resumen por técnico
+                </span>
+            </div>
+
+            <a asp-action="ExportarExcel"
+               asp-route-fechaDesde="@fechaDesde"
+               asp-route-fechaHasta="@fechaHasta"
+               class="btn btn-sm btn-light">
+                <i class="bi bi-file-earmark-excel me-1"></i>
+                Exportar
+            </a>
+        </div>
+
+        <div class="table-responsive">
+            <table class="c-data-table">
+                <thead>
+                    <tr>
+                        <th>Técnico</th>
+                        <th>Rutas</th>
+                        <th>Visitas</th>
+                        <th>Completadas</th>
+                        <th>Dist. optimizada</th>
+                        <th>Dist. real</th>
+                        <th>Diferencia</th>
+                        <th>Duración</th>
+                        <th>Eficiencia</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach (var item in Model.Tecnicos)
+                    {
+                        <tr>
+                            <td>@item.Tecnico</td>
+                            <td>@item.TotalRutas</td>
+                            <td>@item.TotalVisitas</td>
+                            <td>@item.VisitasCompletadas</td>
+                            <td>@item.DistanciaOptimizadaKm.ToString("0.0") km</td>
+                            <td>@item.DistanciaRealKm.ToString("0.0") km</td>
+                            <td>
+                                <span class="@(item.DiferenciaKm <= 0 ? "text-success" : "text-danger") fw-semibold">
+                                    @item.DiferenciaKm.ToString("0.0") km
+                                </span>
+                            </td>
+                            <td>@item.DuracionTotalMin min</td>
+                            <td>
+                                <span class="badge bg-primary">
+                                    @item.EficienciaPorcentaje.ToString("0.0")%
+                                </span>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="c-data-card">
+        <div style="background-color:var(--color-navbar-bg);padding:14px 20px;display:flex;align-items:center;gap:8px">
+            <i class="bi bi-list-ul text-white"></i>
+            <span class="fw-bold text-white" style="font-family:var(--font-family-heading)">
+                Detalle de rutas
+            </span>
+        </div>
+
+        <div class="table-responsive">
+            <table class="c-data-table">
+                <thead>
+                    <tr>
+                        <th>Ruta</th>
+                        <th>Fecha</th>
+                        <th>Técnico</th>
+                        <th>Visitas</th>
+                        <th>Completadas</th>
+                        <th>Dist. optimizada</th>
+                        <th>Dist. real</th>
+                        <th>Diferencia</th>
+                        <th>Duración</th>
+                        <th>Eficiencia</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach (var item in Model.Detalle)
+                    {
+                        <tr>
+                            <td>#@item.RutaId</td>
+                            <td>@item.Fecha.ToString("dd/MM/yyyy")</td>
+                            <td>@item.Tecnico</td>
+                            <td>@item.TotalVisitas</td>
+                            <td>@item.VisitasCompletadas</td>
+                            <td>@item.DistanciaOptimizadaKm.ToString("0.0") km</td>
+                            <td>@item.DistanciaRealKm.ToString("0.0") km</td>
+                            <td>
+                                <span class="@(item.DiferenciaKm <= 0 ? "text-success" : "text-danger") fw-semibold">
+                                    @item.DiferenciaKm.ToString("0.0") km
+                                </span>
+                            </td>
+                            <td>@item.DuracionEstimadaMin min</td>
+                            <td>@item.EficienciaPorcentaje.ToString("0.0")%</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
