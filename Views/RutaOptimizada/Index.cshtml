@@ -57,6 +57,26 @@ else if (!Model.TieneSuficientesParadas)
         @Model.Paradas.Count cita(s) asignada(s) el @Model.Fecha.ToString("dd/MM/yyyy").
     </div>
 }
+else if (!Model.TieneSuficientesParadasConCoordenadas)
+{
+    <div class="alert alert-warning">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        El técnico <strong>@Model.TecnicoNombre</strong> tiene
+        @Model.Paradas.Count cita(s) el @Model.Fecha.ToString("dd/MM/yyyy"),
+        pero solo @Model.ParadasConCoordenadas con ubicación marcada en el mapa.
+        Se necesitan al menos dos direcciones con coordenadas para calcular la ruta.
+        <div class="mt-2 mb-0">
+            Faltan coordenadas en:
+            <ul class="mb-0">
+                @foreach (var parada in Model.Paradas.Where(p => !p.TieneCoordenadas))
+                {
+                    <li>@parada.ClienteNombre — @parada.Direccion</li>
+                }
+            </ul>
+        </div>
+        Editá esas direcciones en <strong>Clientes</strong> y marcá el pin en el mapa para poder incluirlas en la ruta.
+    </div>
+}
 else
 {
     <div class="row g-3">

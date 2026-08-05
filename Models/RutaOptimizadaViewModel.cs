@@ -53,6 +53,15 @@
 
         public int ParadasConCoordenadas => Paradas.Count(p => p.TieneCoordenadas);
 
+        // Antes la vista solo miraba TieneSuficientesParadas (>= 2 citas ese día),
+        // sin importar si esas citas tenían coordenadas. Si el técnico tenía 2+
+        // citas pero ninguna con lat/lng (por ejemplo, direcciones de clientes
+        // creadas antes del selector de mapa), la vista igual entraba a la rama
+        // que arma el mapa, y como el JS filtra por TieneCoordenadas terminaba
+        // con menos de 2 paradas: el mapa de Google nunca se inicializaba y la
+        // pantalla se quedaba en blanco sin ningún mensaje.
+        public bool TieneSuficientesParadasConCoordenadas => ParadasConCoordenadas >= 2;
+
         public string GoogleMapsApiKey { get; set; } = string.Empty;
     }
 }
