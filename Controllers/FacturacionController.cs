@@ -21,7 +21,12 @@ namespace MultiserviciosPiscinas.Controllers
 
         public IActionResult Index()
         {
-            return View();
+            // No existe una pantalla propia de listado de facturas: según las HUs
+            // 8.1/8.2 (Cotización y Facturación), todo el flujo de facturación para
+            // el administrador arranca desde la pantalla "Cotizaciones" (ahí se
+            // filtra la cotización y se factura con el botón correspondiente). Por
+            // eso este Index solo redirige para no dejar una vista rota.
+            return RedirectToAction("Index", "Cotizacion");
         }
 
         public IActionResult Crear()
