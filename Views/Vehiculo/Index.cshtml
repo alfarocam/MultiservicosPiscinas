@@ -1,0 +1,191 @@
+@model IEnumerable<MultiserviciosPiscinas.Models.Vehiculo>
+
+@{
+    ViewData["Title"] = "Registar Vehiculos de la empresa";
+}
+
+<style>
+    #modalNuevoVehiculo .btn-close-vehiculo {
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0.25rem !important;
+        color: #ffffff !important;
+        font-size: 1.15rem;
+        opacity: 0.85;
+        line-height: 1;
+    }
+
+        #modalNuevoVehiculo .btn-close-vehiculo:hover {
+            opacity: 1;
+            background: rgba(255, 255, 255, 0.15) !important;
+            transform: none !important;
+            border-radius: 50%;
+        }
+</style>
+
+<div class="container mt-4">
+    <div class="c-page-header">
+        <h2>Vehículos de la Empresa</h2>
+        <button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#modalNuevoVehiculo">
+            <i class="bi bi-plus-circle me-1"></i>Registrar Vehículo
+        </button>
+    </div>
+
+    @if (TempData["MensajeExito"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle-fill"></i> @TempData["MensajeExito"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["MensajeError"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill"></i> @TempData["MensajeError"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table id="tablaVehiculo" class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID Interno</th>
+                            <th>Placa</th>
+                            <th>Marca</th>
+                            <th>Modelo</th>
+                            <th>Técnico Asignado</th>
+                            <th>Estado</th>
+                            <th class="text-center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var v in Model)
+                        {
+                            <tr>
+                                <td><strong>#@v.Id</strong></td>
+                                <td><span class="badge bg-secondary fs-6">@v.Placa</span></td>
+                                <td>@v.Marca</td>
+                                <td>@(string.IsNullOrEmpty(v.Modelo) ? "N/A" : v.Modelo)</td>
+                                <td>
+                                    <span class="fw-bold text-dark">
+                                        <i class="bi bi-person-badge"></i>
+                                        @(v.Tecnico != null
+                                            ? $"{v.Tecnico.Nombre} {v.Tecnico.ApellidoPaterno} {v.Tecnico.ApellidoMaterno}"
+                                            : "Sin Asignar")
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-success">@v.Estado</span>
+                                </td>
+                                <td class="text-center">
+                                    <button type="button" class="btn btn-sm btn-warning"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#modalEditarVehiculo"
+                                            data-id="@v.Id"
+                                            data-placa="@v.Placa"
+                                            data-marca="@v.Marca"
+                                            data-modelo="@v.Modelo"
+                                            data-tecnicoid="@v.TecnicoId">
+                                        <i class="bi bi-pencil-square"></i> Editar
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalNuevoVehiculo" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header text-white" style="background-color: var(--color-navbar-bg); border-bottom: none;">
+                    <h5 class="modal-title mb-0">Registrar Nuevo Vehículo</h5>
+                    <button type="button" class="btn-close-vehiculo" data-bs-dismiss="modal" aria-label="Cerrar">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+                <form asp-action="Crear" method="post">
+                    @Html.AntiForgeryToken()
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Placa:</label>
+                            <input type="text" name="Placa" class="form-control" placeholder="Ej: CL-123456" required />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Marca:</label>
+                            <input type="text" name="Marca" class="form-control" placeholder="Ej: Toyota" required />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Modelo (Opcional):</label>
+                            <input type="text" name="Modelo" class="form-control" placeholder="Ej: Hilux" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Técnico Asignado:</label>
+                            <select name="TecnicoId" class="form-select" asp-items="ViewBag.Tecnicos" required>
+                                <option value="">-- Seleccione Técnico --</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="bi bi-x-circle me-1"></i>Cancelar
+                        </button>
+                        <button type="submit" class="btn btn-success"><i class="bi bi-save me-1"></i>Guardar Vehiculo</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalEditarVehiculo" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title"><i class="bi bi-pencil"></i> Actualizar Datos de Vehículo</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form asp-action="Editar" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="editId" name="Id" />
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Placa:</label>
+                            <input type="text" id="editPlaca" name="Placa" class="form-control" required />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Marca:</label>
+                            <input type="text" id="editMarca" name="Marca" class="form-control" required />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Modelo:</label>
+                            <input type="text" id="editModelo" name="Modelo" class="form-control" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Técnico Asignado:</label>
+                            <select id="editTecnicoId" name="TecnicoId" class="form-select" asp-items="ViewBag.Tecnicos" required>
+                                <option value="">-- Seleccionar Técnico --</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="bi bi-x-circle me-1"></i>Cancelar
+                        </button>
+                        <button type="submit" class="btn btn-primary"><i class="bi bi-save me-1"></i>Guardar Cambios</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    @section Scripts {
+        <script src="~/js/vehiculo-tabla.js" asp-append-version="true"></script>
+    }

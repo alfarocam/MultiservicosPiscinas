@@ -13,10 +13,9 @@ namespace MultiserviciosPiscinas.Controllers
             _context = context;
         }
 
-        public async Task<IActionResult> Index(string accion, string tabla, string orden)
+        public async Task<IActionResult> Index(string accion, string orden)
         {
             ViewBag.FiltroAccion = accion;
-            ViewBag.FiltroTabla = tabla;
             ViewBag.FiltroOrden = orden;
 
             var consulta = _context.BitacoraAuditoria.Include(b => b.Usuario).AsQueryable();
@@ -24,11 +23,6 @@ namespace MultiserviciosPiscinas.Controllers
             if (!string.IsNullOrEmpty(accion))
             {
                 consulta = consulta.Where(b => b.Accion == accion);
-            }
-
-            if (!string.IsNullOrEmpty(tabla))
-            {
-                consulta = consulta.Where(b => b.TablaAfectada.Contains(tabla));
             }
 
             if (orden == "antiguos")

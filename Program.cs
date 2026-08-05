@@ -24,7 +24,7 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 
 // Configurar DbContext con SQL Server
 builder.Services.AddDbContext<PiscinasYMultiserviciosContext>(options =>
-    options.UseSqlServer(connectionString));
+    options.UseSqlServer(connectionString, sql => sql.CommandTimeout(30)));
 
 // Pagina de errores para migraciones en desarrollo
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
@@ -57,7 +57,6 @@ builder.Services.AddScoped<IReportesGeneralesRepository, ReportesGeneralesReposi
 builder.Services.AddScoped<BitacoraService>();
 builder.Services.AddScoped<GastoOperativoExcelService>();
 builder.Services.AddScoped<ReportesGeneralesExcelService>();
-builder.Services.AddScoped<ReporteEficienciaRutasExcelService>();
 
 // Cotización Manual
 builder.Services.AddScoped<ICotizacionRepository, CotizacionRepository>();
@@ -83,9 +82,11 @@ builder.Services.AddSession(options =>
 
 var app = builder.Build();
 
-// Configuracion del pipeline HTTP (Middlewares)
+
 if (app.Environment.IsDevelopment())
 {
+
+    app.UseDeveloperExceptionPage();
     app.UseMigrationsEndPoint();
 }
 else
@@ -103,20 +104,16 @@ app.UseSession();
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Ruta por defecto MVC (Apunta a Login)
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Auth}/{action=InicioSesion}/{id?}");
 
-// Mapear Razor Pages
 app.MapRazorPages();
 
-// EJECUTAR EL SEEDER
 using (var scope = app.Services.CreateScope())
 {
     var seeder = scope.ServiceProvider.GetRequiredService<DivisionTerritorialSeeder>();
     await seeder.SeedAsync();
 }
-// FIN DEL SEEDER
 
 app.Run();

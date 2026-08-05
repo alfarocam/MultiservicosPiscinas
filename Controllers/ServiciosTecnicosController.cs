@@ -38,14 +38,14 @@ namespace MultiserviciosPiscinas.Controllers
             {
                 consulta = consulta.Where(s => s.Cita.TecnicoId == usuarioId.Value);
             }
-            
+
             var servicios = await consulta
                 .OrderBy(s => s.Estado == "Cerrado")
                 .ThenBy(s => s.FechaApertura)
                 .ThenBy(s => s.Cita.FechaHora)
                 .AsNoTracking()
                 .ToListAsync();
-            
+
 
             if (!string.IsNullOrWhiteSpace(busqueda))
             {
@@ -70,9 +70,57 @@ namespace MultiserviciosPiscinas.Controllers
 
         [Authorize(Roles = "1")]
         [HttpGet]
-        public IActionResult Crear()
+        public async Task<IActionResult> Crear()
         {
+            await CargarCitasDisponiblesAsync();
             return View();
+        }
+
+        [Authorize(Roles = "1")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Crear(ServicioCreateViewModel modelo)
+        {
+            // Un Servicio siempre nace a partir de una Cita ya agendada (así lo
+            // define el modelo: Servicio.CitaId es obligatorio y único por Cita).
+            // Por eso acá no se piden de nuevo cliente/piscina/técnico/fecha: esos
+            // datos ya existen en la Cita elegida, evitamos duplicarlos.
+            var cita = await _context.Cita
+                .Include(c => c.Servicio)
+                .FirstOrDefaultAsync(c => c.Id == modelo.CitaId);
+
+            if (cita == null)
+            {
+                ModelState.AddModelError(nameof(modelo.CitaId), "La cita seleccionada no existe.");
+            }
+            else if (cita.Servicio != null)
+            {
+                ModelState.AddModelError(nameof(modelo.CitaId), "Esa cita ya tiene un servicio técnico registrado.");
+            }
+            else if (cita.Estado == "Cancelada")
+            {
+                ModelState.AddModelError(nameof(modelo.CitaId), "No se puede abrir un servicio para una cita cancelada.");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                await CargarCitasDisponiblesAsync();
+                return View(modelo);
+            }
+
+            var servicio = new Servicio
+            {
+                CitaId = modelo.CitaId,
+                FechaApertura = DateOnly.FromDateTime(DateTime.Now),
+                Estado = "Abierto",
+                TrabajoRealizado = modelo.TrabajoRealizado.Trim()
+            };
+
+            _context.Servicio.Add(servicio);
+            await _context.SaveChangesAsync();
+
+            TempData["MensajeExito"] = "El servicio técnico fue registrado correctamente.";
+            return RedirectToAction(nameof(Index));
         }
 
         [HttpGet]
@@ -484,6 +532,25 @@ namespace MultiserviciosPiscinas.Controllers
             modelo.TecnicoActual = $"{servicio.Cita.Tecnico.Nombre} {servicio.Cita.Tecnico.ApellidoPaterno}";
             modelo.FechaHoraCita = servicio.Cita.FechaHora;
             modelo.EstadoServicio = servicio.Estado;
+        }
+
+        private async Task CargarCitasDisponiblesAsync()
+        {
+            // Solo se ofrecen citas que todavía no tienen un servicio técnico
+            // abierto (Servicio.CitaId es único) y que no estén canceladas.
+            ViewBag.Citas = await _context.Cita
+                .Include(c => c.Piscina)
+                    .ThenInclude(p => p.Cliente)
+                        .ThenInclude(cl => cl.Usuario)
+                .Include(c => c.Tecnico)
+                .Where(c => c.Servicio == null && c.Estado != "Cancelada")
+                .OrderBy(c => c.FechaHora)
+                .Select(c => new
+                {
+                    id = c.Id,
+                    texto = $"{c.FechaHora:dd/MM/yyyy HH:mm} — {c.Piscina.Cliente.Usuario.Nombre} {c.Piscina.Cliente.Usuario.ApellidoPaterno} ({c.Tipo}, técnico: {c.Tecnico.Nombre} {c.Tecnico.ApellidoPaterno})"
+                })
+                .ToListAsync();
         }
 
         private async Task CargarTecnicosDisponiblesAsync()

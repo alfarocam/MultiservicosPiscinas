@@ -26,7 +26,7 @@ namespace MultiserviciosPiscinas.Controllers
             return View(roles);
         }
 
-        
+
         [HttpGet]
         public async Task<IActionResult> Crear()
         {
@@ -67,20 +67,23 @@ namespace MultiserviciosPiscinas.Controllers
             }
         }
 
-        
+
         [HttpGet]
         public async Task<IActionResult> Asignar()
         {
             var usuarios = await _context.Usuario.ToListAsync();
             var roles = await _context.Rol.ToListAsync();
 
-            ViewBag.Usuarios = new SelectList(usuarios, "Id", "Correo");
-            ViewBag.Roles = new SelectList(roles, "Id", "Nombre");
+            // Se envían las listas completas (no un SelectList) porque la vista necesita
+            // conocer el RolId actual de cada usuario para poder ocultar, en el navegador,
+            // el rol que ya tiene asignado dentro del combo de "Nuevo Rol".
+            ViewBag.Usuarios = usuarios;
+            ViewBag.Roles = roles;
 
             return View();
         }
 
-        
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Asignar(int usuarioId, int rolId)
