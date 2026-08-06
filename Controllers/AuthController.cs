@@ -8,7 +8,7 @@ using System.Security.Claims;
 
 namespace MultiserviciosPiscinas.Controllers
 {
-    public class AuthController(PiscinasYMultiserviciosContext _contexto, Generales _generales, IWebHostEnvironment _entornoWeb, IConfiguration _configuration) : Controller
+    public class AuthController(PiscinasYMultiserviciosContext _contexto, Generales _generales, IWebHostEnvironment _entornoWeb, IConfiguration _configuration, ILogger<AuthController> _logger) : Controller
     {
         #region Iniciar Sesión
         // =========================
@@ -219,20 +219,6 @@ namespace MultiserviciosPiscinas.Controllers
 
             var nuevaContrasena = _generales.GenerarContrasena();
 
-            // El SP usa SET NOCOUNT ON, así que ExecuteSql devolvería -1 siempre.
-            // El conteo real viene en el SELECT @@ROWCOUNT que retorna el SP.
-            var actualizacion = await _contexto.Database
-                .SqlQuery<ResultadoActualizacionContrasena>(
-                    $"EXEC seg.ActualizarContrasena @Contrasena={nuevaContrasena}, @IdUsuario={resultado.Id}")
-                .AsAsyncEnumerable()
-                .FirstOrDefaultAsync();
-
-            if (actualizacion is null || actualizacion.FilasAfectadas <= 0)
-            {
-                ViewBag.Mensaje = "Su información no se actualizó correctamente.";
-                return View();
-            }
-
             string rutaHtml = Path.Combine(
                 _entornoWeb.ContentRootPath,
                 "Template",
@@ -250,10 +236,36 @@ namespace MultiserviciosPiscinas.Controllers
                 .Replace("{{NOMBRE_USUARIO}}", resultado.Nombre)
                 .Replace("{{NUEVA_CONTRASENA}}", nuevaContrasena);
 
-            _generales.EnviarCorreo(
-                resultado.Correo,
-                "Recuperar Acceso",
-                htmlFinal);
+            // El correo se envía ANTES de guardar la nueva contraseña: si el envío
+            // falla, la contraseña actual del usuario sigue sirviendo y puede
+            // reintentar, en vez de quedarse sin acceso y sin correo.
+            try
+            {
+                _generales.EnviarCorreo(
+                    resultado.Correo,
+                    "Recuperar Acceso",
+                    htmlFinal);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Falló el envío del correo de recuperación a {Correo}", resultado.Correo);
+                ViewBag.Mensaje = "No se pudo enviar el correo de recuperación. Su contraseña no fue modificada, intente de nuevo.";
+                return View();
+            }
+
+            // El SP usa SET NOCOUNT ON, así que ExecuteSql devolvería -1 siempre.
+            // El conteo real viene en el SELECT @@ROWCOUNT que retorna el SP.
+            var actualizacion = await _contexto.Database
+                .SqlQuery<ResultadoActualizacionContrasena>(
+                    $"EXEC seg.ActualizarContrasena @Contrasena={nuevaContrasena}, @IdUsuario={resultado.Id}")
+                .AsAsyncEnumerable()
+                .FirstOrDefaultAsync();
+
+            if (actualizacion is null || actualizacion.FilasAfectadas <= 0)
+            {
+                ViewBag.Mensaje = "Su información no se actualizó correctamente. Intente de nuevo.";
+                return View();
+            }
 
             return RedirectToAction("InicioSesion", "Auth");
         }

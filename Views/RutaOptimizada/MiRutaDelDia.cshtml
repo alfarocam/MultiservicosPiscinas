@@ -30,16 +30,15 @@
     </div>
 }
 
-<div class="c-page-header">
+<div class="c-page-header d-flex justify-content-between align-items-center">
     <h2>
-        <i class="bi bi-geo-alt-fill me-2"></i>
         Mi Ruta del Día
     </h2>
 
     <a asp-controller="ServiciosTecnicos"
        asp-action="Index"
-       class="btn">
-        ← Servicios Asignados
+       class="btn btn-success">
+        <i class="bi bi-arrow-left me-1"></i>Servicios Asignados
     </a>
 </div>
 
@@ -54,14 +53,14 @@
         </div>
 
         <div class="col-md-3">
-            <button type="submit" class="btn w-100">
+            <button type="submit" class="btn btn-info w-100">
                 <i class="bi bi-search me-1"></i>
                 Consultar
             </button>
         </div>
 
         <div class="col-md-3">
-            <a asp-action="MiRutaDelDia" class="btn w-100">
+            <a asp-action="MiRutaDelDia" class="btn btn-outline-info w-100">
                 Hoy
             </a>
         </div>

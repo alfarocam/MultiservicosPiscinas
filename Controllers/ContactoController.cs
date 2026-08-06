@@ -7,7 +7,7 @@ using System.Security.Claims;
 namespace MultiserviciosPiscinas.Controllers
 {
     [Authorize]
-    public class ContactoController(Generales _generales, IWebHostEnvironment _entornoWeb, IConfiguration _configuracion) : Controller
+    public class ContactoController(Generales _generales, IWebHostEnvironment _entornoWeb, IConfiguration _configuracion, ILogger<ContactoController> _logger) : Controller
     {
 
         [HttpGet]
@@ -49,11 +49,22 @@ namespace MultiserviciosPiscinas.Controllers
 
             var emailEmpresa = _configuracion["EmailSettings:Account"]
                 ?? throw new InvalidOperationException("EmailSettings:Account no está configurado en appsettings.json");
-            _generales.EnviarCorreo(
-                emailEmpresa,
-                $"[Soporte Web] {model.Asunto}",
-                htmlFinal,
-                usuarioEmail);
+            try
+            {
+                _generales.EnviarCorreo(
+                    emailEmpresa,
+                    $"[Soporte Web] {model.Asunto}",
+                    htmlFinal,
+                    usuarioEmail);
+            }
+            catch (Exception ex)
+            {
+                // Un fallo del SMTP no debe tumbar la página con un error 500.
+                _logger.LogError(ex, "Falló el envío de la consulta de contacto de {Usuario}", usuarioEmail);
+                TempData["Mensaje"] = "No se pudo enviar tu mensaje en este momento. Por favor, intenta de nuevo más tarde.";
+                TempData["TipoMensaje"] = "danger";
+                return View(model);
+            }
 
             if (string.IsNullOrEmpty(usuarioEmail))
             {

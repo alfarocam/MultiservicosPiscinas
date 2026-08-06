@@ -32,4 +32,9 @@
     <Folder Include="wwwroot\imagenes\productos\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- Plantillas de correo: se leen en runtime desde ContentRootPath -->
+    <Content Include="Template\**\*.html" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
 </Project>
