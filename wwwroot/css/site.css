@@ -441,6 +441,30 @@ p, .a-text-dark {
     border-right: none !important;
 }
 
+/* En móvil el sidebar inicia escondido (ver site.js) y, al abrirse,
+   se muestra como overlay a pantalla completa en vez de empujar el contenido. */
+@media (max-width: 768px) {
+    .t-app-container {
+        position: relative;
+    }
+
+    .t-sidebar {
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: 100% !important;
+        max-width: 100%;
+        z-index: 1050;
+        overflow-y: auto;
+    }
+
+    .t-sidebar-collapsed .t-sidebar {
+        width: 100% !important;
+        transform: translateX(-100%);
+    }
+}
+
 .t-main-content {
     flex-grow: 1;
     padding: 2rem;

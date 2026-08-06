@@ -1,4 +1,3 @@
-using System.Net.Http.Json;
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -13,115 +12,149 @@ public class DivisionTerritorialSeeder(
 {
     private const string BaseUrl = "https://api-geo-cr.vercel.app";
 
-    // Costa Rica siempre tiene exactamente 7 provincias. Antes esta clase se
-    // saltaba por completo si la tabla Provincia ya tenía AL MENOS una fila, lo
-    // que dejaba la siembra pegada en un estado parcial si una corrida anterior
-    // se interrumpía a medio camino (por ejemplo, una falla de red llamando a la
-    // API externa después de guardar solo San José). Ahora solo se omite cuando
-    // ya están las 7, y cada provincia se procesa de forma independiente para
-    // que una falla puntual no le impida seguir con el resto.
-    private const int TotalProvinciasCostaRica = 7;
+    // La API pagina de a 7 elementos por defecto. Sin pedir un límite alto solo
+    // se guardaba la primera página de cada listado, dejando provincias con 7
+    // cantones y cantones con 7 distritos en vez de todos los que tienen.
+    private const int LimitePorPagina = 200;
 
     public async Task SeedAsync()
     {
-        logger.LogInformation("=== [SEEDER] Verificando base de datos de ubicación ===");
+        logger.LogInformation("=== [SEEDER] Verificando división territorial ===");
 
         try
         {
-            if (await dbContext.Provincia.CountAsync() >= TotalProvinciasCostaRica)
+            var provincias = await ObtenerCatalogoAsync(
+                $"{BaseUrl}/provincias?limit={LimitePorPagina}", "idProvincia");
+
+            if (provincias.Count == 0)
             {
-                logger.LogInformation("[SEEDER] Las 7 provincias ya están cargadas. Omitiendo.");
+                logger.LogWarning("[SEEDER] La API no devolvió provincias. Se conserva lo que ya está guardado.");
                 return;
             }
 
-            logger.LogInformation("[SEEDER] Descargando provincias de la API...");
-            var provRaw = await httpClient.GetStringAsync($"{BaseUrl}/provincias");
+            var provinciasExistentes = await dbContext.Provincia
+                .Select(p => p.Id)
+                .ToListAsync();
 
-            using var doc = JsonDocument.Parse(provRaw);
-
-            // Entrar a la propiedad "data" del JSON
-            if (!doc.RootElement.TryGetProperty("data", out var provinciasData) || provinciasData.ValueKind != JsonValueKind.Array)
+            foreach (var (provinciaId, provinciaNombre) in provincias)
             {
-                logger.LogError("[SEEDER] No se encontró la propiedad 'data' o no es un arreglo en el JSON de Provincias.");
-                return;
-            }
-
-            // Provincias que ya existen (por ejemplo, San José de una corrida
-            // anterior incompleta) se saltan para no duplicarlas ni chocar con
-            // direcciones de clientes que ya las referencian.
-            var provinciasExistentes = await dbContext.Provincia.Select(p => p.Id).ToListAsync();
-
-            // Procesar las Provincias
-            foreach (var itemProv in provinciasData.EnumerateArray())
-            {
-                int provinciaId = itemProv.GetProperty("idProvincia").GetInt32();
-                string provinciaNombre = itemProv.GetProperty("descripcion").GetString() ?? "";
-
-                if (provinciasExistentes.Contains(provinciaId))
-                {
-                    logger.LogInformation($"[SEEDER] Provincia {provinciaNombre} (ID: {provinciaId}) ya existe, se omite.");
-                    continue;
-                }
-
                 try
                 {
-                    logger.LogInformation($"[SEEDER] Procesando provincia: {provinciaNombre} (ID: {provinciaId})...");
-
-                    var provincia = new Provincia { Id = provinciaId, Nombre = provinciaNombre };
-                    dbContext.Provincia.Add(provincia);
-
-                    // PROCESAR CANTONES DE ESTA PROVINCIA
-                    var cantRaw = await httpClient.GetStringAsync($"{BaseUrl}/provincias/{provinciaId}/cantones");
-                    using var cantDoc = JsonDocument.Parse(cantRaw);
-
-                    if (cantDoc.RootElement.TryGetProperty("data", out var cantonesData) && cantonesData.ValueKind == JsonValueKind.Array)
-                    {
-                        foreach (var itemCant in cantonesData.EnumerateArray())
-                        {
-                            int cantonId = itemCant.GetProperty("idCanton").GetInt32();
-                            string cantonNombre = itemCant.GetProperty("descripcion").GetString() ?? "";
-
-                            var canton = new Canton { Id = cantonId, ProvinciaId = provinciaId, Nombre = cantonNombre };
-                            dbContext.Canton.Add(canton);
-
-                            // PROCESAR DISTRITOS DE ESTE CANTÓN
-                            var distRaw = await httpClient.GetStringAsync($"{BaseUrl}/cantones/{cantonId}/distritos");
-                            using var distDoc = JsonDocument.Parse(distRaw);
-
-                            if (distDoc.RootElement.TryGetProperty("data", out var distritosData) && distritosData.ValueKind == JsonValueKind.Array)
-                            {
-                                foreach (var itemDist in distritosData.EnumerateArray())
-                                {
-                                    int distritoId = itemDist.GetProperty("idDistrito").GetInt32();
-                                    string distritoNombre = itemDist.GetProperty("descripcion").GetString() ?? "";
-
-                                    var distrito = new Distrito { Id = distritoId, CantonId = cantonId, Nombre = distritoNombre };
-                                    dbContext.Distrito.Add(distrito);
-                                }
-                            }
-                        }
-                    }
-
-                    // Guardar los cambios en la base de datos por cada provincia procesada
-                    await dbContext.SaveChangesAsync();
-                    logger.LogInformation($"[SEEDER] ¡Provincia {provinciaNombre} guardada con éxito con sus cantones y distritos!");
+                    await SincronizarProvinciaAsync(
+                        provinciaId,
+                        provinciaNombre,
+                        provinciasExistentes.Contains(provinciaId));
                 }
                 catch (Exception exProvincia)
                 {
                     // No se relanza: que falle una provincia (p. ej. un timeout
-                    // puntual de la API externa) no debe impedir que se sigan
-                    // procesando las demás. En el próximo arranque, esta misma
-                    // provincia se vuelve a intentar porque no quedó guardada.
-                    logger.LogError($"[SEEDER] No se pudo procesar la provincia {provinciaNombre} (ID: {provinciaId}): {exProvincia.Message}");
+                    // puntual de la API) no debe impedir procesar las demás. En
+                    // el próximo arranque se vuelve a intentar lo que faltó.
+                    logger.LogError("[SEEDER] No se pudo procesar la provincia ID {Id}: {Error}",
+                        provinciaId, exProvincia.Message);
                     dbContext.ChangeTracker.Clear();
                 }
             }
 
-            logger.LogInformation("=== [SEEDER] Siembra de división territorial finalizada ===");
+            logger.LogInformation("=== [SEEDER] División territorial al día ===");
         }
         catch (Exception ex)
         {
-            logger.LogCritical($"[SEEDER] Error crítico durante la ejecución: {ex.Message}");
+            logger.LogCritical("[SEEDER] Error crítico durante la ejecución: {Error}", ex.Message);
         }
+    }
+
+    // Agrega solo lo que falta comparando la base contra la API, de modo que una
+    // provincia sembrada a medias se pueda completar en un arranque posterior.
+    private async Task SincronizarProvinciaAsync(int provinciaId, string provinciaNombre, bool provinciaExiste)
+    {
+        if (!provinciaExiste)
+        {
+            dbContext.Provincia.Add(new Provincia { Id = provinciaId, Nombre = provinciaNombre });
+        }
+
+        var cantonesGuardados = await dbContext.Canton
+            .Where(c => c.ProvinciaId == provinciaId)
+            .Select(c => c.Id)
+            .ToListAsync();
+
+        // Cantones guardados a los que nunca se les cargaron distritos.
+        var cantonesSinDistritos = await dbContext.Canton
+            .Where(c => c.ProvinciaId == provinciaId && !c.Distrito.Any())
+            .Select(c => c.Id)
+            .ToListAsync();
+
+        var cantones = await ObtenerCatalogoAsync(
+            $"{BaseUrl}/provincias/{provinciaId}/cantones?limit={LimitePorPagina}", "idCanton");
+
+        int cantonesNuevos = 0;
+        int distritosNuevos = 0;
+
+        foreach (var (cantonId, cantonNombre) in cantones)
+        {
+            bool cantonExiste = cantonesGuardados.Contains(cantonId);
+
+            if (!cantonExiste)
+            {
+                dbContext.Canton.Add(new Canton
+                {
+                    Id = cantonId,
+                    ProvinciaId = provinciaId,
+                    Nombre = cantonNombre
+                });
+                cantonesNuevos++;
+            }
+            else if (!cantonesSinDistritos.Contains(cantonId))
+            {
+                // Ya está guardado y con distritos: no hace falta pedirlos.
+                continue;
+            }
+
+            var distritos = await ObtenerCatalogoAsync(
+                $"{BaseUrl}/cantones/{cantonId}/distritos?limit={LimitePorPagina}", "idDistrito");
+
+            foreach (var (distritoId, distritoNombre) in distritos)
+            {
+                dbContext.Distrito.Add(new Distrito
+                {
+                    Id = distritoId,
+                    CantonId = cantonId,
+                    Nombre = distritoNombre
+                });
+                distritosNuevos++;
+            }
+        }
+
+        if (!provinciaExiste || cantonesNuevos > 0 || distritosNuevos > 0)
+        {
+            await dbContext.SaveChangesAsync();
+            logger.LogInformation("[SEEDER] Provincia ID {Id}: {Cantones} cantones y {Distritos} distritos agregados.",
+                provinciaId, cantonesNuevos, distritosNuevos);
+        }
+    }
+
+    // Los tres endpoints comparten la forma de respuesta: un arreglo "data" con
+    // el id en un campo propio y el nombre siempre en "descripcion".
+    private async Task<List<(int Id, string Nombre)>> ObtenerCatalogoAsync(string url, string campoId)
+    {
+        var lista = new List<(int, string)>();
+
+        var raw = await httpClient.GetStringAsync(url);
+        using var doc = JsonDocument.Parse(raw);
+
+        if (!doc.RootElement.TryGetProperty("data", out var data) || data.ValueKind != JsonValueKind.Array)
+        {
+            logger.LogError("[SEEDER] Respuesta inesperada de {Url}: no trae un arreglo 'data'.", url);
+            return lista;
+        }
+
+        foreach (var item in data.EnumerateArray())
+        {
+            lista.Add((
+                item.GetProperty(campoId).GetInt32(),
+                item.GetProperty("descripcion").GetString() ?? ""));
+        }
+
+        return lista;
     }
 }

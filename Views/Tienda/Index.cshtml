@@ -3,12 +3,16 @@
     Layout = "~/Views/Shared/_LayoutCliente.cshtml";
 }
 
-<div class="container-fluid p-4">
-    <div class="row mb-4">
-        <div class="col-md-12">
-            <h1 class="a-title">Catálogo de Productos</h1>
-        </div>
+<div class="row mb-4 c-page-header d-flex justify-content-between align-items-center">
+    <div class="col-md-9">
+        <h2>Catálogo de Productos</h2>
     </div>
+    <div class="col-md-3 d-flex justify-content-end gap-2">
+        <button type="button" class="btn btn-info" id="btnCarrito" data-bs-toggle="offcanvas" data-bs-target="#canvasCarrito">
+            <i class="bi bi-cart3 me-1"></i>Carrito <span class="badge bg-danger" id="badgeCarrito">0</span>
+        </button>
+    </div>
+</div>
 
     <div class="row mb-4">
         <div class="col-md-3">
@@ -17,11 +21,7 @@
                 <option value="">-- Seleccionar categoría --</option>
             </select>
         </div>
-        <div class="col-md-3">
-            <button type="button" class="btn btn-info mt-4" id="btnCarrito" data-bs-toggle="offcanvas" data-bs-target="#canvasCarrito">
-                <i class="bi bi-cart3 me-1"></i>Carrito <span class="badge bg-danger" id="badgeCarrito">0</span>
-            </button>
-        </div>
+        
     </div>
 
     <div class="row" id="recomendacionesContainer">
@@ -31,7 +31,6 @@
     <div class="row" id="productosContainer">
         <!-- Los productos se cargan aquí vía AJAX -->
     </div>
-</div>
 
 <!-- Canvas del carrito -->
 <div class="offcanvas offcanvas-end" tabindex="-1" id="canvasCarrito">

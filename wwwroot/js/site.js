@@ -2,6 +2,12 @@
 document.addEventListener("DOMContentLoaded", function () {
     const sidebarToggle = document.getElementById("sidebarToggle");
     const appContainer = document.querySelector(".t-app-container");
+    const mobileQuery = window.matchMedia("(max-width: 768px)");
+
+    // En móvil el sidebar inicia escondido para no tapar el contenido
+    if (appContainer && mobileQuery.matches) {
+        appContainer.classList.add("t-sidebar-collapsed");
+    }
 
     if (sidebarToggle && appContainer) {
         sidebarToggle.addEventListener("click", function () {
@@ -11,6 +17,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Lógica para marcar como activa la opción del menú al darle click
     const navLinks = document.querySelectorAll(".t-sidebar .nav-link");
+
+    // En móvil, cerrar el sidebar al seleccionar una opción del menú
+    navLinks.forEach(link => {
+        link.addEventListener("click", function () {
+            if (appContainer && mobileQuery.matches) {
+                appContainer.classList.add("t-sidebar-collapsed");
+            }
+        });
+    });
 
     // Recuperar la opción activa almacenada previamente, o usar la ruta actual si no hay ninguna
     let activeLinkHref = localStorage.getItem("activeSidebarLink");
