@@ -1,7 +1,10 @@
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MultiserviciosPiscinas.Models;
+using System.Security.Claims;
 
 namespace MultiserviciosPiscinas.Controllers
 {
@@ -34,7 +37,7 @@ namespace MultiserviciosPiscinas.Controllers
 
             if (usuario == null)
             {
-                return NotFound();
+                return await CerrarSesionPorCorreoInvalidoAsync();
             }
 
             return View(usuario);
@@ -124,7 +127,7 @@ namespace MultiserviciosPiscinas.Controllers
 
             if (usuario == null)
             {
-                return NotFound();
+                return await CerrarSesionPorCorreoInvalidoAsync();
             }
 
             await CargarListasDireccionAsync(usuario);
@@ -164,6 +167,17 @@ namespace MultiserviciosPiscinas.Controllers
             if (string.IsNullOrWhiteSpace(correo))
             {
                 ModelState.AddModelError("", "El correo es obligatorio.");
+            }
+            else
+            {
+                // sin esta validación el SaveChanges falla con un mensaje genérico.
+                bool correoEnUso = await _context.Usuario
+                    .AnyAsync(u => u.Correo == correo && u.Id != id);
+
+                if (correoEnUso)
+                {
+                    ModelState.AddModelError("", "El correo ya está registrado por otro usuario.");
+                }
             }
 
             if (usuarioDb.Cliente != null)
@@ -247,6 +261,11 @@ namespace MultiserviciosPiscinas.Controllers
                 _context.Update(usuarioDb);
                 await _context.SaveChangesAsync();
 
+                // La sesión identifica al usuario por su correo, así que hay que
+                // rehacer la cookie: si no, al cambiarlo, las pantallas que lo
+                // buscan por User.Identity.Name dejan de encontrarlo (404).
+                await RefrescarSesionAsync(usuarioDb);
+
                 TempData["MensajeExito"] = "Información del perfil actualizada correctamente.";
                 return RedirectToAction(nameof(Detalle));
             }
@@ -302,6 +321,35 @@ namespace MultiserviciosPiscinas.Controllers
                 TempData["MensajeErrorContrasena"] = "Ocurrió un error al cambiar la contraseña. Inténtalo de nuevo.";
                 return RedirectToAction(nameof(Editar));
             }
+        }
+
+        // Si la cookie apunta a un correo que ya no existe (sesión vieja de antes
+        // de cambiarlo), cerramos sesión en vez de dejar al usuario en un 404.
+        private async Task<IActionResult> CerrarSesionPorCorreoInvalidoAsync()
+        {
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            return RedirectToAction("InicioSesion", "Auth");
+        }
+
+        // Vuelve a hacer la cookie de autenticación con los datos actuales del usuario.
+        // Mismos claims que arma AuthController al iniciar sesión.
+        private async Task RefrescarSesionAsync(Usuario usuario)
+        {
+            var declaraciones = new List<Claim>
+            {
+                new Claim(ClaimTypes.Name, usuario.Correo),
+                new Claim("NombreCompleto", usuario.Nombre),
+                new Claim(ClaimTypes.Email, usuario.Correo),
+                new Claim(ClaimTypes.Role, usuario.RolId.ToString())
+            };
+
+            var identidad = new ClaimsIdentity(
+                declaraciones,
+                CookieAuthenticationDefaults.AuthenticationScheme);
+
+            await HttpContext.SignInAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                new ClaimsPrincipal(identidad));
         }
 
         // [AllowAnonymous]: estos dos endpoints solo devuelven el catálogo público
