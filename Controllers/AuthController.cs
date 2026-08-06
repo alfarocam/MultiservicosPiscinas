@@ -219,11 +219,15 @@ namespace MultiserviciosPiscinas.Controllers
 
             var nuevaContrasena = _generales.GenerarContrasena();
 
-            int filasAfectadas = await _contexto.Database
-                .ExecuteSqlAsync(
-                    $"EXEC seg.ActualizarContrasena @Contrasena={nuevaContrasena}, @IdUsuario={resultado.Id}");
+            // El SP usa SET NOCOUNT ON, así que ExecuteSql devolvería -1 siempre.
+            // El conteo real viene en el SELECT @@ROWCOUNT que retorna el SP.
+            var actualizacion = await _contexto.Database
+                .SqlQuery<ResultadoActualizacionContrasena>(
+                    $"EXEC seg.ActualizarContrasena @Contrasena={nuevaContrasena}, @IdUsuario={resultado.Id}")
+                .AsAsyncEnumerable()
+                .FirstOrDefaultAsync();
 
-            if (filasAfectadas <= 0)
+            if (actualizacion is null || actualizacion.FilasAfectadas <= 0)
             {
                 ViewBag.Mensaje = "Su información no se actualizó correctamente.";
                 return View();
@@ -279,6 +283,11 @@ namespace MultiserviciosPiscinas.Controllers
             public int Id { get; set; }
             public string Nombre { get; set; } = string.Empty;
             public string Correo { get; set; } = string.Empty;
+        }
+
+        public class ResultadoActualizacionContrasena
+        {
+            public int FilasAfectadas { get; set; }
         }
     }
 }
