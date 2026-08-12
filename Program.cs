@@ -1,5 +1,7 @@
+using System.Globalization;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using MultiserviciosPiscinas.Data;
 using MultiserviciosPiscinas.Interfaces;
@@ -85,7 +87,23 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
+// Cultura de moneda fija con simbolo de colon (₡). Se arma a mano sobre la
+// cultura invariante (en vez de "es-CR") para que no dependa de los datos de
+// ICU/globalizacion instalados en el servidor donde se publique la app; eso
+// es lo que provocaba que en el hosting se viera "¤" en vez de "₡".
+var culturaCR = (CultureInfo)CultureInfo.InvariantCulture.Clone();
+culturaCR.NumberFormat.CurrencySymbol = "₡";
+CultureInfo.DefaultThreadCurrentCulture = culturaCR;
+CultureInfo.DefaultThreadCurrentUICulture = culturaCR;
+
 var app = builder.Build();
+
+app.UseRequestLocalization(new RequestLocalizationOptions
+{
+    DefaultRequestCulture = new RequestCulture(culturaCR),
+    SupportedCultures = new[] { culturaCR },
+    SupportedUICultures = new[] { culturaCR }
+});
 
 
 if (app.Environment.IsDevelopment())
