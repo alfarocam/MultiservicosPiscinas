@@ -1,4 +1,4 @@
-﻿@model List<MultiserviciosPiscinas.DTOs.Factura.CotizacionListadoDto>
+@model List<MultiserviciosPiscinas.DTOs.Factura.CotizacionListadoDto>
 
 @{
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
@@ -40,7 +40,7 @@ else
                         <th>Fecha</th>
                         <th>Total</th>
                         <th>Estado</th>
-                        <th class="text-center">Acción</th>
+                        <th class="text-center">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -53,9 +53,18 @@ else
                             <td><strong>₡@cot.Total.ToString("N2")</strong></td>
                             <td><span class="badge bg-warning text-dark">@cot.Estado</span></td>
                             <td class="text-center">
-                                <a asp-action="Facturar" asp-route-id="@cot.Id" class="btn btn-sm btn-success">
-                                    <i class="bi bi-receipt"></i> Facturar
-                                </a>
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="bi bi-three-dots-vertical me-1"></i>Acciones
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                                        <li>
+                                            <a asp-action="Facturar" asp-route-id="@cot.Id" class="dropdown-item">
+                                                <i class="bi bi-receipt me-2 text-success"></i>Facturar
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
                             </td>
                         </tr>
                     }

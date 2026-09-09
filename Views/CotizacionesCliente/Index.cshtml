@@ -46,7 +46,7 @@
                                 <th>Fecha Vigencia</th>
                                 <th>Total</th>
                                 <th>Estado</th>
-                                <th>Acciones</th>
+                                <th class="text-center">Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -75,10 +75,19 @@
                                             <span class="badge bg-secondary">@cotizacion.Estado</span>
                                         }
                                     </td>
-                                    <td>
-                                        <a asp-action="Detalle" asp-route-id="@cotizacion.Id" class="c-btn-sm btn-info">
-                                            <i class="bi bi-eye me-1"></i>Ver Detalle
-                                        </a>
+                                    <td class="text-center">
+                                        <div class="dropdown">
+                                            <button class="btn btn-sm btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                <i class="bi bi-three-dots-vertical me-1"></i>Acciones
+                                            </button>
+                                            <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                                                <li>
+                                                    <a asp-action="Detalle" asp-route-id="@cotizacion.Id" class="dropdown-item">
+                                                        <i class="bi bi-eye me-2 text-info"></i>Ver Detalle
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </div>
                                     </td>
                                 </tr>
                             }

@@ -29,7 +29,7 @@
                 <th>Monto</th>
                 <th>Descripción</th>
                 <th>Registrado por</th>
-                <th>Comprobante</th>
+                <th class="text-center">Comprobante</th>
                 <th>Estado</th>
             </tr>
         </thead>
@@ -46,16 +46,27 @@
                         <td class="c-price">₡@g.Monto.ToString("N2")</td>
                         <td class="c-muted">@(g.Descripcion ?? "—")</td>
                         <td>@g.Usuario.Nombre @g.Usuario.ApellidoPaterno</td>
-                        <td>
+                        <td class="text-center">
                             @if (!string.IsNullOrEmpty(g.ComprobanteRuta))
                             {
-                                <a href="@g.ComprobanteRuta" target="_blank" class="c-btn-sm c-btn-sm-primary">
-                                    <i class="bi bi-paperclip me-1"></i>Ver
-                                </a>
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="bi bi-three-dots-vertical me-1"></i>Acciones
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                                        <li>
+                                            <a href="@g.ComprobanteRuta" target="_blank" class="dropdown-item">
+                                                <i class="bi bi-eye me-2 text-info"></i>Ver
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
                             }
                             else
                             {
-                                <span class="c-muted">Sin comprobante</span>
+                                <span class="text-muted small">
+                                    <i class="bi bi-file-earmark-x me-1"></i>Sin archivo
+                                </span>
                             }
                         </td>
                         <td>
