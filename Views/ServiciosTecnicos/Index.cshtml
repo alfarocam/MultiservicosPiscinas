@@ -136,7 +136,7 @@
                                     }
                                     <li>
                                         <a asp-action="Detalle" asp-route-id="@servicio.Id" class="dropdown-item">
-                                            <i class="bi bi-eye-fill me-2 text-info"></i>Ver detalle
+                                            <i class="bi bi-eye-fill me-2 text-info"></i>Ver
                                         </a>
                                     </li>
                                     @if (User.IsInRole("1") && servicio.Estado != "Cerrado" && servicio.Estado != "Cancelado")

@@ -9,7 +9,7 @@
 :root {
     /* Colores - Dedicados a una empresa premium de piscinas y construcción */
     --color-body-bg: #f4f8fb;
-    --color-navbar-bg: #005f73;
+    --color-navbar-bg: #002d38;
     --color-footer-bg: #002d38;
     --color-form-bg: #ffffff;
     --color-input-bg: #ffffff;
@@ -17,9 +17,9 @@
     --color-btn-hover: #005f73;
     --color-btn-text: #ffffff;
     --color-text-dark: #1a2f3b;
-    --color-text-light: #ffffff;
+    --color-text-light: #f3efef; /* --- ESTE ES EL COLOR DE LOS TITULOS --- */
     --color-text-muted: #627b87;
-    --color-logo-text: #ffffff;
+    --color-logo-text: #f3f0f0;
     --color-navbar-text: #ffffff;
     --color-accent: #e9d8a6;
     --color-accent-orange: #ca6702;
