@@ -79,7 +79,16 @@
                                 </span>
                             </td>
                             <td>
-                                <span class="badge bg-success">@v.Estado</span>
+                                @{
+                                    var badgeClass = v.Estado switch
+                                    {
+                                        "Activo" or "Disponible" => "c-badge-green",
+                                        "En mantenimiento" or "Mantenimiento" => "c-badge-amber",
+                                        "Inactivo" => "c-badge-red",
+                                        _ => "c-badge-gray"
+                                    };
+                                }
+                                <span class="c-badge @badgeClass">@v.Estado</span>
                             </td>
                             <td class="text-center">
                                 <div class="dropdown">

@@ -1,4 +1,4 @@
-﻿@model MultiserviciosPiscinas.DTOs.Cotizacion.CotizacionClienteDetalleDto
+@model MultiserviciosPiscinas.DTOs.Cotizacion.CotizacionClienteDetalleDto
 
 @{
     ViewData["Title"] = "Detalle de Cotización";
@@ -37,17 +37,21 @@
                     <p class="mb-1"><strong>Válida Hasta:</strong> @Model.FechaVigencia.ToString("dd/MM/yyyy")</p>
                     <p class="mb-1">
                         <strong>Estado:</strong>
-                        @if (Model.Estado == "Enviada")
+                        @if (Model.Estado == "Enviada" || Model.Estado == "Pendiente")
                         {
-                            <span class="badge bg-warning text-dark">Pendiente de Aceptación</span>
+                            <span class="c-badge c-badge-amber">Pendiente de Aceptación</span>
                         }
                         else if (Model.Estado == "Aceptada")
                         {
-                            <span class="badge bg-primary">Aceptada (Pendiente de Facturación)</span>
+                            <span class="c-badge c-badge-green">Aceptada (Pendiente de Facturación)</span>
+                        }
+                        else if (Model.Estado == "Rechazada")
+                        {
+                            <span class="c-badge c-badge-red">Rechazada</span>
                         }
                         else
                         {
-                            <span class="badge bg-secondary">@Model.Estado</span>
+                            <span class="c-badge c-badge-gray">@Model.Estado</span>
                         }
                     </p>
                 </div>

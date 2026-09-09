@@ -58,21 +58,21 @@
                                     <td>@cotizacion.FechaVigencia.ToString("dd/MM/yyyy")</td>
                                     <td>₡@cotizacion.Total.ToString("N2")</td>
                                     <td>
-                                        @if (cotizacion.Estado == "Enviada")
+                                        @if (cotizacion.Estado == "Enviada" || cotizacion.Estado == "Pendiente")
                                         {
-                                            <span class="badge bg-warning text-dark">Pendiente</span>
+                                            <span class="c-badge c-badge-amber">Pendiente</span>
                                         }
                                         else if (cotizacion.Estado == "Aceptada")
                                         {
-                                            <span class="badge bg-primary">Aceptada</span>
+                                            <span class="c-badge c-badge-green">Aceptada</span>
                                         }
                                         else if (cotizacion.Estado == "Rechazada")
                                         {
-                                            <span class="badge bg-danger">Rechazada</span>
+                                            <span class="c-badge c-badge-red">Rechazada</span>
                                         }
                                         else
                                         {
-                                            <span class="badge bg-secondary">@cotizacion.Estado</span>
+                                            <span class="c-badge c-badge-gray">@cotizacion.Estado</span>
                                         }
                                     </td>
                                     <td class="text-center">

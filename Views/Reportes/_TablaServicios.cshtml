@@ -1,4 +1,4 @@
-﻿@model MultiserviciosPiscinas.Models.ReporteServiciosViewModel
+@model MultiserviciosPiscinas.Models.ReporteServiciosViewModel
 
 @if (Model.Servicios.Count == 0)
 {
@@ -29,14 +29,14 @@ else
                         <td>
                             @{
                                 var badgeClass = item.Estado switch {
-                                    "Completado" => "bg-success",
-                                    "En progreso" => "bg-primary",
-                                    "Pendiente" => "bg-warning text-dark",
-                                    "Cancelado" => "bg-danger",
-                                    _ => "bg-secondary"
+                                    "Completado" or "Finalizado" => "c-badge-green",
+                                    "En progreso" => "c-badge-blue",
+                                    "Pendiente" => "c-badge-amber",
+                                    "Cancelado" => "c-badge-red",
+                                    _ => "c-badge-gray"
                                 };
                             }
-                            <span class="badge @badgeClass">@item.Estado</span>
+                            <span class="c-badge @badgeClass">@item.Estado</span>
                         </td>
                         <td>@item.FechaHora.ToString("dd/MM/yyyy HH:mm")</td>
                     </tr>

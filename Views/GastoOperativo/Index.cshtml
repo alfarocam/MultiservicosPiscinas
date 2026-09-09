@@ -29,8 +29,9 @@
                 <th>Monto</th>
                 <th>Descripción</th>
                 <th>Registrado por</th>
-                <th class="text-center">Comprobante</th>
                 <th>Estado</th>
+                <th class="text-center">Comprobante</th>
+                
             </tr>
         </thead>
         <tbody>
@@ -46,6 +47,20 @@
                         <td class="c-price">₡@g.Monto.ToString("N2")</td>
                         <td class="c-muted">@(g.Descripcion ?? "—")</td>
                         <td>@g.Usuario.Nombre @g.Usuario.ApellidoPaterno</td>
+                        <td>
+                            @if (g.Estado == "Aprobado")
+                            {
+                                <span class="c-badge c-badge-green">Aprobado</span>
+                            }
+                            else if (g.Estado == "Pendiente")
+                            {
+                                <span class="c-badge c-badge-amber">Pendiente</span>
+                            }
+                            else
+                            {
+                                <span class="c-badge c-badge-red">Rechazado</span>
+                            }
+                        </td>
                         <td class="text-center">
                             @if (!string.IsNullOrEmpty(g.ComprobanteRuta))
                             {
@@ -69,20 +84,7 @@
                                 </span>
                             }
                         </td>
-                        <td>
-                            @if (g.Estado == "Aprobado")
-                            {
-                                <span class="c-badge c-badge-green">Aprobado</span>
-                            }
-                            else if (g.Estado == "Pendiente")
-                            {
-                                <span class="c-badge c-badge-amber">Pendiente</span>
-                            }
-                            else
-                            {
-                                <span class="c-badge c-badge-red">Rechazado</span>
-                            }
-                        </td>
+                        
                     </tr>
                     c++;
                 }

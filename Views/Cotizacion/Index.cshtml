@@ -46,12 +46,20 @@ else
                 <tbody>
                     @foreach (var cot in Model)
                     {
+                        var badgeClass = cot.Estado switch
+                        {
+                            "Aceptada" => "c-badge-green",
+                            "Pendiente" or "Enviada" => "c-badge-amber",
+                            "Rechazada" => "c-badge-red",
+                            _ => "c-badge-gray"
+                        };
+
                         <tr>
                             <td><strong>@cot.NumeroCotizacion</strong></td>
                             <td>@cot.NombreCliente</td>
                             <td>@cot.FechaEmision.ToString("dd/MM/yyyy")</td>
                             <td><strong>₡@cot.Total.ToString("N2")</strong></td>
-                            <td><span class="badge bg-warning text-dark">@cot.Estado</span></td>
+                            <td><span class="c-badge @badgeClass">@cot.Estado</span></td>
                             <td class="text-center">
                                 <div class="dropdown">
                                     <button class="btn btn-sm btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">

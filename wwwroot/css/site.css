@@ -834,14 +834,24 @@ main {
         font-weight: 600;
     }
 
-/* --- Badges de estado --- */
+/* --- Badges de estado unificados --- */
 .c-badge {
-    padding: 4px 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 31px;
+    min-width: 90px;
+    padding: 0.25rem 0.85rem;
     border-radius: 20px;
-    font-size: 0.75rem;
-    font-weight: 700;
+    font-size: 0.8125rem;
+    font-weight: 600;
     font-family: var(--font-family-body);
-    display: inline-block;
+    line-height: 1.5;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: middle;
+    box-sizing: border-box;
+    border: 1px solid transparent;
 }
 
 .c-badge-lg {
@@ -863,31 +873,37 @@ main {
 .c-badge-green {
     background-color: #d1fae5;
     color: #065f46;
+    border-color: #a7f3d0;
 }
 
 .c-badge-teal {
     background-color: #ccfbf1;
     color: #0f766e;
+    border-color: #99f6e4;
 }
 
 .c-badge-gray {
     background-color: #f1f5f9;
     color: #475569;
+    border-color: #e2e8f0;
 }
 
 .c-badge-blue {
     background-color: #dbeafe;
     color: #1e40af;
+    border-color: #bfdbfe;
 }
 
 .c-badge-amber {
     background-color: #fef3c7;
     color: #92400e;
+    border-color: #fde68a;
 }
 
 .c-badge-red {
     background-color: #fee2e2;
     color: #991b1b;
+    border-color: #fecaca;
 }
 
 /* --- Botones pequeños de acción en tablas --- */

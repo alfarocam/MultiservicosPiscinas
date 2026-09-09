@@ -56,7 +56,16 @@
                                     <td>@compra.FechaEmision.ToString("dd/MM/yyyy")</td>
                                     <td>₡@compra.Total.ToString("N2")</td>
                                     <td>
-                                        <span class="badge bg-success">@compra.Estado</span>
+                                        @{
+                                            var badgeClass = compra.Estado switch
+                                            {
+                                                "Pagada" or "Completada" => "c-badge-green",
+                                                "Pendiente" => "c-badge-amber",
+                                                "Anulada" or "Cancelada" => "c-badge-red",
+                                                _ => "c-badge-gray"
+                                            };
+                                        }
+                                        <span class="c-badge @badgeClass">@compra.Estado</span>
                                     </td>
                                     <td class="text-center">
                                         <a href="@Url.Action("Detalle", "Facturacion", new { id = compra.FacturaId })" class="c-btn-sm btn-info"><i class="bi bi-eye me-1"></i>Ver Detalle</a>
