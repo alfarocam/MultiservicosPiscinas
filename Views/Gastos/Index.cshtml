@@ -47,7 +47,7 @@
                 @foreach (var g in Model)
                 {
                     <tr>
-                        <td>@g.Fecha.ToString("dd/MM/yyyy")</td>
+                        <td data-order="@g.Fecha.ToString("yyyyMMdd")">@g.Fecha.ToString("dd/MM/yyyy")</td>
                         <td>@(g.Categoria?.NombreCategoria ?? "General")</td>
                         <td><strong>₡@g.Monto.ToString("N2")</strong></td>
                         <td>@(g.Descripcion ?? "—")</td>
@@ -65,7 +65,7 @@
                                 </span>
                             }
                         </td>
-                        <td>
+                        <td data-order="@(g.Estado == "Pendiente" ? 1 : (g.Estado == "Aprobado" ? 2 : 3))">
                             @if (g.Estado == "Aprobado")
                             {
                                 <span class="c-badge c-badge-green">Aprobado</span>
@@ -198,5 +198,5 @@
 }
 
 @section Scripts {
-    <script src="~/js/gastos-tabla.js"></script>
+    <script src="~/js/gastos-tabla.js" asp-append-version="true"></script>
 }

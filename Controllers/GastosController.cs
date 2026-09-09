@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using MultiserviciosPiscinas.Models;
@@ -23,7 +23,8 @@ namespace MultiserviciosPiscinas.Controllers
             var gastos = await _context.GastoOperativo
                 .Include(g => g.Categoria)
                 .Include(g => g.Usuario)
-                .OrderByDescending(g => g.Fecha)
+                .OrderBy(g => g.Estado == "Pendiente" ? 1 : (g.Estado == "Aprobado" ? 2 : 3))
+                .ThenByDescending(g => g.Fecha)
                 .ThenByDescending(g => g.Id)
                 .ToListAsync();
 
