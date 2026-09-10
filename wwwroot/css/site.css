@@ -528,7 +528,7 @@ main {
         content: '';
         position: absolute;
         inset: 0;
-        background: rgba(236, 254, 255, 0.80);
+        background: rgba(0, 45, 56, 0.50);
         z-index: 1;
     }
 
