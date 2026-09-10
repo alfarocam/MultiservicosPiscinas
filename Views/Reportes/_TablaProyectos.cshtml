@@ -1,4 +1,4 @@
-﻿@model MultiserviciosPiscinas.Models.ReporteProyectosViewModel
+@model MultiserviciosPiscinas.Models.ReporteProyectosViewModel
 
 @if (Model.Proyectos.Count == 0)
 {
@@ -7,7 +7,7 @@
 else
 {
     <div class="table-responsive">
-        <table class="table table-hover">
+        <table class="table table-hover align-middle">
             <thead class="table-light">
                 <tr>
                     <th>ID</th>
@@ -29,13 +29,14 @@ else
                         <td>
                             @{
                                 var badgeClass = item.Estado switch {
-                                    "Finalizado" => "bg-success",
-                                    "En Curso" => "bg-primary",
-                                    "Planificación" => "bg-info",
-                                    _ => "bg-secondary"
+                                    "Finalizado" or "Completado" => "c-badge-green",
+                                    "En Curso" or "En progreso" or "En ejecución" => "c-badge-amber",
+                                    "Planificación" or "En Planificación" => "c-badge-blue",
+                                    "Cancelado" => "c-badge-red",
+                                    _ => "c-badge-gray"
                                 };
                             }
-                            <span class="badge @badgeClass">@item.Estado</span>
+                            <span class="c-badge @badgeClass">@item.Estado</span>
                         </td>
                         <td>@item.FechaInicio.ToString("dd/MM/yyyy")</td>
                         <td>@(item.FechaFinEstimada?.ToString("dd/MM/yyyy") ?? "N/A")</td>

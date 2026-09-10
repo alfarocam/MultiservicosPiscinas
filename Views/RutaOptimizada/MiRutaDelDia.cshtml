@@ -1,4 +1,4 @@
-﻿@model MultiserviciosPiscinas.Models.RutaOptimizadaViewModel
+@model MultiserviciosPiscinas.Models.RutaOptimizadaViewModel
 
 @{
     Layout = "~/Views/Shared/_LayoutTecnico.cshtml";
@@ -189,25 +189,25 @@ else
 
                                 @if (estaCompletada)
                                 {
-                                    <span class="badge bg-success">
+                                    <span class="c-badge c-badge-green">
                                         Completada
                                     </span>
                                 }
                                 else if (estaCancelada)
                                 {
-                                    <span class="badge bg-danger">
+                                    <span class="c-badge c-badge-red">
                                         Cancelada
                                     </span>
                                 }
                                 else if (esSiguiente)
                                 {
-                                    <span class="badge bg-primary">
+                                    <span class="c-badge c-badge-blue">
                                         Siguiente
                                     </span>
                                 }
                                 else
                                 {
-                                    <span class="badge bg-secondary">
+                                    <span class="c-badge c-badge-amber">
                                         Pendiente
                                     </span>
                                 }

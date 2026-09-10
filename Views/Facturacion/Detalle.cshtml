@@ -1,4 +1,4 @@
-﻿@model MultiserviciosPiscinas.DTOs.Factura.CompraDetalleViewModel
+@model MultiserviciosPiscinas.DTOs.Factura.CompraDetalleViewModel
 
 @{
     Layout = "~/Views/Shared/_LayoutCliente.cshtml";
@@ -26,15 +26,25 @@
                     </div>
                     <div class="col-md-6 text-end">
                         <p><strong>Condición de Pago:</strong> @Model.CondicionPago</p>
-                        <p><strong>Estado:</strong> <span class="badge bg-success">@Model.Estado</span></p>
+                        @{
+                            var badgeClass = Model.Estado switch
+                            {
+                                "Pagada" or "Completada" => "c-badge-green",
+                                "Pendiente" => "c-badge-amber",
+                                "Anulada" or "Cancelada" => "c-badge-red",
+                                _ => "c-badge-gray"
+                            };
+                        }
+                        <p><strong>Estado:</strong> <span class="c-badge @badgeClass">@Model.Estado</span></p>
                     </div>
                 </div>
 
                 <hr />
 
                 <h5 class="mb-3">Artículos Comprados</h5>
-                <table class="table table-hover align-middle">
-                    <thead class="table-light">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
                         <tr>
                             <th>Producto</th>
                             <th class="text-end">Precio Unit.</th>
@@ -61,6 +71,7 @@
                         }
                     </tbody>
                 </table>
+                </div>
             </div>
         </div>
 

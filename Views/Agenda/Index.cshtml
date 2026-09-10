@@ -8,7 +8,7 @@
     // para colorear los eventos del calendario y que ambas vistas se vean consistentes.
     string BadgeClass(string estado) => estado switch
     {
-        "Pendiente" => "c-badge-gray",
+        "Pendiente" => "c-badge-amber",
         "Confirmada" => "c-badge-blue",
         "En camino" => "c-badge-blue",
         "En progreso" => "c-badge-amber",
@@ -75,7 +75,7 @@
                                 <th>Fecha y hora</th>
                                 <th>Tipo</th>
                                 <th>Estado</th>
-                                <th>Acciones</th>
+                                <th class="text-center">Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -90,10 +90,19 @@
                                         <td>@cita.FechaHora.ToString("dd/MM/yyyy HH:mm")</td>
                                         <td>@cita.Tipo</td>
                                         <td><span class="c-badge @BadgeClass(cita.Estado)">@cita.Estado</span></td>
-                                        <td>
-                                            <a asp-action="Editar" asp-route-id="@cita.Id" class="c-btn-sm btn-warning">
-                                                <i class="bi bi-pencil me-1"></i>Editar
-                                            </a>
+                                        <td class="text-center">
+                                            <div class="dropdown">
+                                                <button class="btn btn-sm btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                    <i class="bi bi-three-dots-vertical me-1"></i>Acciones
+                                                </button>
+                                                <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                                                    <li>
+                                                        <a asp-action="Editar" asp-route-id="@cita.Id" class="dropdown-item">
+                                                            <i class="bi bi-pencil me-2 text-warning"></i>Editar
+                                                        </a>
+                                                    </li>
+                                                </ul>
+                                            </div>
                                         </td>
                                     </tr>
                                 }

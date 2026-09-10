@@ -1,16 +1,16 @@
 $(document).ready(function () {
-    $('.btn-eliminar').on('click', function (e) {
+    $(document).on('click', '.btn-eliminar', function (e) {
         e.preventDefault();
         const form = $(this).closest('form');
         
         Swal.fire({
-            title: '¿Eliminar producto?',
+            title: '¿Desactivar producto?',
             text: 'El producto dejará de estar disponible para la venta.',
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#d33',
             cancelButtonColor: '#6c757d',
-            confirmButtonText: 'Sí, eliminar',
+            confirmButtonText: 'Sí, desactivar',
             cancelButtonText: 'Cancelar'
         }).then((result) => {
             if (result.isConfirmed) {
@@ -19,7 +19,7 @@ $(document).ready(function () {
         });
     });
 
-    $('.btn-activar').on('click', function (e) {
+    $(document).on('click', '.btn-activar', function (e) {
         e.preventDefault();
         const form = $(this).closest('form');
         

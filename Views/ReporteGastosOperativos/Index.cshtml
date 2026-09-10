@@ -62,33 +62,35 @@ else
                 <span>Totales por Categoría</span>
             </div>
         </div>
-        <table class="table table-hover">
-            <thead class="table-light">
-                <tr>
-                    <th>Categoría</th>
-                    <th>Total</th>
-                    <th>Cantidad</th>
-                    <th>Porcentaje (%)</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var categoria in Model.TotalesPorCategoria)
-                {
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
                     <tr>
-                        <td class="fw-semibold">@categoria.NombreCategoria</td>
-                        <td><span class="c-price">₡@categoria.Total.ToString("N2")</span></td>
-                        <td>@categoria.Cantidad</td>
-                        <td>@categoria.Porcentaje.ToString("F2")%</td>
+                        <th>Categoría</th>
+                        <th>Total</th>
+                        <th>Cantidad</th>
+                        <th>Porcentaje (%)</th>
                     </tr>
-                }
-                <tr class="fw-bold table-light">
-                    <td>TOTAL GENERAL</td>
-                    <td class="c-price">₡@Model.TotalGeneral.ToString("N2")</td>
-                    <td>@Model.Detalle.Count()</td>
-                    <td>100.00%</td>
-                </tr>
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @foreach (var categoria in Model.TotalesPorCategoria)
+                    {
+                        <tr>
+                            <td class="fw-semibold">@categoria.NombreCategoria</td>
+                            <td><span class="c-price">₡@categoria.Total.ToString("N2")</span></td>
+                            <td>@categoria.Cantidad</td>
+                            <td>@categoria.Porcentaje.ToString("F2")%</td>
+                        </tr>
+                    }
+                    <tr class="fw-bold table-light">
+                        <td>TOTAL GENERAL</td>
+                        <td class="c-price">₡@Model.TotalGeneral.ToString("N2")</td>
+                        <td>@Model.Detalle.Count()</td>
+                        <td>100.00%</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <!-- Gráfico de distribución -->
@@ -119,7 +121,7 @@ else
             </a>
         </div>
         <div class="table-responsive">
-            <table id="tablaDetalleGastos" class="table table-hover align-middle w-100">
+            <table id="tablaDetalleGastos" class="table table-hover align-middle">
                 <thead class="table-light">
                     <tr>
                         <th class="a-text-muted small text-uppercase">Fecha</th>

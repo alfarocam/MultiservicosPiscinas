@@ -68,22 +68,24 @@
     }
     else
     {
-        <table class="table table-hover">
-            <thead class="table-light"><tr><th>Técnico</th><th>Promedio</th><th>Encuestas</th><th>Nivel</th></tr></thead>
-            <tbody>
-                @foreach (var t in Model.PromediosPorTecnico)
-                {
-                    string bc = t.Promedio >= 4.0 ? "c-badge-green" : t.Promedio >= 3.0 ? "c-badge-blue" : t.Promedio >= 2.0 ? "c-badge-amber" : "c-badge-red";
-                    string bl = t.Promedio >= 4.0 ? "Excelente" : t.Promedio >= 3.0 ? "Bueno" : t.Promedio >= 2.0 ? "Regular" : "Crítico";
-                    <tr>
-                        <td class="fw-semibold">@t.NombreTecnico</td>
-                        <td><span class="c-price">@t.Promedio.ToString("F2")</span> <span class="text-muted small">/ 5</span></td>
-                        <td>@t.TotalEncuestas</td>
-                        <td><span class="c-badge @bc">@bl</span></td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light"><tr><th>Técnico</th><th>Promedio</th><th>Encuestas</th><th>Nivel</th></tr></thead>
+                <tbody>
+                    @foreach (var t in Model.PromediosPorTecnico)
+                    {
+                        string bc = t.Promedio >= 4.0 ? "c-badge-green" : t.Promedio >= 3.0 ? "c-badge-blue" : t.Promedio >= 2.0 ? "c-badge-amber" : "c-badge-red";
+                        string bl = t.Promedio >= 4.0 ? "Excelente" : t.Promedio >= 3.0 ? "Bueno" : t.Promedio >= 2.0 ? "Regular" : "Crítico";
+                        <tr>
+                            <td class="fw-semibold">@t.NombreTecnico</td>
+                            <td><span class="c-price">@t.Promedio.ToString("F2")</span> <span class="text-muted small">/ 5</span></td>
+                            <td>@t.TotalEncuestas</td>
+                            <td><span class="c-badge @bc">@bl</span></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
     }
 </div>
 
@@ -100,22 +102,24 @@
     }
     else
     {
-        <table class="table table-hover">
-            <thead class="table-light"><tr><th>#</th><th>Servicio</th><th>Técnico</th><th>Calificación</th><th>Comentario</th><th>Fecha</th></tr></thead>
-            <tbody>
-                @foreach (var enc in Model.UltimasEncuestas)
-                {
-                    string cc = enc.Calificacion >= 4 ? "c-badge-green" : enc.Calificacion == 3 ? "c-badge-blue" : enc.Calificacion == 2 ? "c-badge-amber" : "c-badge-red";
-                    <tr>
-                        <td class="c-num">@enc.Id</td>
-                        <td><span class="fw-semibold">#@enc.ServicioId</span> — @enc.TipoServicio</td>
-                        <td>@enc.NombreTecnico</td>
-                        <td><span class="c-badge @cc">@enc.Calificacion ★</span></td>
-                        <td class="c-muted">@(enc.Comentario ?? "—")</td>
-                        <td class="c-muted">@enc.FechaEnvio.ToString("dd/MM/yyyy")</td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light"><tr><th>#</th><th>Servicio</th><th>Técnico</th><th>Calificación</th><th>Comentario</th><th>Fecha</th></tr></thead>
+                <tbody>
+                    @foreach (var enc in Model.UltimasEncuestas)
+                    {
+                        string cc = enc.Calificacion >= 4 ? "c-badge-green" : enc.Calificacion == 3 ? "c-badge-blue" : enc.Calificacion == 2 ? "c-badge-amber" : "c-badge-red";
+                        <tr>
+                            <td class="c-num">@enc.Id</td>
+                            <td><span class="fw-semibold">#@enc.ServicioId</span> — @enc.TipoServicio</td>
+                            <td>@enc.NombreTecnico</td>
+                            <td><span class="c-badge @cc">@enc.Calificacion ★</span></td>
+                            <td class="c-muted">@(enc.Comentario ?? "—")</td>
+                            <td class="c-muted">@enc.FechaEnvio.ToString("dd/MM/yyyy")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
     }
 </div>

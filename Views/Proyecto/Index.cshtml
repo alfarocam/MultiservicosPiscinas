@@ -43,8 +43,9 @@
         }
         else
         {
-            <table id="tablaProyectos" class="table table-hover align-middle w-100">
-                <thead class="table-light">
+            <div class="table-responsive">
+                <table id="tablaProyectos" class="table table-hover align-middle">
+                    <thead class="table-light">
                     <tr>
                         <th class="a-text-muted small text-uppercase" hidden>ID</th>
                         <th class="a-text-muted small text-uppercase">Nombre del Cliente</th>
@@ -109,40 +110,41 @@
                             <td>@proyecto.Presupuesto.ToString("C")</td>
 
                             <td>
-                                <div class="d-flex gap-1 justify-content-end">
-                                    <a asp-action="Detalle"
-                                       asp-controller="Proyecto"
-                                       asp-route-id="@proyecto.Id"
-                                       class="c-btn-sm btn-info">
-                                        <i class="bi bi-eye me-1"></i>Ver
-                                    </a>
-
-                            @if (esEditable)
-                                    {
-                                        <a asp-action="Editar"
-                                           asp-controller="Proyecto"
-                                           asp-route-id="@proyecto.Id"
-                                           class="c-btn-sm c-btn-sm-warning"
-                                           title="Editar proyecto">
-                                            <i class="bi bi-pencil-fill me-1"></i> Editar
-                                        </a>
-                                    }
-                                    else
-                                    {
-                                        <button type="button"
-                                                class="c-btn-sm c-btn-sm-outline opacity-50"
-                                                disabled
-                                                title="Este proyecto no se puede editar porque está completado o cancelado">
-                                            <i class="bi bi-lock-fill me-1"></i> Cerrado
-                                        </button>
-                                    }
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="bi bi-three-dots-vertical me-1"></i>Acciones
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                                        <li>
+                                            <a asp-action="Detalle" asp-controller="Proyecto" asp-route-id="@proyecto.Id" class="dropdown-item">
+                                                <i class="bi bi-eye me-2 text-info"></i>Ver
+                                            </a>
+                                        </li>
+                                        @if (esEditable)
+                                        {
+                                            <li>
+                                                <a asp-action="Editar" asp-controller="Proyecto" asp-route-id="@proyecto.Id" class="dropdown-item">
+                                                    <i class="bi bi-pencil me-2 text-warning"></i>Editar
+                                                </a>
+                                            </li>
+                                        }
+                                        else
+                                        {
+                                            <li title="Este proyecto no se puede editar porque está completado o cancelado">
+                                                <span class="dropdown-item disabled text-muted" title="Este proyecto no se puede editar porque está completado o cancelado">
+                                                    <i class="bi bi-lock-fill me-2 text-secondary"></i>Cerrado
+                                                </span>
+                                            </li>
+                                        }
+                                    </ul>
                                 </div>
                             </td>
                         </tr>
                     }
                 </tbody>
             </table>
-        }
+        </div>
+    }
     </div>
 </div>
 

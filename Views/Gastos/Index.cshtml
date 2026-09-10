@@ -30,7 +30,7 @@
 
 <div class="o-form-card">
     <div class="table-responsive">
-        <table id="tablaGastos" class="table table-hover align-middle w-100">
+        <table id="tablaGastos" class="table table-hover align-middle">
             <thead class="table-light">
                 <tr>
                     <th class="a-text-muted small text-uppercase">Fecha</th>
@@ -47,23 +47,25 @@
                 @foreach (var g in Model)
                 {
                     <tr>
-                        <td>@g.Fecha.ToString("dd/MM/yyyy")</td>
+                        <td data-order="@g.Fecha.ToString("yyyyMMdd")">@g.Fecha.ToString("dd/MM/yyyy")</td>
                         <td>@(g.Categoria?.NombreCategoria ?? "General")</td>
                         <td><strong>₡@g.Monto.ToString("N2")</strong></td>
                         <td>@(g.Descripcion ?? "—")</td>
                         <td>
                             @if (!string.IsNullOrEmpty(g.ComprobanteRuta))
                             {
-                                <a href="@g.ComprobanteRuta" target="_blank" class="c-btn-sm btn-info">
-                                    <i class="bi bi-eye me-1"></i>Ver
-                                </a>
+                                <span class="small">
+                                    <i class="bi bi-file-check me-1 text-success"></i>Comprobante adjunto
+                                </span>
                             }
                             else
                             {
-                                <span class="text-muted small">Sin archivo</span>
+                                <span class="text-muted small">
+                                    <i class="bi bi-file-earmark-x me-1 text-danger"></i>Sin comprobante
+                                </span>
                             }
                         </td>
-                        <td>
+                        <td data-order="@(g.Estado == "Pendiente" ? 1 : (g.Estado == "Aprobado" ? 2 : 3))">
                             @if (g.Estado == "Aprobado")
                             {
                                 <span class="c-badge c-badge-green">Aprobado</span>
@@ -88,46 +90,65 @@
                             }
                         </td>
                         <td class="text-center">
-                            @if (g.Estado == "Pendiente")
-                            {
-                                if (esAdmin)
-                                {
-                                    <div class="d-flex justify-content-center gap-1">
-                                        <form asp-action="Aprobar" method="post" class="d-inline">
-                                            @Html.AntiForgeryToken()
-                                            <input type="hidden" name="id" value="@g.Id" />
-                                            <button type="submit" class="c-btn-sm btn-success" title="Aprobar">
-                                                <i class="bi bi-check-lg me-1"></i>Aprobar
-                                            </button>
-                                        </form>
-
-                                        <button type="button" class="c-btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#modalRechazar-@g.Id" title="Rechazar">
-                                            <i class="bi bi-x-lg me-1"></i>Rechazar
-                                        </button>
-                                    </div>
-                                }
-                                else
-                                {
-                                    <span class="text-muted small"><i class="bi bi-clock me-1"></i>En espera</span>
-                                }
-                            }
-                            else if (g.Estado == "Aprobado")
-                            {
-                                <span class="text-success small fw-bold"><i class="bi bi-check-circle-fill me-1"></i>Aprobado</span>
-                            }
-                            else if (g.Estado == "Rechazado")
-                            {
-                                if (esAdmin)
-                                {
-                                    <span class="text-danger small fw-bold"><i class="bi bi-x-circle-fill me-1"></i>Rechazado</span>
-                                }
-                                else
-                                {
-                                    <a asp-action="Corregir" asp-route-id="@g.Id" class="c-btn-sm btn-warning">
-                                        <i class="bi bi-pencil me-1"></i>Corregir
-                                    </a>
-                                }
-                            }
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-three-dots-vertical me-1"></i>Acciones
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                                    @if (!string.IsNullOrEmpty(g.ComprobanteRuta))
+                                    {
+                                        <li>
+                                            <a href="@g.ComprobanteRuta" target="_blank" class="dropdown-item">
+                                                <i class="bi bi-eye me-2 text-info"></i>Ver
+                                            </a>
+                                        </li>
+                                    }
+                                    @if (g.Estado == "Pendiente")
+                                    {
+                                        if (esAdmin)
+                                        {
+                                            <li>
+                                                <form asp-action="Aprobar" method="post" class="d-inline">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="id" value="@g.Id" />
+                                                    <button type="submit" class="dropdown-item text-success" title="Aprobar">
+                                                        <i class="bi bi-check-lg me-2 text-success"></i>Aprobar
+                                                    </button>
+                                                </form>
+                                            </li>
+                                            <li>
+                                                <button type="button" class="dropdown-item text-danger" data-bs-toggle="modal" data-bs-target="#modalRechazar-@g.Id" title="Rechazar">
+                                                    <i class="bi bi-x-lg me-2 text-danger"></i>Rechazar
+                                                </button>
+                                            </li>
+                                        }
+                                        else
+                                        {
+                                            <li>
+                                                <span class="dropdown-item disabled text-muted">
+                                                    <i class="bi bi-clock me-2 text-secondary"></i>En espera
+                                                </span>
+                                            </li>
+                                        }
+                                    }
+                                    else if (g.Estado == "Rechazado" && !esAdmin)
+                                    {
+                                        <li>
+                                            <a asp-action="Corregir" asp-route-id="@g.Id" class="dropdown-item">
+                                                <i class="bi bi-pencil me-2 text-warning"></i>Corregir
+                                            </a>
+                                        </li>
+                                    }
+                                    @if (string.IsNullOrEmpty(g.ComprobanteRuta) && (g.Estado == "Aprobado" || (g.Estado == "Rechazado" && esAdmin)))
+                                    {
+                                        <li>
+                                            <span class="dropdown-item disabled text-muted">
+                                                <i class="bi bi-dash-circle me-2 text-secondary"></i>Sin acciones
+                                            </span>
+                                        </li>
+                                    }
+                                </ul>
+                            </div>
                         </td>
                     </tr>
                 }
@@ -177,5 +198,5 @@
 }
 
 @section Scripts {
-    <script src="~/js/gastos-tabla.js"></script>
+    <script src="~/js/gastos-tabla.js" asp-append-version="true"></script>
 }

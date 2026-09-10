@@ -9,7 +9,7 @@
 :root {
     /* Colores - Dedicados a una empresa premium de piscinas y construcción */
     --color-body-bg: #f4f8fb;
-    --color-navbar-bg: #005f73;
+    --color-navbar-bg: #002d38;
     --color-footer-bg: #002d38;
     --color-form-bg: #ffffff;
     --color-input-bg: #ffffff;
@@ -17,9 +17,9 @@
     --color-btn-hover: #005f73;
     --color-btn-text: #ffffff;
     --color-text-dark: #1a2f3b;
-    --color-text-light: #ffffff;
+    --color-text-light: #f3efef; /* --- ESTE ES EL COLOR DE LOS TITULOS --- */
     --color-text-muted: #627b87;
-    --color-logo-text: #ffffff;
+    --color-logo-text: #f3f0f0;
     --color-navbar-text: #ffffff;
     --color-accent: #e9d8a6;
     --color-accent-orange: #ca6702;
@@ -408,9 +408,23 @@ p, .a-text-dark {
     transition: var(--transition-smooth);
 }
 
-    .o-form-card:hover, form.card:hover, .card:hover {
+    .o-form-card:hover, form.card:hover {
         transform: translateY(-4px);
         box-shadow: var(--shadow-lg) !important;
+    }
+
+    /* Las tarjetas que contienen tablas o tarjetas estándar no deben elevarse ni saltar al pasar el mouse */
+    .card:hover,
+    .card:has(table):hover,
+    .card:has(.table):hover,
+    .card:has(.table-responsive):hover,
+    .c-data-card:hover,
+    .table-responsive:hover,
+    .table:hover,
+    table:hover,
+    .table tbody tr:hover,
+    table tbody tr:hover {
+        transform: none !important;
     }
 
 /* ==========================================================================
@@ -514,7 +528,7 @@ main {
         content: '';
         position: absolute;
         inset: 0;
-        background: rgba(236, 254, 255, 0.80);
+        background: rgba(0, 45, 56, 0.50);
         z-index: 1;
     }
 
@@ -562,6 +576,16 @@ main {
         transform: none;
         box-shadow: var(--shadow-md);
     }
+
+/* Permite que los menús desplegables (dropdowns) fluyan libremente fuera de tablas y tarjetas */
+.table-responsive:has(.dropdown-menu.show),
+.c-data-card:has(.dropdown-menu.show),
+.card:has(.dropdown-menu.show),
+.table-responsive.u-overflow-visible,
+.c-data-card.u-overflow-visible,
+.card.u-overflow-visible {
+    overflow: visible !important;
+}
 
 .c-data-table {
     width: 100%;
@@ -834,14 +858,24 @@ main {
         font-weight: 600;
     }
 
-/* --- Badges de estado --- */
+/* --- Badges de estado unificados --- */
 .c-badge {
-    padding: 4px 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 31px;
+    min-width: 90px;
+    padding: 0.25rem 0.85rem;
     border-radius: 20px;
-    font-size: 0.75rem;
-    font-weight: 700;
+    font-size: 0.8125rem;
+    font-weight: 600;
     font-family: var(--font-family-body);
-    display: inline-block;
+    line-height: 1.5;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: middle;
+    box-sizing: border-box;
+    border: 1px solid transparent;
 }
 
 .c-badge-lg {
@@ -863,31 +897,37 @@ main {
 .c-badge-green {
     background-color: #d1fae5;
     color: #065f46;
+    border-color: #a7f3d0;
 }
 
 .c-badge-teal {
     background-color: #ccfbf1;
     color: #0f766e;
+    border-color: #99f6e4;
 }
 
 .c-badge-gray {
     background-color: #f1f5f9;
     color: #475569;
+    border-color: #e2e8f0;
 }
 
 .c-badge-blue {
     background-color: #dbeafe;
     color: #1e40af;
+    border-color: #bfdbfe;
 }
 
 .c-badge-amber {
     background-color: #fef3c7;
     color: #92400e;
+    border-color: #fde68a;
 }
 
 .c-badge-red {
     background-color: #fee2e2;
     color: #991b1b;
+    border-color: #fecaca;
 }
 
 /* --- Botones pequeños de acción en tablas --- */

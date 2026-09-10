@@ -42,7 +42,7 @@
                 <th>Stock</th>
                 <th>Precio</th>
                 <th>Estado</th>
-                <th>Acciones</th>
+                <th class="text-center">Acciones</th>
             </tr>
         </thead>
         <tbody>
@@ -64,32 +64,49 @@
                             }
                             else
                             {
-                                <span class="c-badge c-badge-gray">Inactivo</span>
+                                <span class="c-badge c-badge-red">Inactivo</span>
                             }
                         </td>
-                        <td class="d-flex gap-2">
-                            <a asp-action="Detalle" asp-route-id="@p.Id" class="c-btn-sm btn-info">
-                                <i class="bi bi-eye me-1"></i>Ver
-                            </a>
-                            <a asp-action="Editar" asp-route-id="@p.Id" class="c-btn-sm btn-warning">
-                                <i class="bi bi-pencil me-1"></i>Editar
-                            </a>
-                            @if (p.Activo)
-                            {
-                                <form asp-action="Eliminar" asp-route-id="@p.Id" method="post" class="d-inline">
-                                    <button type="button" class="c-btn-sm btn-danger btn-eliminar">
-                                        <i class="bi bi-trash me-1"></i>Eliminar
-                                    </button>
-                                </form>
-                            }
-                            else
-                            {
-                                <form asp-action="Activar" asp-route-id="@p.Id" method="post" class="d-inline">
-                                    <button type="button" class="c-btn-sm btn-success btn-activar">
-                                        <i class="bi bi-check-circle me-1"></i>Activar
-                                    </button>
-                                </form>
-                            }
+                        <td class="text-center">
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-three-dots-vertical me-1"></i>Acciones
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                                    <li>
+                                        <a asp-action="Detalle" asp-route-id="@p.Id" class="dropdown-item">
+                                            <i class="bi bi-eye me-2 text-info"></i>Ver
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a asp-action="Editar" asp-route-id="@p.Id" class="dropdown-item">
+                                            <i class="bi bi-pencil me-2 text-warning"></i>Editar
+                                        </a>
+                                    </li>
+                                    @if (p.Activo)
+                                    {
+                                        <li>
+                                            <form asp-action="Eliminar" asp-route-id="@p.Id" method="post" class="d-inline">
+                                                @Html.AntiForgeryToken()
+                                                <button type="button" class="dropdown-item text-danger btn-eliminar">
+                                                    <i class="bi bi-slash-circle me-2 text-danger"></i>Desactivar
+                                                </button>
+                                            </form>
+                                        </li>
+                                    }
+                                    else
+                                    {
+                                        <li>
+                                            <form asp-action="Activar" asp-route-id="@p.Id" method="post" class="d-inline">
+                                                @Html.AntiForgeryToken()
+                                                <button type="button" class="dropdown-item text-success btn-activar">
+                                                    <i class="bi bi-check-circle me-2 text-success"></i>Activar
+                                                </button>
+                                            </form>
+                                        </li>
+                                    }
+                                </ul>
+                            </div>
                         </td>
                     </tr>
                     c++;
