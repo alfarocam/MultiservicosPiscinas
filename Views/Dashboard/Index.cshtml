@@ -1,4 +1,4 @@
-﻿@model MultiserviciosPiscinas.DTOs.DashboardDto
+@model MultiserviciosPiscinas.DTOs.DashboardDto
 @using System.Text.Json
 
 @{
@@ -188,40 +188,42 @@
     }
     else
     {
-        <table class="table table-hover">
-            <thead class="table-light">
-                <tr>
-                    <th>Fecha</th>
-                    <th>Tipo</th>
-                    <th>Cliente</th>
-                    <th>Técnico</th>
-                    <th>Estado</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var item in Model.ActividadReciente)
-                {
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
                     <tr>
-                        <td>@item.FechaHora.ToString("dd/MM/yyyy HH:mm")</td>
-                        <td><span class="fw-semibold">@item.Tipo</span></td>
-                        <td>@item.NombreCliente</td>
-                        <td>@item.NombreTecnico</td>
-                        <td>
-                            @{
-                                var badgeClass = item.Estado switch {
-                                    "Completado" or "Cerrado" => "c-badge-green",
-                                    "En progreso" or "Abierto" => "c-badge-blue",
-                                    "Cancelado" => "c-badge-red",
-                                    "Pendiente" => "c-badge-amber",
-                                    _ => "c-badge-gray"
-                                };
-                            }
-                            <span class="c-badge @badgeClass">@item.Estado</span>
-                        </td>
+                        <th>Fecha</th>
+                        <th>Tipo</th>
+                        <th>Cliente</th>
+                        <th>Técnico</th>
+                        <th>Estado</th>
                     </tr>
-                }
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.ActividadReciente)
+                    {
+                        <tr>
+                            <td>@item.FechaHora.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td><span class="fw-semibold">@item.Tipo</span></td>
+                            <td>@item.NombreCliente</td>
+                            <td>@item.NombreTecnico</td>
+                            <td>
+                                @{
+                                    var badgeClass = item.Estado switch {
+                                        "Completado" or "Cerrado" => "c-badge-green",
+                                        "En progreso" or "Abierto" => "c-badge-blue",
+                                        "Cancelado" => "c-badge-red",
+                                        "Pendiente" => "c-badge-amber",
+                                        _ => "c-badge-gray"
+                                    };
+                                }
+                                <span class="c-badge @badgeClass">@item.Estado</span>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
     }
 </div>
 

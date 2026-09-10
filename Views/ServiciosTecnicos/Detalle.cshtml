@@ -1,4 +1,4 @@
-﻿@model MultiserviciosPiscinas.Models.Servicio
+@model MultiserviciosPiscinas.Models.Servicio
 
 @{
     Layout = User.IsInRole("2")
@@ -185,8 +185,9 @@
     else
     {
         <div class="c-data-card mb-4">
-            <table class="table table-hover">
-                <thead class="table-light">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
                     <tr>
                         <th>#</th>
                         <th>Tarea</th>
@@ -237,6 +238,7 @@
                                 }
                 </tbody>
             </table>
+            </div>
         </div>
     }
 
@@ -255,8 +257,9 @@
     else
     {
         <div class="c-data-card mb-4">
-            <table class="table table-hover">
-                <thead class="table-light">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
                     <tr>
                         <th>Fecha</th>
                         <th>Usuario</th>
@@ -290,6 +293,7 @@
                                 }
                 </tbody>
             </table>
+            </div>
         </div>
     }
 

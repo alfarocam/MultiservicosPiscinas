@@ -56,3 +56,47 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 });
+
+// ==========================================================================
+// Prevención global para menús desplegables (Dropdowns) en tablas y tarjetas
+// Evita que el overflow de .table-responsive o cards corte los dropdowns
+// ==========================================================================
+(function () {
+    // 1. Configuración por defecto de Bootstrap Dropdown para usar Popper con fixed positioning y boundary viewport
+    if (typeof bootstrap !== 'undefined' && bootstrap.Dropdown) {
+        bootstrap.Dropdown.Default.boundary = 'viewport';
+        bootstrap.Dropdown.Default.popperConfig = function (defaultBsPopperConfig) {
+            return {
+                ...defaultBsPopperConfig,
+                strategy: 'fixed'
+            };
+        };
+    }
+
+    // 2. Control dinámico de overflow en contenedores (.table-responsive, .c-data-card, .card)
+    document.addEventListener('show.bs.dropdown', function (e) {
+        var tableResp = e.target.closest('.table-responsive');
+        if (tableResp) {
+            tableResp.classList.add('u-overflow-visible');
+            tableResp.style.overflow = 'visible';
+        }
+        var card = e.target.closest('.c-data-card, .card');
+        if (card) {
+            card.classList.add('u-overflow-visible');
+            card.style.overflow = 'visible';
+        }
+    });
+
+    document.addEventListener('hidden.bs.dropdown', function (e) {
+        var tableResp = e.target.closest('.table-responsive');
+        if (tableResp) {
+            tableResp.classList.remove('u-overflow-visible');
+            tableResp.style.overflow = '';
+        }
+        var card = e.target.closest('.c-data-card, .card');
+        if (card) {
+            card.classList.remove('u-overflow-visible');
+            card.style.overflow = '';
+        }
+    });
+})();

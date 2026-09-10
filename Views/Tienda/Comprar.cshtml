@@ -18,31 +18,33 @@
                 <p><strong>Cliente:</strong> @Model.NombreCliente</p>
                 <p><strong>Fecha:</strong> @Model.FechaEmision.ToString("dd/MM/yyyy")</p>
 
-                <table class="table table-hover table-sm align-middle">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Producto</th>
-                            <th class="text-end">Precio</th>
-                            <th class="text-end">Cantidad</th>
-                            <th class="text-end">Subtotal</th>
-                            <th class="text-end">IVA</th>
-                            <th class="text-end">Total</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var linea in Model.Lineas)
-                        {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
                             <tr>
-                                <td>@linea.Nombre</td>
-                                <td class="text-end">₡@linea.PrecioUnitario.ToString("N2")</td>
-                                <td class="text-end">@linea.Cantidad</td>
-                                <td class="text-end">₡@linea.LineaSubtotal.ToString("N2")</td>
-                                <td class="text-end">₡@linea.LineaImpuesto.ToString("N2")</td>
-                                <td class="text-end"><strong>₡@linea.LineaTotal.ToString("N2")</strong></td>
+                                <th>Producto</th>
+                                <th class="text-end">Precio</th>
+                                <th class="text-end">Cantidad</th>
+                                <th class="text-end">Subtotal</th>
+                                <th class="text-end">IVA</th>
+                                <th class="text-end">Total</th>
                             </tr>
-                        }
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            @foreach (var linea in Model.Lineas)
+                            {
+                                <tr>
+                                    <td>@linea.Nombre</td>
+                                    <td class="text-end">₡@linea.PrecioUnitario.ToString("N2")</td>
+                                    <td class="text-end">@linea.Cantidad</td>
+                                    <td class="text-end">₡@linea.LineaSubtotal.ToString("N2")</td>
+                                    <td class="text-end">₡@linea.LineaImpuesto.ToString("N2")</td>
+                                    <td class="text-end"><strong>₡@linea.LineaTotal.ToString("N2")</strong></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
 
                 <hr />
 

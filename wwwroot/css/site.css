@@ -408,9 +408,23 @@ p, .a-text-dark {
     transition: var(--transition-smooth);
 }
 
-    .o-form-card:hover, form.card:hover, .card:hover {
+    .o-form-card:hover, form.card:hover {
         transform: translateY(-4px);
         box-shadow: var(--shadow-lg) !important;
+    }
+
+    /* Las tarjetas que contienen tablas o tarjetas estándar no deben elevarse ni saltar al pasar el mouse */
+    .card:hover,
+    .card:has(table):hover,
+    .card:has(.table):hover,
+    .card:has(.table-responsive):hover,
+    .c-data-card:hover,
+    .table-responsive:hover,
+    .table:hover,
+    table:hover,
+    .table tbody tr:hover,
+    table tbody tr:hover {
+        transform: none !important;
     }
 
 /* ==========================================================================
@@ -562,6 +576,16 @@ main {
         transform: none;
         box-shadow: var(--shadow-md);
     }
+
+/* Permite que los menús desplegables (dropdowns) fluyan libremente fuera de tablas y tarjetas */
+.table-responsive:has(.dropdown-menu.show),
+.c-data-card:has(.dropdown-menu.show),
+.card:has(.dropdown-menu.show),
+.table-responsive.u-overflow-visible,
+.c-data-card.u-overflow-visible,
+.card.u-overflow-visible {
+    overflow: visible !important;
+}
 
 .c-data-table {
     width: 100%;
