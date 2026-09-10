@@ -1,53 +1,107 @@
-// Lógica para colapsar y expandir la barra lateral (Sidebar)
+// ==========================================================================
+// Lógica para barra lateral (Desktop Collapse & Mobile Drawer)
+// ==========================================================================
 document.addEventListener("DOMContentLoaded", function () {
     const sidebarToggle = document.getElementById("sidebarToggle");
     const appContainer = document.querySelector(".t-app-container");
     const mobileQuery = window.matchMedia("(max-width: 768px)");
 
-    // En móvil el sidebar inicia escondido para no tapar el contenido
-    if (appContainer && mobileQuery.matches) {
-        appContainer.classList.add("t-sidebar-collapsed");
+    // Crear o recuperar el backdrop para dispositivos móviles
+    let backdrop = document.querySelector(".t-sidebar-backdrop");
+    if (!backdrop) {
+        backdrop = document.createElement("div");
+        backdrop.className = "t-sidebar-backdrop";
+        document.body.appendChild(backdrop);
     }
 
-    if (sidebarToggle && appContainer) {
-        sidebarToggle.addEventListener("click", function () {
+    function closeMobileSidebar() {
+        if (!appContainer) return;
+        appContainer.classList.remove("t-sidebar-mobile-open");
+        if (sidebarToggle) {
+            sidebarToggle.classList.remove("is-active");
+            sidebarToggle.setAttribute("aria-expanded", "false");
+        }
+        if (backdrop) {
+            backdrop.classList.remove("show");
+        }
+    }
+
+    function openMobileSidebar() {
+        if (!appContainer) return;
+        appContainer.classList.add("t-sidebar-mobile-open");
+        if (sidebarToggle) {
+            sidebarToggle.classList.add("is-active");
+            sidebarToggle.setAttribute("aria-expanded", "true");
+        }
+        if (backdrop) {
+            backdrop.classList.add("show");
+        }
+    }
+
+    function toggleSidebar() {
+        if (!appContainer) return;
+        if (mobileQuery.matches) {
+            if (appContainer.classList.contains("t-sidebar-mobile-open")) {
+                closeMobileSidebar();
+            } else {
+                openMobileSidebar();
+            }
+        } else {
             appContainer.classList.toggle("t-sidebar-collapsed");
+            const isCollapsed = appContainer.classList.contains("t-sidebar-collapsed");
+            if (sidebarToggle) {
+                sidebarToggle.setAttribute("aria-expanded", !isCollapsed ? "true" : "false");
+            }
+        }
+    }
+
+    if (sidebarToggle) {
+        sidebarToggle.addEventListener("click", function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            toggleSidebar();
         });
     }
 
-    // Lógica para marcar como activa la opción del menú al darle click
-    const navLinks = document.querySelectorAll(".t-sidebar .nav-link");
+    // Cerrar sidebar al tocar el backdrop oscuro en móvil
+    if (backdrop) {
+        backdrop.addEventListener("click", function () {
+            closeMobileSidebar();
+        });
+    }
 
-    // En móvil, cerrar el sidebar al seleccionar una opción del menú
+    // Cerrar sidebar al hacer click en cualquier link del menú en móvil
+    const navLinks = document.querySelectorAll(".t-sidebar .nav-link");
     navLinks.forEach(link => {
         link.addEventListener("click", function () {
-            if (appContainer && mobileQuery.matches) {
-                appContainer.classList.add("t-sidebar-collapsed");
+            if (mobileQuery.matches) {
+                closeMobileSidebar();
             }
         });
     });
 
+    // Cerrar sidebar con la tecla Escape en móvil
+    document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape" && mobileQuery.matches && appContainer && appContainer.classList.contains("t-sidebar-mobile-open")) {
+            closeMobileSidebar();
+        }
+    });
+
     // Recuperar la opción activa almacenada previamente, o usar la ruta actual si no hay ninguna
     let activeLinkHref = localStorage.getItem("activeSidebarLink");
-    
     if (!activeLinkHref) {
         activeLinkHref = window.location.pathname;
     }
 
     if (activeLinkHref) {
-        let found = false;
         navLinks.forEach(link => {
             if (link.getAttribute("href") === activeLinkHref) {
                 link.classList.add("active");
-                found = true;
             }
         });
-        
-        // Si no se encontró coincidencia exacta y la URL es solo la raíz u otro,
-        // al menos intentar asegurar que se marque algo, pero dejaremos que el click actúe
     }
 
-    // Agregar evento click a los enlaces
+    // Marcar como activa la opción seleccionada
     navLinks.forEach(link => {
         link.addEventListener("click", function () {
             navLinks.forEach(l => l.classList.remove("active"));
@@ -58,11 +112,57 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 // ==========================================================================
+// Configuración Global y Normalización de DataTables
+// ==========================================================================
+if (window.jQuery && $.fn.dataTable) {
+    // 1. Opciones por defecto para todas las instancias de DataTables
+    $.extend(true, $.fn.dataTable.defaults, {
+        responsive: true,
+        autoWidth: false,
+        language: {
+            search: "",
+            searchPlaceholder: "Buscar...",
+            lengthMenu: "Mostrar _MENU_",
+            info: "_START_ a _END_ de _TOTAL_",
+            infoEmpty: "0 a 0 de 0",
+            infoFiltered: "(de _MAX_)",
+            zeroRecords: "No se encontraron resultados",
+            emptyTable: "No hay datos disponibles",
+            paginate: {
+                first: '<i class="bi bi-chevron-double-left"></i>',
+                previous: '<i class="bi bi-chevron-left"></i>',
+                next: '<i class="bi bi-chevron-right"></i>',
+                last: '<i class="bi bi-chevron-double-right"></i>'
+            }
+        }
+    });
+
+    // 2. Normalización de contenedores para evitar que los controles se desplacen con el scroll
+    $(document).on('init.dt', function (e, settings) {
+        var api = new $.fn.dataTable.Api(settings);
+        var $wrapper = $(api.table().container());
+        var $parent = $wrapper.parent();
+
+        // Si la tabla estaba envuelta externamente en .table-responsive,
+        // quitamos ese contenedor exterior para que el buscador y paginación ocupen el 100% de la tarjeta,
+        // y para que DataTables Responsive gestione el colapso directamente sin interferencias.
+        if ($parent.hasClass('table-responsive')) {
+            $wrapper.unwrap();
+        }
+
+        // Asegurar placeholder en el campo de búsqueda si la API remota de idioma lo sobrescribió
+        var $filterInput = $wrapper.find('.dataTables_filter input');
+        if ($filterInput.length && !$filterInput.attr('placeholder')) {
+            $filterInput.attr('placeholder', 'Buscar en la tabla...');
+        }
+    });
+}
+
+// ==========================================================================
 // Prevención global para menús desplegables (Dropdowns) en tablas y tarjetas
-// Evita que el overflow de .table-responsive o cards corte los dropdowns
+// Evita que el overflow corte los menús usando Popper fixed strategy
 // ==========================================================================
 (function () {
-    // 1. Configuración por defecto de Bootstrap Dropdown para usar Popper con fixed positioning y boundary viewport
     if (typeof bootstrap !== 'undefined' && bootstrap.Dropdown) {
         bootstrap.Dropdown.Default.boundary = 'viewport';
         bootstrap.Dropdown.Default.popperConfig = function (defaultBsPopperConfig) {
@@ -72,31 +172,5 @@ document.addEventListener("DOMContentLoaded", function () {
             };
         };
     }
-
-    // 2. Control dinámico de overflow en contenedores (.table-responsive, .c-data-card, .card)
-    document.addEventListener('show.bs.dropdown', function (e) {
-        var tableResp = e.target.closest('.table-responsive');
-        if (tableResp) {
-            tableResp.classList.add('u-overflow-visible');
-            tableResp.style.overflow = 'visible';
-        }
-        var card = e.target.closest('.c-data-card, .card');
-        if (card) {
-            card.classList.add('u-overflow-visible');
-            card.style.overflow = 'visible';
-        }
-    });
-
-    document.addEventListener('hidden.bs.dropdown', function (e) {
-        var tableResp = e.target.closest('.table-responsive');
-        if (tableResp) {
-            tableResp.classList.remove('u-overflow-visible');
-            tableResp.style.overflow = '';
-        }
-        var card = e.target.closest('.c-data-card, .card');
-        if (card) {
-            card.classList.remove('u-overflow-visible');
-            card.style.overflow = '';
-        }
-    });
 })();
+

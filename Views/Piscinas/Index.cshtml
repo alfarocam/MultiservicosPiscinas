@@ -13,7 +13,6 @@
             <table id="tablaPiscinas" class="table table-hover align-middle">
                 <thead class="table-light">
                     <tr>
-                        <th class="a-text-muted small text-uppercase" hidden>ID</th>
                         <th class="a-text-muted small text-uppercase">Cliente</th>
                         <th class="a-text-muted small text-uppercase">Dirección</th>
                         <th class="a-text-muted small text-uppercase">Tipo</th>
@@ -26,7 +25,6 @@
                     @foreach (var piscina in Model)
                     {
                         <tr>
-                            <td hidden>@piscina.Id</td>
                             <td>@piscina.Cliente.Usuario.Nombre @piscina.Cliente.Usuario.ApellidoPaterno</td>
                             <td>@piscina.Direccion.Detalles, @piscina.Direccion.Distrito.Nombre</td>
                             <td>@piscina.Tipo</td>

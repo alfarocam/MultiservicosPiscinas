@@ -1,5 +1,6 @@
 $(document).ready(function () {
     $('#tablaPiscinas').DataTable({
+        responsive: true,
         language: {
             search: 'Buscar:',
             lengthMenu: 'Mostrar _MENU_ registros',
