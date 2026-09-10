@@ -36,7 +36,6 @@
             <table id="tablaInventario" class="table table-hover align-middle">
                 <thead class="table-light">
             <tr>
-                <th>#</th>
                 <th>Producto</th>
                 <th>Categoría</th>
                 <th>Stock</th>
@@ -52,7 +51,6 @@
                 foreach (var p in Model)
                 {
                     <tr>
-                        <td class="c-num">@c</td>
                         <td class="fw-semibold">@p.Nombre</td>
                         <td>@p.Categoria.NombreCategoria</td>
                         <td>@p.Stock</td>

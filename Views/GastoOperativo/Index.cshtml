@@ -23,7 +23,6 @@
             <table id="tablaGastosOperativos" class="table table-hover align-middle">
                 <thead class="table-light">
             <tr>
-                <th>#</th>
                 <th>Fecha</th>
                 <th>Categoría</th>
                 <th>Monto</th>
@@ -41,7 +40,6 @@
                 foreach (var g in Model)
                 {
                     <tr>
-                        <td class="c-num">@c</td>
                         <td>@g.Fecha.ToString("dd/MM/yyyy")</td>
                         <td>@g.Categoria.NombreCategoria</td>
                         <td class="c-price">₡@g.Monto.ToString("N2")</td>

@@ -38,7 +38,6 @@
             <table id="tablaBitacora" class="table table-hover align-middle">
                 <thead class="table-light">
                     <tr>
-                        <th>#</th>
                         <th>Fecha y Hora</th>
                         <th>Colaborador / Usuario</th>
                         <th>Operación</th>
@@ -68,7 +67,6 @@
                             };
 
                             <tr>
-                                <td class="c-num">@item.Id</td>
                                 <td>@item.FechaHora.ToString("dd/MM/yyyy HH:mm")</td>
                                 <td class="fw-semibold">@(item.Usuario != null ? $"{item.Usuario.Nombre} {item.Usuario.ApellidoPaterno}" : $"ID: {item.UsuarioId}")</td>
                                 <td><span class="c-badge @badgeClass">@textoAccion</span></td>

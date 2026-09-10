@@ -16,7 +16,6 @@
         <table id="tablaClientes" class="table table-hover align-middle">
             <thead class="table-light">
                 <tr>
-                    <th class="a-text-muted small text-uppercase">ID</th>
                     <th class="a-text-muted small text-uppercase">Nombre</th>
                     <th class="a-text-muted small text-uppercase">Correo</th>
                     <th class="a-text-muted small text-uppercase">Teléfono</th>
@@ -27,7 +26,6 @@
                 @foreach (var cliente in Model)
                 {
                     <tr>
-                        <td>@cliente.Id</td>
                         <td>@cliente.Usuario.Nombre @cliente.Usuario.ApellidoPaterno</td>
                         <td>@cliente.Usuario.Correo</td>
                         <td>@(cliente.TelefonosCliente.FirstOrDefault()?.NumeroTelefono)</td>

@@ -53,7 +53,6 @@
             <table id="tablaVehiculo" class="table table-hover align-middle">
                 <thead class="table-light">
                     <tr>
-                        <th>ID Interno</th>
                         <th>Placa</th>
                         <th>Marca</th>
                         <th>Modelo</th>
@@ -66,7 +65,6 @@
                     @foreach (var v in Model)
                     {
                         <tr>
-                            <td><strong>#@v.Id</strong></td>
                             <td><span class="badge bg-secondary fs-6">@v.Placa</span></td>
                             <td>@v.Marca</td>
                             <td>@(string.IsNullOrEmpty(v.Modelo) ? "N/A" : v.Modelo)</td>
