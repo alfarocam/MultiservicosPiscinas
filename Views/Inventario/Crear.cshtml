@@ -50,6 +50,12 @@
                     <span asp-validation-for="Stock" class="text-danger small"></span>
                 </div>
 
+                <div class="col-md-4">
+                    <label asp-for="StockMinimo" class="form-label">Stock mínimo</label>
+                    <input asp-for="StockMinimo" type="number" min="0" class="form-control" placeholder="5" />
+                    <span asp-validation-for="StockMinimo" class="text-danger small"></span>
+                </div>
+
                 <div class="col-md-12">
                     <label for="imagen" class="form-label">Imagen del producto <span class="text-muted">(opcional)</span></label>
                     <input type="file" name="imagen" id="imagen" class="form-control" accept=".jpg,.jpeg,.png" />

@@ -71,7 +71,7 @@
                             </div>
                             <div class="col-md-4">
                                 <label asp-for="Fecha" class="form-label fw-semibold"></label>
-                                <input asp-for="Fecha" type="date" class="form-control" required />
+                                <input asp-for="Fecha" type="date" class="form-control" min="@DateOnly.FromDateTime(DateTime.Now).ToString("yyyy-MM-dd")" required />
                                 <span asp-validation-for="Fecha" class="text-danger small"></span>
                             </div>
                             <div class="col-md-4">

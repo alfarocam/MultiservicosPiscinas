@@ -982,6 +982,12 @@ namespace MultiserviciosPiscinas.Migrations
                         .HasColumnType("int")
                         .HasColumnName("stock");
 
+                    b.Property<int>("StockMinimo")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(5)
+                        .HasColumnName("stock_minimo");
+
                     b.HasKey("Id")
                         .HasName("PK__PRODUCTO__3213E83FED7556DA");
 

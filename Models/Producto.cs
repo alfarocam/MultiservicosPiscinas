@@ -17,6 +17,8 @@ public partial class Producto
 
     public int Stock { get; set; }
 
+    public int StockMinimo { get; set; }
+
     public bool Activo { get; set; }
 
     public string? ImagenRuta { get; set; }

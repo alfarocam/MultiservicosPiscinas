@@ -728,6 +728,9 @@ public partial class PiscinasYMultiserviciosContext : DbContext
                 .HasColumnType("decimal(10, 2)")
                 .HasColumnName("precio");
             entity.Property(e => e.Stock).HasColumnName("stock");
+            entity.Property(e => e.StockMinimo)
+                .HasDefaultValue(5)
+                .HasColumnName("stock_minimo");
             entity.Property(e => e.ImagenRuta)
                 .HasMaxLength(500)
                 .IsUnicode(false)

@@ -154,6 +154,25 @@ public class FacturaRepository : IFacturaRepository
                 if (!esServicio)
                 {
                     producto.Stock -= (int)item.Cantidad;
+
+                    if (producto.Stock <= producto.StockMinimo)
+                    {
+                        var administradores = await _context.Usuario
+                            .Where(u => u.RolId == 1 && u.Activo)
+                            .ToListAsync();
+
+                        foreach (var admin in administradores)
+                        {
+                            _context.Notificacion.Add(new Notificacion
+                            {
+                                UsuarioId = admin.Id,
+                                CitaId = null,
+                                Mensaje = $"Stock bajo: '{producto.Nombre}' quedó en {producto.Stock} unidades (mínimo: {producto.StockMinimo}).",
+                                Leida = false,
+                                FechaCreacion = DateTime.Now
+                            });
+                        }
+                    }
                 }
             }
 

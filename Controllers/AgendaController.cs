@@ -51,6 +51,11 @@ namespace MultiserviciosPiscinas.Controllers
 
             var fechaHora = model.Fecha.ToDateTime(model.Hora);
 
+            if (fechaHora <= DateTime.Now)
+            {
+                ModelState.AddModelError(nameof(model.Fecha), "No se pueden agendar citas en fechas u horas pasadas.");
+            }
+
             var horariosDelDia = await _context.Cita
                 .Where(c => c.TecnicoId == model.TecnicoId
                          && c.Estado != "Cancelada"
@@ -156,6 +161,11 @@ namespace MultiserviciosPiscinas.Controllers
             }
 
             var fechaHoraNueva = model.Fecha.ToDateTime(model.Hora);
+
+            if (fechaHoraNueva <= DateTime.Now && fechaHoraNueva != cita.FechaHora)
+            {
+                ModelState.AddModelError(nameof(model.Fecha), "No se puede reprogramar una cita a una fecha u hora pasada.");
+            }
 
             var conflicto = await _context.Cita
                 .AnyAsync(c => c.Id != id

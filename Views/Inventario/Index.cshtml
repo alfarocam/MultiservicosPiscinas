@@ -53,7 +53,15 @@
                     <tr>
                         <td class="fw-semibold">@p.Nombre</td>
                         <td>@p.Categoria.NombreCategoria</td>
-                        <td>@p.Stock</td>
+                        <td>
+                            @p.Stock
+                            @if (p.Stock <= p.StockMinimo)
+                            {
+                                <span class="c-badge c-badge-red ms-1" title="Stock mínimo alcanzado">
+                                    <i class="bi bi-exclamation-triangle-fill"></i> Bajo
+                                </span>
+                            }
+                        </td>
                         <td class="c-price">₡@p.Precio.ToString("N2")</td>
                         <td>
                             @if (p.Activo)
