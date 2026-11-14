@@ -31,6 +31,7 @@ namespace MultiserviciosPiscinas.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "1")]
         public IActionResult Crear(int clienteId)
         {
             var cliente = _contexto.Cliente
@@ -58,6 +59,7 @@ namespace MultiserviciosPiscinas.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "1")]
         public IActionResult Crear(Piscina piscina)
         {
             ModelState.Remove("Cliente");
@@ -95,6 +97,7 @@ namespace MultiserviciosPiscinas.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "1")]
         public IActionResult Historial(int id)
         {
             var piscina = _contexto.Piscina
@@ -111,6 +114,7 @@ namespace MultiserviciosPiscinas.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "1")]
         public IActionResult Detalle(int id)
         {
             var piscina = _contexto.Piscina
@@ -129,6 +133,7 @@ namespace MultiserviciosPiscinas.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "1")]
         public IActionResult Editar(int id)
         {
             var piscina = _contexto.Piscina
@@ -147,6 +152,7 @@ namespace MultiserviciosPiscinas.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "1")]
         public IActionResult Editar(Piscina piscina)
         {
             ModelState.Remove("Cliente");

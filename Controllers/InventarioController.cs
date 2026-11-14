@@ -46,6 +46,7 @@ namespace MultiserviciosPiscinas.Controllers
         }
 
         // GET: /Inventario/Crear
+        [Authorize(Roles = "1")]
         public async Task<IActionResult> Crear()
         {
             await CargarCategoriasAsync();
@@ -53,6 +54,7 @@ namespace MultiserviciosPiscinas.Controllers
         }
 
         // POST: /Inventario/Crear
+        [Authorize(Roles = "1")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Crear(Producto producto, IFormFile? imagen)
@@ -120,6 +122,7 @@ namespace MultiserviciosPiscinas.Controllers
         }
 
         // GET: /Inventario/Editar/5
+        [Authorize(Roles = "1")]
         public async Task<IActionResult> Editar(int id)
         {
             var producto = await _context.Producto.FindAsync(id);
@@ -132,6 +135,7 @@ namespace MultiserviciosPiscinas.Controllers
         }
 
         // POST: /Inventario/Editar/5
+        [Authorize(Roles = "1")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Editar(int id, Producto producto, IFormFile? imagen)
@@ -210,6 +214,7 @@ namespace MultiserviciosPiscinas.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        [Authorize(Roles = "1")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Eliminar(int id)
@@ -235,6 +240,7 @@ namespace MultiserviciosPiscinas.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        [Authorize(Roles = "1")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Activar(int id)
