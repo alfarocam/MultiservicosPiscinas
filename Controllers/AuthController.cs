@@ -25,12 +25,21 @@ namespace MultiserviciosPiscinas.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> InicioSesion(string correo, string contrasena)
         {
+            if (string.IsNullOrWhiteSpace(correo) || string.IsNullOrEmpty(contrasena))
+            {
+                ViewBag.Mensaje = "Correo o contraseña incorrectos.";
+                return View();
+            }
+
+            var correoLimpio = correo.Trim();
+
             // Buscar usuario por correo
             var usuario = await _contexto.Usuario
-                .FirstOrDefaultAsync(u => u.Correo == correo);
+                .FirstOrDefaultAsync(u => u.Correo == correoLimpio);
 
             // Validar existencia y contraseña
             if (usuario != null &&
+                string.Equals(usuario.Correo, correoLimpio, StringComparison.OrdinalIgnoreCase) &&
                 usuario.Contrasena == contrasena &&
                 usuario.Activo == true)
             {
