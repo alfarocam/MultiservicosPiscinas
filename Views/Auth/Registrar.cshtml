@@ -21,7 +21,7 @@
 
         <div asp-validation-summary="ModelOnly" class="text-danger mb-3 small"></div>
 
-        <form asp-controller="Auth" asp-action="Registrar" method="post">
+        <form id="formRegistro" asp-controller="Auth" asp-action="Registrar" method="post">
             @Html.AntiForgeryToken()
 
             <div class="m-form-field">
@@ -49,7 +49,8 @@
                 </div>
                 <div class="col-sm-6 m-form-field">
                     <label asp-for="Telefono" class="form-label fw-semibold">Teléfono</label>
-                    <input asp-for="Telefono" class="form-control form-control-lg a-input" placeholder="Ej: 8888-0000" required>
+                    <input asp-for="Telefono" type="tel" inputmode="numeric"
+                           class="form-control form-control-lg a-input" placeholder="Ej: 88880000" required>
                     <span asp-validation-for="Telefono" class="text-danger small"></span>
                 </div>
             </div>
@@ -136,6 +137,7 @@
 </div>
 
 @section Scripts {
+    <script src="~/js/registro-validacion.js" asp-append-version="true"></script>
     <script src="~/js/ubicaciones.js"></script>
     <script src="~/js/clientes-mapa.js"></script>
     <script src="https://maps.googleapis.com/maps/api/js?key=@ViewBag.GoogleMapsApiKey&callback=iniciarMapaCliente&loading=async"

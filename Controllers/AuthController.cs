@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MultiserviciosPiscinas.Models;
 using MultiserviciosPiscinas.Services;
+using System.Net;
 using System.Security.Claims;
 
 namespace MultiserviciosPiscinas.Controllers
@@ -112,8 +113,10 @@ namespace MultiserviciosPiscinas.Controllers
                 return View(model);
             }
 
+            var correoLimpio = model.Correo.Trim();
+
             bool correoExiste = await _contexto.Usuario
-                .AnyAsync(u => u.Correo == model.Correo);
+                .AnyAsync(u => u.Correo == correoLimpio);
 
             if (correoExiste)
             {
@@ -132,10 +135,10 @@ namespace MultiserviciosPiscinas.Controllers
                     .SqlQueryRaw<int>(
                         "EXEC seg.InsertarUsuarioYCliente @p0, @p1, @p2, @p3, @p4, @p5, @p6",
                         rolCliente,
-                        model.Nombre,
-                        model.ApellidoPaterno,
-                        model.ApellidoMaterno,
-                        model.Correo,
+                        model.Nombre.Trim(),
+                        model.ApellidoPaterno.Trim(),
+                        model.ApellidoMaterno.Trim(),
+                        correoLimpio,
                         model.Contrasena,
                         fechaCreacion
                     )
@@ -166,7 +169,7 @@ namespace MultiserviciosPiscinas.Controllers
                 {
                     ClienteId = cliente.Id,
                     TipoTelefono = "Principal",
-                    NumeroTelefono = model.Telefono,
+                    NumeroTelefono = model.Telefono.Trim(),
                     EsPrincipal = 1
                 });
 
@@ -175,7 +178,7 @@ namespace MultiserviciosPiscinas.Controllers
                     ClienteId = cliente.Id,
                     DistritoId = model.DistritoId,
                     TipoDireccion = "Principal",
-                    Detalles = model.Direccion,
+                    Detalles = model.Direccion.Trim(),
                     EsPrincipal = 1,
                     Latitud = model.Latitud,
                     Longitud = model.Longitud
@@ -183,17 +186,65 @@ namespace MultiserviciosPiscinas.Controllers
 
                 await _contexto.SaveChangesAsync();
 
-                ViewBag.Mensaje = "Usuario creado correctamente.";
-                ViewBag.TipoMensaje = "success";
-                await CargarDatosUbicacionAsync();
-                return View();
+                bool correoEnviado = await EnviarCorreoBienvenidaAsync(
+                    $"{model.Nombre.Trim()} {model.ApellidoPaterno.Trim()}",
+                    correoLimpio);
+
+                if (correoEnviado)
+                {
+                    TempData["Mensaje"] = "Usuario creado correctamente. Te hemos enviado un correo de bienvenida.";
+                    TempData["TipoMensaje"] = "success";
+                }
+                else
+                {
+                    TempData["Mensaje"] = "Usuario creado correctamente, pero no se pudo enviar el correo de bienvenida en este momento.";
+                    TempData["TipoMensaje"] = "warning";
+                }
+
+                return RedirectToAction("InicioSesion", "Auth");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "Error al registrar el cliente con correo {Correo}", correoLimpio);
                 ViewBag.Mensaje = "Ocurrió un error inesperado en el servidor.";
                 ViewBag.TipoMensaje = "danger";
                 await CargarDatosUbicacionAsync();
                 return View(model);
+            }
+        }
+
+        private async Task<bool> EnviarCorreoBienvenidaAsync(string nombreUsuario, string correoDestino)
+        {
+            try
+            {
+                string rutaHtml = Path.Combine(
+                    _entornoWeb.ContentRootPath,
+                    "Template",
+                    "Bienvenida.html");
+
+                if (!System.IO.File.Exists(rutaHtml))
+                {
+                    _logger.LogError("No se encontró la plantilla de correo de bienvenida en {Ruta}", rutaHtml);
+                    return false;
+                }
+
+                string contenidoHtml = await System.IO.File.ReadAllTextAsync(rutaHtml);
+
+                string htmlFinal = contenidoHtml
+                    .Replace("{{NOMBRE_USUARIO}}", WebUtility.HtmlEncode(nombreUsuario))
+                    .Replace("{{CORREO_USUARIO}}", WebUtility.HtmlEncode(correoDestino));
+
+                _generales.EnviarCorreo(
+                    correoDestino,
+                    "¡Bienvenido a Multiservicios y Piscinas!",
+                    htmlFinal);
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Falló el envío del correo de bienvenida a {Correo}", correoDestino);
+                return false;
             }
         }
         #endregion
