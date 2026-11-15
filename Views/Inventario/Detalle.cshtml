@@ -55,8 +55,11 @@
         <a asp-action="Index" class="btn btn-success">
             <i class="bi bi-arrow-left me-1"></i>Volver
         </a>
-        <a asp-action="Editar" asp-route-id="@Model.Id" class="btn btn-warning">
-            <i class="bi bi-pencil me-1"></i>Editar producto
-        </a>
+        @if (User.IsInRole("1"))
+        {
+            <a asp-action="Editar" asp-route-id="@Model.Id" class="btn btn-warning">
+                <i class="bi bi-pencil me-1"></i>Editar producto
+            </a>
+        }
     </div>
 </div>

@@ -16,6 +16,13 @@
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 }
+@if (TempData["MensajeError"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["MensajeError"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
 
 <div class="card shadow-sm">
     <div class="card-body">
@@ -60,27 +67,18 @@
                             }
                         </td>
                         <td class="text-center">
-                            @if (!string.IsNullOrEmpty(g.ComprobanteRuta))
-                            {
-                                <div class="dropdown">
-                                    <button class="btn btn-sm btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                        <i class="bi bi-three-dots-vertical me-1"></i>Acciones
-                                    </button>
-                                    <ul class="dropdown-menu dropdown-menu-end shadow-sm">
-                                        <li>
-                                            <a href="@g.ComprobanteRuta" target="_blank" class="dropdown-item">
-                                                <i class="bi bi-eye me-2 text-info"></i>Ver
-                                            </a>
-                                        </li>
-                                    </ul>
-                                </div>
-                            }
-                            else
-                            {
-                                <span class="text-muted small">
-                                    <i class="bi bi-file-earmark-x me-1"></i>Sin archivo
-                                </span>
-                            }
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-three-dots-vertical me-1"></i>Acciones
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                                    <li>
+                                        <a asp-action="Detalle" asp-route-id="@g.Id" class="dropdown-item">
+                                            <i class="bi bi-eye me-2 text-info"></i>Ver detalle
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
                         </td>
                         
                     </tr>

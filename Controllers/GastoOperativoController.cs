@@ -99,6 +99,14 @@ namespace MultiserviciosPiscinas.Controllers
                 ComprobanteRuta = comprobanteRuta
             };
 
+            // Sin comprobante el gasto se rechaza automáticamente.
+            bool sinComprobante = string.IsNullOrEmpty(comprobanteRuta);
+            if (sinComprobante)
+            {
+                gasto.Estado = "Rechazado";
+                gasto.MotivoRechazo = "Rechazado automáticamente: el gasto no tiene comprobante adjunto.";
+            }
+
             _context.GastoOperativo.Add(gasto);
             await _context.SaveChangesAsync();
 
@@ -113,8 +121,26 @@ namespace MultiserviciosPiscinas.Controllers
                 valorNuevo: $"Categoría: {categoriaNombre} | Monto: ₡{model.Monto:N2} | Fecha: {model.Fecha:dd/MM/yyyy}"
             );
 
-            TempData["MensajeExito"] = "Gasto registrado correctamente.";
+            if (sinComprobante)
+                TempData["MensajeError"] = "El gasto fue registrado pero quedó RECHAZADO automáticamente por no tener comprobante.";
+            else
+                TempData["MensajeExito"] = "Gasto registrado correctamente.";
             return RedirectToAction("Index", "GastoOperativo");
+        }
+
+        // GET: /GastoOperativo/Detalle/5
+        public async Task<IActionResult> Detalle(int id)
+        {
+            var gasto = await _context.GastoOperativo
+                .Include(g => g.Categoria)
+                .Include(g => g.Usuario)
+                .Include(g => g.Cita).ThenInclude(c => c!.Piscina)
+                .FirstOrDefaultAsync(g => g.Id == id);
+
+            if (gasto == null) return NotFound();
+
+            ViewBag.VolverController = "GastoOperativo";
+            return View("~/Views/Gastos/Detalle.cshtml", gasto);
         }
 
         private async Task CargarCategoriasAsync()

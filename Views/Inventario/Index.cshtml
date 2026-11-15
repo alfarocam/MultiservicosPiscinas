@@ -5,7 +5,10 @@
 
 <div class="c-page-header d-flex justify-content-between align-items-center">
     <h2>Inventario</h2>
-    <a asp-action="Crear" class="btn btn-primary"><i class="bi bi-plus-circle me-1"></i>Nuevo producto</a>
+    @if (User.IsInRole("1"))
+    {
+        <a asp-action="Crear" class="btn btn-primary"><i class="bi bi-plus-circle me-1"></i>Nuevo producto</a>
+    }
 </div>
 
 @if (TempData["MensajeExito"] != null)
@@ -76,32 +79,35 @@
                                             <i class="bi bi-eye me-2 text-info"></i>Ver
                                         </a>
                                     </li>
-                                    <li>
-                                        <a asp-action="Editar" asp-route-id="@p.Id" class="dropdown-item">
-                                            <i class="bi bi-pencil me-2 text-warning"></i>Editar
-                                        </a>
-                                    </li>
-                                    @if (p.Activo)
+                                    @if (User.IsInRole("1"))
                                     {
                                         <li>
-                                            <form asp-action="Eliminar" asp-route-id="@p.Id" method="post" class="d-inline">
-                                                @Html.AntiForgeryToken()
-                                                <button type="button" class="dropdown-item text-danger btn-eliminar">
-                                                    <i class="bi bi-slash-circle me-2 text-danger"></i>Desactivar
-                                                </button>
-                                            </form>
+                                            <a asp-action="Editar" asp-route-id="@p.Id" class="dropdown-item">
+                                                <i class="bi bi-pencil me-2 text-warning"></i>Editar
+                                            </a>
                                         </li>
-                                    }
-                                    else
-                                    {
-                                        <li>
-                                            <form asp-action="Activar" asp-route-id="@p.Id" method="post" class="d-inline">
-                                                @Html.AntiForgeryToken()
-                                                <button type="button" class="dropdown-item text-success btn-activar">
-                                                    <i class="bi bi-check-circle me-2 text-success"></i>Activar
-                                                </button>
-                                            </form>
-                                        </li>
+                                        if (p.Activo)
+                                        {
+                                            <li>
+                                                <form asp-action="Eliminar" asp-route-id="@p.Id" method="post" class="d-inline">
+                                                    @Html.AntiForgeryToken()
+                                                    <button type="button" class="dropdown-item text-danger btn-eliminar">
+                                                        <i class="bi bi-slash-circle me-2 text-danger"></i>Desactivar
+                                                    </button>
+                                                </form>
+                                            </li>
+                                        }
+                                        else
+                                        {
+                                            <li>
+                                                <form asp-action="Activar" asp-route-id="@p.Id" method="post" class="d-inline">
+                                                    @Html.AntiForgeryToken()
+                                                    <button type="button" class="dropdown-item text-success btn-activar">
+                                                        <i class="bi bi-check-circle me-2 text-success"></i>Activar
+                                                    </button>
+                                                </form>
+                                            </li>
+                                        }
                                     }
                                 </ul>
                             </div>

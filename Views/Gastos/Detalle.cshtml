@@ -1,0 +1,106 @@
+@model MultiserviciosPiscinas.Models.GastoOperativo
+
+@{
+    ViewData["Title"] = "Detalle del Gasto";
+
+    // Controlador al que regresa el botón Volver (Gastos o GastoOperativo).
+    string volverController = ViewBag.VolverController ?? "Gastos";
+
+    bool tieneComprobante = !string.IsNullOrEmpty(Model.ComprobanteRuta);
+    bool esPdf = tieneComprobante && Model.ComprobanteRuta!.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase);
+
+    var badgeClass = Model.Estado switch
+    {
+        "Aprobado" => "c-badge-green",
+        "Pendiente" => "c-badge-amber",
+        _ => "c-badge-red"
+    };
+}
+
+<div class="c-page-header d-flex justify-content-between align-items-center">
+    <h2 class="mb-0">Detalle del gasto</h2>
+    <a asp-controller="@volverController" asp-action="Index" class="btn btn-success">
+        <i class="bi bi-arrow-left me-1"></i>Volver
+    </a>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <span class="c-badge @badgeClass mb-3 d-inline-block">@Model.Estado</span>
+
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="a-text-muted small">Registrado por</div>
+                <div class="fw-semibold">@Model.Usuario.Nombre @Model.Usuario.ApellidoPaterno @Model.Usuario.ApellidoMaterno</div>
+                <div class="small text-muted">@Model.Usuario.Correo</div>
+            </div>
+            <div class="col-md-4">
+                <div class="a-text-muted small">Fecha del gasto</div>
+                <div class="fw-semibold">@Model.Fecha.ToString("dd/MM/yyyy")</div>
+            </div>
+            <div class="col-md-4">
+                <div class="a-text-muted small">Categoría</div>
+                <div class="fw-semibold">@Model.Categoria.NombreCategoria</div>
+            </div>
+            <div class="col-md-4">
+                <div class="a-text-muted small">Monto</div>
+                <div class="fw-semibold">₡@Model.Monto.ToString("N2")</div>
+            </div>
+            <div class="col-md-4">
+                <div class="a-text-muted small">Cita asociada</div>
+                @if (Model.Cita != null)
+                {
+                    <div class="fw-semibold">Cita #@Model.Cita.Id — @Model.Cita.Tipo</div>
+                    <div class="small text-muted">@Model.Cita.FechaHora.ToString("dd/MM/yyyy HH:mm")</div>
+                }
+                else
+                {
+                    <div class="fw-semibold">—</div>
+                }
+            </div>
+            <div class="col-md-12">
+                <div class="a-text-muted small">Descripción</div>
+                <div class="fw-semibold">@(string.IsNullOrWhiteSpace(Model.Descripcion) ? "—" : Model.Descripcion)</div>
+            </div>
+
+            @if (Model.Estado == "Rechazado")
+            {
+                <div class="col-md-12">
+                    <div class="alert alert-danger mb-0">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i><strong>Motivo del rechazo:</strong>
+                        @(string.IsNullOrWhiteSpace(Model.MotivoRechazo) ? "—" : Model.MotivoRechazo)
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <h5 class="fw-bold mb-3">Comprobante</h5>
+
+        @if (!tieneComprobante)
+        {
+            <p class="text-muted mb-0">
+                <i class="bi bi-file-earmark-x me-1 text-danger"></i>Este gasto no tiene comprobante adjunto.
+            </p>
+        }
+        else
+        {
+            if (esPdf)
+            {
+                <iframe src="@Model.ComprobanteRuta" class="w-100 border rounded mb-3" style="height: 600px;" title="Comprobante del gasto"></iframe>
+            }
+            else
+            {
+                <img src="@Model.ComprobanteRuta" alt="Comprobante del gasto" class="img-fluid border rounded mb-3" style="max-height: 600px;" />
+            }
+            <div>
+                <a href="@Model.ComprobanteRuta" target="_blank" class="btn btn-outline-primary btn-sm">
+                    <i class="bi bi-box-arrow-up-right me-1"></i>Abrir en otra pestaña
+                </a>
+            </div>
+        }
+    </div>
+</div>

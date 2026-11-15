@@ -8,6 +8,14 @@
     <h2></i>Bitácora</h2>
 </div>
 
+@if (ViewBag.MensajeError != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i> @ViewBag.MensajeError
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
 <div class="c-filter-bar mb-3">
     <form method="get" asp-action="Index" class="d-flex gap-2 align-items-center flex-wrap w-100">
         <select name="accion" class="form-select" style="max-width: 220px;">
@@ -16,6 +24,20 @@
             <option value="UPDATE" selected="@(ViewBag.FiltroAccion == "UPDATE")">Modificación</option>
             <option value="DELETE" selected="@(ViewBag.FiltroAccion == "DELETE")">Eliminación</option>
         </select>
+
+        <select name="usuarioId" class="form-select" style="max-width: 220px;">
+            <option value="">-- Todos los usuarios --</option>
+            @foreach (var u in (IEnumerable<MultiserviciosPiscinas.Models.Usuario>)ViewBag.Usuarios)
+            {
+                <option value="@u.Id" selected="@(ViewBag.FiltroUsuarioId == u.Id)">@u.Nombre @u.ApellidoPaterno</option>
+            }
+        </select>
+
+        <label for="desde" class="form-label mb-0 fw-semibold">Desde</label>
+        <input type="date" id="desde" name="desde" value="@ViewBag.FiltroDesde" class="form-control" style="max-width: 170px;" />
+
+        <label for="hasta" class="form-label mb-0 fw-semibold">Hasta</label>
+        <input type="date" id="hasta" name="hasta" value="@ViewBag.FiltroHasta" class="form-control" style="max-width: 170px;" />
 
         <select name="orden" class="form-select" style="max-width: 220px;">
             <option value="recientes" selected="@(ViewBag.FiltroOrden != "antiguos")">Más recientes primero</option>
@@ -67,7 +89,7 @@
                             };
 
                             <tr>
-                                <td>@item.FechaHora.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td data-order="@item.FechaHora.ToString("yyyyMMddHHmmss")">@item.FechaHora.ToString("dd/MM/yyyy HH:mm")</td>
                                 <td class="fw-semibold">@(item.Usuario != null ? $"{item.Usuario.Nombre} {item.Usuario.ApellidoPaterno}" : $"ID: {item.UsuarioId}")</td>
                                 <td><span class="c-badge @badgeClass">@textoAccion</span></td>
                                 <td>@item.RegistroId</td>
