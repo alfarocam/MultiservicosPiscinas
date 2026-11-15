@@ -7,10 +7,17 @@
     <div class="card-body p-4">
         <h4 class="a-title text-center mb-4">Iniciar Sesión</h4>
 
-        @if (ViewBag.Mensaje != null)
+        @{
+            var mensaje = ViewBag.Mensaje ?? TempData["Mensaje"];
+            var tipoMensaje = ViewBag.Mensaje != null
+                ? (ViewBag.TipoMensaje ?? "danger")
+                : (TempData["TipoMensaje"] ?? "danger");
+        }
+
+        @if (mensaje != null)
         {
-            <div class="alert alert-danger alert-dismissible fade show text-center small" role="alert">
-                @ViewBag.Mensaje
+            <div class="alert alert-@tipoMensaje alert-dismissible fade show text-center small" role="alert">
+                @mensaje
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         }

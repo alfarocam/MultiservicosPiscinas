@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MultiserviciosPiscinas.Models;
+using MultiserviciosPiscinas.Services;
 
 namespace MultiserviciosPiscinas.Controllers
 {
@@ -48,13 +49,93 @@ namespace MultiserviciosPiscinas.Controllers
             ViewBag.Distritos = new List<Distrito>();
         }
 
-        public async Task<IActionResult> Crear()
+        private async Task CargarDatosCrearAsync()
         {
             await CargarProvinciasAsync();
             // Mismo patrón que ya usa RutaOptimizadaController para pasarle la
             // API key de Google Maps a la vista (nunca hardcodeada, sale de
             // configuración: appsettings.Development.json / User Secrets en local).
             ViewBag.GoogleMapsApiKey = _configuration["GoogleMaps:ApiKey"] ?? string.Empty;
+        }
+
+        private async Task<(bool Existe, string? Campo, int? ClienteId, string? Mensaje, string? UrlPerfil)> BuscarClienteExistenteAsync(string? correo, string? telefono)
+        {
+            var correoLimpio = correo?.Trim() ?? string.Empty;
+            var telefonoNormalizado = Generales.NormalizarTelefono(telefono);
+
+            var clientePorCorreo = string.IsNullOrEmpty(correoLimpio)
+                ? null
+                : await _context.Cliente
+                    .Where(c => c.Usuario.Correo == correoLimpio)
+                    .Select(c => new
+                    {
+                        c.Id,
+                        NombreCompleto = c.Usuario.Nombre + " " + c.Usuario.ApellidoPaterno
+                    })
+                    .FirstOrDefaultAsync();
+
+            var clientePorTelefono = string.IsNullOrEmpty(telefonoNormalizado)
+                ? null
+                : await _context.TelefonosCliente
+                    .Where(t => t.NumeroTelefono.Trim().Replace("-", "").Replace(" ", "") == telefonoNormalizado)
+                    .Select(t => new
+                    {
+                        Id = t.ClienteId,
+                        NombreCompleto = t.Cliente.Usuario.Nombre + " " + t.Cliente.Usuario.ApellidoPaterno
+                    })
+                    .FirstOrDefaultAsync();
+
+            if (clientePorTelefono != null && clientePorCorreo != null)
+            {
+                var url = Url.Action(nameof(Detalle), "Clientes", new { id = clientePorTelefono.Id });
+                var mensaje = clientePorTelefono.Id == clientePorCorreo.Id
+                    ? $"Ya existe un cliente registrado con ese correo y teléfono ({clientePorTelefono.NombreCompleto})."
+                    : $"Ya existen clientes registrados con ese correo ({clientePorCorreo.NombreCompleto}) y con ese teléfono ({clientePorTelefono.NombreCompleto}).";
+                return (true, "ambos", clientePorTelefono.Id, mensaje, url);
+            }
+
+            if (clientePorTelefono != null)
+            {
+                var url = Url.Action(nameof(Detalle), "Clientes", new { id = clientePorTelefono.Id });
+                return (true, "telefono", clientePorTelefono.Id,
+                    $"Ya existe un cliente registrado con ese teléfono ({clientePorTelefono.NombreCompleto}).", url);
+            }
+
+            if (clientePorCorreo != null)
+            {
+                var url = Url.Action(nameof(Detalle), "Clientes", new { id = clientePorCorreo.Id });
+                return (true, "correo", clientePorCorreo.Id,
+                    $"Ya existe un cliente registrado con ese correo ({clientePorCorreo.NombreCompleto}).", url);
+            }
+
+            bool usuarioExiste = !string.IsNullOrEmpty(correoLimpio) &&
+                await _context.Usuario.AnyAsync(u => u.Correo == correoLimpio);
+
+            if (usuarioExiste)
+            {
+                return (true, "correo", null, "Ya existe un usuario registrado con ese correo.", null);
+            }
+
+            return (false, null, null, null, null);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> VerificarDuplicado(string? correo, string? telefono)
+        {
+            var resultado = await BuscarClienteExistenteAsync(correo, telefono);
+            return Json(new
+            {
+                existe = resultado.Existe,
+                campo = resultado.Campo,
+                clienteId = resultado.ClienteId,
+                mensaje = resultado.Mensaje,
+                urlPerfil = resultado.UrlPerfil
+            });
+        }
+
+        public async Task<IActionResult> Crear()
+        {
+            await CargarDatosCrearAsync();
             return View();
         }
 
@@ -64,17 +145,29 @@ namespace MultiserviciosPiscinas.Controllers
         {
             if (!ModelState.IsValid)
             {
-                await CargarProvinciasAsync();
+                await CargarDatosCrearAsync();
                 return View(model);
             }
 
-            bool correoExiste = await _context.Usuario
-                .AnyAsync(u => u.Correo == model.Correo);
+            model.Correo = model.Correo.Trim();
+            model.Telefono = model.Telefono.Trim();
 
-            if (correoExiste)
+            var duplicado = await BuscarClienteExistenteAsync(model.Correo, model.Telefono);
+            if (duplicado.Existe)
             {
-                ModelState.AddModelError("", "Ya existe un cliente con ese correo.");
-                await CargarProvinciasAsync();
+                if (duplicado.Campo is "telefono" or "ambos")
+                {
+                    ModelState.AddModelError(nameof(model.Telefono), duplicado.Mensaje ?? "Ya existe un cliente con ese teléfono.");
+                }
+
+                if (duplicado.Campo is "correo" or "ambos")
+                {
+                    ModelState.AddModelError(nameof(model.Correo), duplicado.Mensaje ?? "Ya existe un usuario con ese correo.");
+                }
+
+                ViewBag.ClienteExistenteMensaje = duplicado.Mensaje;
+                ViewBag.ClienteExistenteUrl = duplicado.UrlPerfil;
+                await CargarDatosCrearAsync();
                 return View(model);
             }
 

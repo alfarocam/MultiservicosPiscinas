@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MultiserviciosPiscinas.Models;
 using MultiserviciosPiscinas.Services;
+using System.Net;
 using System.Security.Claims;
 
 namespace MultiserviciosPiscinas.Controllers
@@ -25,12 +26,21 @@ namespace MultiserviciosPiscinas.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> InicioSesion(string correo, string contrasena)
         {
+            if (string.IsNullOrWhiteSpace(correo) || string.IsNullOrEmpty(contrasena))
+            {
+                ViewBag.Mensaje = "Correo o contraseña incorrectos.";
+                return View();
+            }
+
+            var correoLimpio = correo.Trim();
+
             // Buscar usuario por correo
             var usuario = await _contexto.Usuario
-                .FirstOrDefaultAsync(u => u.Correo == correo);
+                .FirstOrDefaultAsync(u => u.Correo == correoLimpio);
 
             // Validar existencia y contraseña
             if (usuario != null &&
+                string.Equals(usuario.Correo, correoLimpio, StringComparison.OrdinalIgnoreCase) &&
                 usuario.Contrasena == contrasena &&
                 usuario.Activo == true)
             {
@@ -93,6 +103,46 @@ namespace MultiserviciosPiscinas.Controllers
             ViewBag.GoogleMapsApiKey = _configuration["GoogleMaps:ApiKey"] ?? string.Empty;
         }
 
+        [HttpGet]
+        public async Task<IActionResult> VerificarDuplicadoRegistro(string? correo, string? telefono)
+        {
+            var correoLimpio = correo?.Trim() ?? string.Empty;
+            var telefonoNormalizado = Generales.NormalizarTelefono(telefono);
+
+            bool correoExiste = !string.IsNullOrEmpty(correoLimpio) &&
+                await _contexto.Usuario.AnyAsync(u => u.Correo == correoLimpio);
+
+            bool telefonoExiste = !string.IsNullOrEmpty(telefonoNormalizado) &&
+                await _contexto.TelefonosCliente
+                    .AnyAsync(t => t.NumeroTelefono.Trim().Replace("-", "").Replace(" ", "") == telefonoNormalizado);
+
+            string? campo = null;
+            string? mensaje = null;
+
+            if (correoExiste && telefonoExiste)
+            {
+                campo = "ambos";
+                mensaje = "El correo y el teléfono ya están registrados. Por favor, verifica tus datos.";
+            }
+            else if (telefonoExiste)
+            {
+                campo = "telefono";
+                mensaje = "Ya existe una cuenta registrada con ese número de teléfono.";
+            }
+            else if (correoExiste)
+            {
+                campo = "correo";
+                mensaje = "El correo ya está registrado. Por favor, elige otro.";
+            }
+
+            return Json(new
+            {
+                existe = correoExiste || telefonoExiste,
+                campo,
+                mensaje
+            });
+        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Registrar(UsuarioRegistroViewModel model)
@@ -103,12 +153,34 @@ namespace MultiserviciosPiscinas.Controllers
                 return View(model);
             }
 
-            bool correoExiste = await _contexto.Usuario
-                .AnyAsync(u => u.Correo == model.Correo);
+            var correoLimpio = model.Correo.Trim();
+            var telefonoLimpio = model.Telefono.Trim();
+            var telefonoNormalizado = Generales.NormalizarTelefono(telefonoLimpio);
 
-            if (correoExiste)
+            bool correoExiste = await _contexto.Usuario
+                .AnyAsync(u => u.Correo == correoLimpio);
+
+            bool telefonoExiste = !string.IsNullOrEmpty(telefonoNormalizado) &&
+                await _contexto.TelefonosCliente
+                    .AnyAsync(t => t.NumeroTelefono.Trim().Replace("-", "").Replace(" ", "") == telefonoNormalizado);
+
+            if (correoExiste || telefonoExiste)
             {
-                ViewBag.Mensaje = "El correo ya está registrado. Por favor, elige otro.";
+                if (correoExiste && telefonoExiste)
+                {
+                    ViewBag.Mensaje = "El correo y el teléfono ya están registrados. Por favor, verifica tus datos.";
+                }
+                else if (telefonoExiste)
+                {
+                    ViewBag.Mensaje = "Ya existe una cuenta registrada con ese número de teléfono.";
+                    ModelState.AddModelError(nameof(model.Telefono), ViewBag.Mensaje);
+                }
+                else
+                {
+                    ViewBag.Mensaje = "El correo ya está registrado. Por favor, elige otro.";
+                    ModelState.AddModelError(nameof(model.Correo), ViewBag.Mensaje);
+                }
+
                 ViewBag.TipoMensaje = "danger";
                 await CargarDatosUbicacionAsync();
                 return View(model);
@@ -119,14 +191,16 @@ namespace MultiserviciosPiscinas.Controllers
 
             try
             {
+                await using var transaction = await _contexto.Database.BeginTransactionAsync();
+
                 var usuarioIdResult = await _contexto.Database
                     .SqlQueryRaw<int>(
                         "EXEC seg.InsertarUsuarioYCliente @p0, @p1, @p2, @p3, @p4, @p5, @p6",
                         rolCliente,
-                        model.Nombre,
-                        model.ApellidoPaterno,
-                        model.ApellidoMaterno,
-                        model.Correo,
+                        model.Nombre.Trim(),
+                        model.ApellidoPaterno.Trim(),
+                        model.ApellidoMaterno.Trim(),
+                        correoLimpio,
                         model.Contrasena,
                         fechaCreacion
                     )
@@ -136,6 +210,7 @@ namespace MultiserviciosPiscinas.Controllers
 
                 if (nuevoUsuarioId <= 0)
                 {
+                    await transaction.RollbackAsync();
                     ViewBag.Mensaje = "Error al registrar el usuario.";
                     ViewBag.TipoMensaje = "danger";
                     await CargarDatosUbicacionAsync();
@@ -157,7 +232,7 @@ namespace MultiserviciosPiscinas.Controllers
                 {
                     ClienteId = cliente.Id,
                     TipoTelefono = "Principal",
-                    NumeroTelefono = model.Telefono,
+                    NumeroTelefono = model.Telefono.Trim(),
                     EsPrincipal = 1
                 });
 
@@ -166,25 +241,74 @@ namespace MultiserviciosPiscinas.Controllers
                     ClienteId = cliente.Id,
                     DistritoId = model.DistritoId,
                     TipoDireccion = "Principal",
-                    Detalles = model.Direccion,
+                    Detalles = model.Direccion.Trim(),
                     EsPrincipal = 1,
                     Latitud = model.Latitud,
                     Longitud = model.Longitud
                 });
 
                 await _contexto.SaveChangesAsync();
+                await transaction.CommitAsync();
 
-                ViewBag.Mensaje = "Usuario creado correctamente.";
-                ViewBag.TipoMensaje = "success";
-                await CargarDatosUbicacionAsync();
-                return View();
+                bool correoEnviado = await EnviarCorreoBienvenidaAsync(
+                    $"{model.Nombre.Trim()} {model.ApellidoPaterno.Trim()}",
+                    correoLimpio);
+
+                if (correoEnviado)
+                {
+                    TempData["Mensaje"] = "Usuario creado correctamente. Te hemos enviado un correo de bienvenida.";
+                    TempData["TipoMensaje"] = "success";
+                }
+                else
+                {
+                    TempData["Mensaje"] = "Usuario creado correctamente, pero no se pudo enviar el correo de bienvenida en este momento.";
+                    TempData["TipoMensaje"] = "warning";
+                }
+
+                return RedirectToAction("InicioSesion", "Auth");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "Error al registrar el cliente con correo {Correo}", correoLimpio);
                 ViewBag.Mensaje = "Ocurrió un error inesperado en el servidor.";
                 ViewBag.TipoMensaje = "danger";
                 await CargarDatosUbicacionAsync();
                 return View(model);
+            }
+        }
+
+        private async Task<bool> EnviarCorreoBienvenidaAsync(string nombreUsuario, string correoDestino)
+        {
+            try
+            {
+                string rutaHtml = Path.Combine(
+                    _entornoWeb.ContentRootPath,
+                    "Template",
+                    "Bienvenida.html");
+
+                if (!System.IO.File.Exists(rutaHtml))
+                {
+                    _logger.LogError("No se encontró la plantilla de correo de bienvenida en {Ruta}", rutaHtml);
+                    return false;
+                }
+
+                string contenidoHtml = await System.IO.File.ReadAllTextAsync(rutaHtml);
+
+                string htmlFinal = contenidoHtml
+                    .Replace("{{NOMBRE_USUARIO}}", WebUtility.HtmlEncode(nombreUsuario))
+                    .Replace("{{CORREO_USUARIO}}", WebUtility.HtmlEncode(correoDestino));
+
+                _generales.EnviarCorreo(
+                    correoDestino,
+                    "¡Bienvenido a Multiservicios y Piscinas!",
+                    htmlFinal);
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Falló el envío del correo de bienvenida a {Correo}", correoDestino);
+                return false;
             }
         }
         #endregion

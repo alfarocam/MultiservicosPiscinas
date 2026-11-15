@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 using System.Net.Mail;
 using System.Security.Cryptography;
 using System.Text;
@@ -11,10 +11,13 @@ namespace MultiserviciosPiscinas.Services
         public void EnviarCorreo(string destinatario, string asunto, string cuerpo, string? replyTo = null)
         {
             //leemos desde appsettings.json
-            var emailAccount = configuration["EmailSettings:Account"]
-                ?? throw new InvalidOperationException("EmailSettings:Account no está configurado en appsettings.json");
-            var emailPassword = configuration["EmailSettings:Password"]
-                ?? throw new InvalidOperationException("EmailSettings:Password no está configurado en appsettings.json");
+            var emailAccount = configuration["EmailSettings:Account"];
+            if (string.IsNullOrWhiteSpace(emailAccount))
+                throw new InvalidOperationException("EmailSettings:Account no está configurado en appsettings.json");
+
+            var emailPassword = configuration["EmailSettings:Password"];
+            if (string.IsNullOrWhiteSpace(emailPassword))
+                throw new InvalidOperationException("EmailSettings:Password no está configurado en appsettings.json");
 
             using var mail = new MailMessage();
             mail.From = new MailAddress(emailAccount);
@@ -36,6 +39,16 @@ namespace MultiserviciosPiscinas.Services
         }
         #endregion
 
+
+        #region Normalizar Teléfono
+        public static string NormalizarTelefono(string? telefono)
+        {
+            return (telefono ?? string.Empty)
+                .Trim()
+                .Replace("-", "")
+                .Replace(" ", "");
+        }
+        #endregion
 
         #region Generar Contraseña
         public string GenerarContrasena()
