@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using MultiserviciosPiscinas.Models;
+using MultiserviciosPiscinas.Services;
 using System;
 using System.Threading.Tasks;
 
@@ -13,10 +14,12 @@ namespace MultiserviciosPiscinas.Controllers
     public class RolesController : Controller
     {
         private readonly PiscinasYMultiserviciosContext _context;
+        private readonly BitacoraService _bitacora;
 
-        public RolesController(PiscinasYMultiserviciosContext context)
+        public RolesController(PiscinasYMultiserviciosContext context, BitacoraService bitacora)
         {
             _context = context;
+            _bitacora = bitacora;
         }
 
         [HttpGet]
@@ -96,6 +99,9 @@ namespace MultiserviciosPiscinas.Controllers
                 return NotFound("El usuario seleccionado no existe.");
             }
 
+            var rolAnterior = await _context.Rol.FindAsync(usuarioDb.RolId);
+            var rolNuevo = await _context.Rol.FindAsync(rolId);
+
             // cambiamos el rol viejo por el nuevo RolId
             usuarioDb.RolId = rolId;
 
@@ -104,6 +110,15 @@ namespace MultiserviciosPiscinas.Controllers
                 // guarda sql
                 _context.Update(usuarioDb);
                 await _context.SaveChangesAsync();
+
+                await _bitacora.RegistrarAsync(
+                    userClaims: User,
+                    accion: "UPDATE",
+                    tablaAfectada: "seg.USUARIO",
+                    registroId: usuarioDb.Id,
+                    valorNuevo: $"Usuario: {usuarioDb.Correo} | Rol: {rolNuevo?.Nombre ?? rolId.ToString()}",
+                    valorAnterior: $"Usuario: {usuarioDb.Correo} | Rol: {rolAnterior?.Nombre ?? "Sin rol"}"
+                );
 
                 TempData["MensajeExito"] = "El rol del usuario ha sido modificado con exitoo";
                 return RedirectToAction(nameof(Index));
