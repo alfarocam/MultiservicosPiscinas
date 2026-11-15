@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +11,8 @@ namespace MultiserviciosPiscinas.Controllers
     {
         private readonly PiscinasYMultiserviciosContext _context;
         private readonly IWebHostEnvironment _env;
+
+        private const string MotivoSinComprobante = "Rechazado automáticamente: el gasto no tiene comprobante adjunto.";
 
         public GastosController(PiscinasYMultiserviciosContext context, IWebHostEnvironment env)
         {
@@ -89,10 +92,21 @@ namespace MultiserviciosPiscinas.Controllers
                     gasto.ComprobanteRuta = await GuardarComprobanteAsync(comprobanteArchivo);
                 }
 
+                // Sin comprobante el gasto se rechaza automáticamente.
+                bool sinComprobante = string.IsNullOrEmpty(gasto.ComprobanteRuta);
+                if (sinComprobante)
+                {
+                    gasto.Estado = "Rechazado";
+                    gasto.MotivoRechazo = MotivoSinComprobante;
+                }
+
                 _context.GastoOperativo.Add(gasto);
                 await _context.SaveChangesAsync();
 
-                TempData["MensajeExito"] = "El gasto se registro correctamente y quedo en estadoo PENDIENTE de aprobación.";
+                if (sinComprobante)
+                    TempData["MensajeError"] = "El gasto fue registrado pero quedó RECHAZADO automáticamente por no tener comprobante. Puede corregirlo adjuntando uno.";
+                else
+                    TempData["MensajeExito"] = "El gasto se registró correctamente y quedó en estado PENDIENTE de aprobación.";
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
@@ -105,6 +119,7 @@ namespace MultiserviciosPiscinas.Controllers
             return View(gasto);
         }
 
+        [Authorize(Roles = "1")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Aprobar(int id)
@@ -112,6 +127,15 @@ namespace MultiserviciosPiscinas.Controllers
             var gasto = await _context.GastoOperativo.FindAsync(id);
             if (gasto != null)
             {
+                if (string.IsNullOrEmpty(gasto.ComprobanteRuta))
+                {
+                    gasto.Estado = "Rechazado";
+                    gasto.MotivoRechazo = MotivoSinComprobante;
+                    await _context.SaveChangesAsync();
+                    TempData["MensajeError"] = "El gasto no tiene comprobante, por lo que fue RECHAZADO automáticamente.";
+                    return RedirectToAction(nameof(Index));
+                }
+
                 gasto.Estado = "Aprobado";
                 gasto.MotivoRechazo = null;
                 await _context.SaveChangesAsync();
@@ -120,6 +144,7 @@ namespace MultiserviciosPiscinas.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        [Authorize(Roles = "1")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Rechazar(int id, string motivoRechazo)
@@ -139,6 +164,22 @@ namespace MultiserviciosPiscinas.Controllers
                 TempData["MensajeExito"] = "El gasto fue RECHAZADO.";
             }
             return RedirectToAction(nameof(Index));
+        }
+
+        [Authorize(Roles = "1,2")]
+        [HttpGet]
+        public async Task<IActionResult> Detalle(int id)
+        {
+            var gasto = await _context.GastoOperativo
+                .Include(g => g.Categoria)
+                .Include(g => g.Usuario)
+                .Include(g => g.Cita).ThenInclude(c => c!.Piscina)
+                .FirstOrDefaultAsync(g => g.Id == id);
+
+            if (gasto == null) return NotFound();
+
+            ViewBag.VolverController = "Gastos";
+            return View(gasto);
         }
 
         [HttpGet]
@@ -178,17 +219,24 @@ namespace MultiserviciosPiscinas.Controllers
                     gastoExistente.CitaId = null;
                 }
 
-                
-                gastoExistente.Estado = "Pendiente";
-                gastoExistente.MotivoRechazo = null;
-
                 if (comprobanteArchivo != null && comprobanteArchivo.Length > 0)
                 {
                     gastoExistente.ComprobanteRuta = await GuardarComprobanteAsync(comprobanteArchivo);
                 }
 
+                // Sin comprobante el gasto sigue rechazado.
+                bool sinComprobante = string.IsNullOrEmpty(gastoExistente.ComprobanteRuta);
+                gastoExistente.Estado = sinComprobante ? "Rechazado" : "Pendiente";
+                gastoExistente.MotivoRechazo = sinComprobante ? MotivoSinComprobante : null;
+
                 _context.Update(gastoExistente);
                 await _context.SaveChangesAsync();
+
+                if (sinComprobante)
+                {
+                    TempData["MensajeError"] = "El gasto sigue RECHAZADO porque no tiene comprobante. Adjunte uno para enviarlo a aprobación.";
+                    return RedirectToAction(nameof(Index));
+                }
 
                 TempData["MensajeExito"] = "Corrección enviada correctamente. El gasto volvió a estado PENDIENTE.";
                 return RedirectToAction(nameof(Index));

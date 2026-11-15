@@ -27,5 +27,14 @@ namespace MultiserviciosPiscinas.Controllers
                 _ => View() // El guion bajo (_) es el "default". Si no es ningún rol, muestra la vista común.
             };
         }
+
+        // Destino de AccessDeniedPath: se muestra cuando un usuario autenticado
+        // intenta abrir una vista que su rol no permite (devuelve HTTP 403).
+        [HttpGet]
+        public IActionResult AccesoDenegado()
+        {
+            Response.StatusCode = StatusCodes.Status403Forbidden;
+            return View();
+        }
     }
 }

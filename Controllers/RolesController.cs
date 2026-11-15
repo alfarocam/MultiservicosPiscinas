@@ -319,7 +319,8 @@ namespace MultiserviciosPiscinas.Controllers
                 return NotFound("El usuario seleccionado no existe.");
             }
 
-            var rolAnteriorId = usuarioDb.RolId;
+            var rolAnterior = await _context.Rol.FindAsync(usuarioDb.RolId);
+            var rolNuevo = await _context.Rol.FindAsync(rolId);
 
             // cambiamos el rol viejo por el nuevo RolId
             usuarioDb.RolId = rolId;
@@ -331,12 +332,13 @@ namespace MultiserviciosPiscinas.Controllers
                 await _context.SaveChangesAsync();
 
                 await _bitacora.RegistrarAsync(
-                    User,
-                    "UPDATE",
-                    "seg.USUARIO",
-                    usuarioDb.Id,
-                    $"Usuario: {usuarioDb.Correo} | RolId: {rolId}",
-                    $"Usuario: {usuarioDb.Correo} | RolId: {rolAnteriorId}");
+                    userClaims: User,
+                    accion: "UPDATE",
+                    tablaAfectada: "seg.USUARIO",
+                    registroId: usuarioDb.Id,
+                    valorNuevo: $"Usuario: {usuarioDb.Correo} | Rol: {rolNuevo?.Nombre ?? rolId.ToString()}",
+                    valorAnterior: $"Usuario: {usuarioDb.Correo} | Rol: {rolAnterior?.Nombre ?? "Sin rol"}"
+                );
 
                 TempData["MensajeExito"] = "El rol del usuario ha sido modificado con exitoo";
                 return RedirectToAction(nameof(Index));

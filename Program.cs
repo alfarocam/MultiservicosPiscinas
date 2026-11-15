@@ -48,6 +48,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     .AddCookie(options =>
     {
         options.LoginPath = "/Auth/InicioSesion"; // Ruta de redireccion si no esta autenticado
+        options.AccessDeniedPath = "/Home/AccesoDenegado"; // Ruta cuando el rol no tiene permiso
         options.ExpireTimeSpan = TimeSpan.FromMinutes(50); // Tiempo de vida de la sesion
     });
 

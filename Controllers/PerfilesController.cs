@@ -142,8 +142,10 @@ namespace MultiserviciosPiscinas.Controllers
         public async Task<IActionResult> Editar(
             int id,
             string nombre,
+            string apellidoPaterno,
+            string apellidoMaterno,
             string correo,
-            string telefono,
+            string? telefono, // solo existe para clientes; si fuera 'string' MVC lo exigiría a todos los roles
             int? distritoId,
             string? detalles)
         {
@@ -163,6 +165,16 @@ namespace MultiserviciosPiscinas.Controllers
             if (string.IsNullOrWhiteSpace(nombre))
             {
                 ModelState.AddModelError("", "El nombre es obligatorio.");
+            }
+
+            if (string.IsNullOrWhiteSpace(apellidoPaterno))
+            {
+                ModelState.AddModelError("", "El primer apellido es obligatorio.");
+            }
+
+            if (string.IsNullOrWhiteSpace(apellidoMaterno))
+            {
+                ModelState.AddModelError("", "El segundo apellido es obligatorio.");
             }
 
             if (string.IsNullOrWhiteSpace(correo))
@@ -210,6 +222,8 @@ namespace MultiserviciosPiscinas.Controllers
 
             // act usuario
             usuarioDb.Nombre = nombre;
+            usuarioDb.ApellidoPaterno = apellidoPaterno;
+            usuarioDb.ApellidoMaterno = apellidoMaterno;
             usuarioDb.Correo = correo;
 
             // actualiza tel
@@ -220,7 +234,7 @@ namespace MultiserviciosPiscinas.Controllers
 
                 if (telefonoPrincipal != null)
                 {
-                    telefonoPrincipal.NumeroTelefono = telefono;
+                    telefonoPrincipal.NumeroTelefono = telefono!;
                     _context.TelefonosCliente.Update(telefonoPrincipal);
                 }
                 else
@@ -229,7 +243,7 @@ namespace MultiserviciosPiscinas.Controllers
                     {
                         ClienteId = usuarioDb.Cliente.Id,
                         TipoTelefono = "Principal",
-                        NumeroTelefono = telefono,
+                        NumeroTelefono = telefono!,
                         EsPrincipal = 1
                     };
                     await _context.TelefonosCliente.AddAsync(nuevoTelefono);
