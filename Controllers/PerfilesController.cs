@@ -4,12 +4,13 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MultiserviciosPiscinas.Models;
+using MultiserviciosPiscinas.Services;
 using System.Security.Claims;
 
 namespace MultiserviciosPiscinas.Controllers
 {
     [Authorize]
-    public class PerfilesController(PiscinasYMultiserviciosContext _context) : Controller
+    public class PerfilesController(PiscinasYMultiserviciosContext _context, BitacoraService _bitacora) : Controller
     {
 
         //ver el perfil 
@@ -205,6 +206,8 @@ namespace MultiserviciosPiscinas.Controllers
                 return View(usuarioDb);
             }
 
+            var valorAnterior = $"Nombre: {usuarioDb.Nombre} | Correo: {usuarioDb.Correo}";
+
             // act usuario
             usuarioDb.Nombre = nombre;
             usuarioDb.Correo = correo;
@@ -266,6 +269,14 @@ namespace MultiserviciosPiscinas.Controllers
                 // buscan por User.Identity.Name dejan de encontrarlo (404).
                 await RefrescarSesionAsync(usuarioDb);
 
+                await _bitacora.RegistrarAsync(
+                    User,
+                    "UPDATE",
+                    "seg.USUARIO",
+                    usuarioDb.Id,
+                    $"Nombre: {usuarioDb.Nombre} | Correo: {usuarioDb.Correo}",
+                    valorAnterior);
+
                 TempData["MensajeExito"] = "Información del perfil actualizada correctamente.";
                 return RedirectToAction(nameof(Detalle));
             }
@@ -313,6 +324,13 @@ namespace MultiserviciosPiscinas.Controllers
                 _context.Update(usuarioDb);
                 await _context.SaveChangesAsync();
 
+                await _bitacora.RegistrarAsync(
+                    User,
+                    "UPDATE",
+                    "seg.USUARIO",
+                    usuarioDb.Id,
+                    $"Cambio de contraseña del usuario {usuarioDb.Correo}");
+
                 TempData["MensajeExito"] = "Contraseña actualizada correctamente.";
                 return RedirectToAction(nameof(Detalle));
             }
@@ -347,9 +365,13 @@ namespace MultiserviciosPiscinas.Controllers
                 declaraciones,
                 CookieAuthenticationDefaults.AuthenticationScheme);
 
+            var principal = new ClaimsPrincipal(identidad);
+
             await HttpContext.SignInAsync(
                 CookieAuthenticationDefaults.AuthenticationScheme,
-                new ClaimsPrincipal(identidad));
+                principal);
+
+            HttpContext.User = principal;
         }
 
         // [AllowAnonymous]: estos dos endpoints solo devuelven el catálogo público
