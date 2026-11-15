@@ -44,6 +44,26 @@
                 </div>
                 <div class="col-md-6">
                     <label class="form-label fw-semibold">
+                        Primer apellido
+                    </label>
+                    <input type="text"
+                           name="apellidoPaterno"
+                           class="form-control"
+                           value="@Model.ApellidoPaterno"
+                           required />
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">
+                        Segundo apellido
+                    </label>
+                    <input type="text"
+                           name="apellidoMaterno"
+                           class="form-control"
+                           value="@Model.ApellidoMaterno"
+                           required />
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">
                         Correo electrónico
                     </label>
                     <input type="email"
@@ -144,7 +164,7 @@
                 </a>
                 <button type="submit"
                         class="btn btn-primary">
-                    Guardar cambios
+                    <i class="bi bi-save me-1"></i>Guardar cambios
                 </button>
             </div>
         </form>
