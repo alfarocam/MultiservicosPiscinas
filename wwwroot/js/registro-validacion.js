@@ -19,6 +19,24 @@ $(document).ready(function () {
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
     }, 'Ingresá un correo válido.');
 
+    var urlVerificarDuplicado = $('#urlVerificarDuplicado').val();
+    var validandoEnvio = false;
+
+    function mostrarAlertaDuplicado(mensaje) {
+        if (typeof Swal === 'undefined') {
+            alert(mensaje);
+            return;
+        }
+
+        Swal.fire({
+            title: 'Datos ya registrados',
+            text: mensaje,
+            icon: 'warning',
+            confirmButtonText: 'Corregir datos',
+            confirmButtonColor: '#0d6efd'
+        });
+    }
+
     $('#formRegistro').validate({
         errorClass: 'text-danger small mt-1 d-block',
         rules: {
@@ -91,6 +109,32 @@ $(document).ready(function () {
             Direccion: {
                 required: 'La dirección es obligatoria.'
             }
+        },
+        submitHandler: function (form) {
+            if (validandoEnvio || !urlVerificarDuplicado) {
+                form.submit();
+                return;
+            }
+
+            validandoEnvio = true;
+            var correo = $.trim($('#Correo').val() || '');
+            var telefono = $.trim($('#Telefono').val() || '');
+
+            $.getJSON(urlVerificarDuplicado, { correo: correo, telefono: telefono })
+                .done(function (data) {
+                    if (data && data.existe) {
+                        validandoEnvio = false;
+                        mostrarAlertaDuplicado(
+                            data.mensaje || 'Ya existe una cuenta registrada con esa información.'
+                        );
+                    } else {
+                        form.submit();
+                    }
+                })
+                .fail(function () {
+                    // Si falla la verificación AJAX, el servidor igualmente valida duplicados en POST
+                    form.submit();
+                });
         }
     });
 });

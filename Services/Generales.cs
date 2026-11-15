@@ -40,6 +40,16 @@ namespace MultiserviciosPiscinas.Services
         #endregion
 
 
+        #region Normalizar Teléfono
+        public static string NormalizarTelefono(string? telefono)
+        {
+            return (telefono ?? string.Empty)
+                .Trim()
+                .Replace("-", "")
+                .Replace(" ", "");
+        }
+        #endregion
+
         #region Generar Contraseña
         public string GenerarContrasena()
         {
