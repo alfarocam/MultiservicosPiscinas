@@ -20,7 +20,7 @@
     <div class="card-body">
         <h4 class="card-title mb-4">Información personal</h4>
 
-        <form asp-action="Editar" method="post">
+        <form id="formEditarPerfil" asp-action="Editar" method="post">
             @Html.AntiForgeryToken()
 
             <input type="hidden"
@@ -37,6 +37,7 @@
                         Nombre
                     </label>
                     <input type="text"
+                           id="nombre"
                            name="nombre"
                            class="form-control"
                            value="@Model.Nombre"
@@ -47,6 +48,7 @@
                         Primer apellido
                     </label>
                     <input type="text"
+                           id="apellidoPaterno"
                            name="apellidoPaterno"
                            class="form-control"
                            value="@Model.ApellidoPaterno"
@@ -57,6 +59,7 @@
                         Segundo apellido
                     </label>
                     <input type="text"
+                           id="apellidoMaterno"
                            name="apellidoMaterno"
                            class="form-control"
                            value="@Model.ApellidoMaterno"
@@ -67,6 +70,7 @@
                         Correo electrónico
                     </label>
                     <input type="email"
+                           id="correo"
                            name="correo"
                            class="form-control"
                            value="@Model.Correo"
@@ -79,12 +83,16 @@
                         <label class="form-label fw-semibold">
                             Teléfono
                         </label>
-                        <input type="text"
+                        <input type="tel"
+                               id="telefono"
                                name="telefono"
+                               inputmode="numeric"
+                               maxlength="8"
                                class="form-control"
-                               value="@(Model.Cliente?.TelefonosCliente
+                               placeholder="Ej: 88880000"
+                               value="@((Model.Cliente?.TelefonosCliente
                                                                ?.FirstOrDefault(t => t.EsPrincipal == 1)
-                                                               ?.NumeroTelefono ?? "")"
+                                                               ?.NumeroTelefono ?? "").Replace("-", "").Replace(" ", ""))"
                                required />
                     </div>
 
@@ -152,7 +160,7 @@
                         <label class="form-label fw-semibold">
                             Detalles de la dirección
                         </label>
-                        <textarea name="detalles" class="form-control" rows="3" placeholder="Otras señas exactas de la dirección..." required>@ViewBag.DireccionDetalles</textarea>
+                        <textarea id="detalles" name="detalles" class="form-control" rows="3" placeholder="Otras señas exactas de la dirección..." required>@ViewBag.DireccionDetalles</textarea>
                     </div>
                 }
             </div>
@@ -185,7 +193,7 @@
             </div>
         }
 
-        <form asp-action="CambiarContrasena" method="post">
+        <form id="formCambiarContrasena" asp-action="CambiarContrasena" method="post">
             @Html.AntiForgeryToken()
 
             <input type="hidden"
@@ -198,6 +206,7 @@
                         Nueva contraseña
                     </label>
                     <input type="password"
+                           id="contrasena"
                            name="contrasena"
                            class="form-control"
                            placeholder="Nueva contraseña"
@@ -208,6 +217,7 @@
                         Confirmar contraseña
                     </label>
                     <input type="password"
+                           id="confirmarContrasena"
                            name="confirmarContrasena"
                            class="form-control"
                            placeholder="Confirmar contraseña"
@@ -227,4 +237,5 @@
 
 @section Scripts {
     <script src="~/js/ubicaciones.js"></script>
+    <script src="~/js/perfiles-editar.js" asp-append-version="true"></script>
 }

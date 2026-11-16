@@ -68,9 +68,12 @@ $(document).ready(function () {
         $('#apellidoPaterno').val($(this).data('apellidopaterno'));
         $('#apellidoMaterno').val($(this).data('apellidomaterno'));
         $('#correoCliente').val($(this).data('correo'));
-        $('#telefonoCliente').val($(this).data('telefono') || '');
+        $('#telefonoCliente').val($(this).data('telefono') || '').trigger('input');
         $('#busquedaCliente').val($(this).data('nombrecompleto'));
         $('#resultadosClientes').hide().empty();
+        if ($('#formCliente').data('validator')) {
+            $('#formCliente').valid();
+        }
     });
 
     // Abrir carrito

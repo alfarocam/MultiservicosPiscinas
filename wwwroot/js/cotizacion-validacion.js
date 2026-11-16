@@ -1,35 +1,45 @@
 $(document).ready(function () {
-    // Regla personalizada para el formato de teléfono
+    // Regla personalizada para el formato de teléfono (acepta con o sin guion, ej. 1234-5678 o 12345678)
     $.validator.addMethod('telefonoValido', function (value, element) {
-        if (!value) return true;
-        return /^[0-9]{4}-[0-9]{4}$/.test(value);
-    }, 'El teléfono debe tener el formato 1234-5678.');
+        if (this.optional(element)) return true;
+        return /^\d{4}-?\d{4}$/.test($.trim(value));
+    }, 'El teléfono debe tener el formato 1234-5678 (8 dígitos).');
 
     $.validator.addMethod('emailValido', function (value, element) {
-        if (!value) return true;
-        // Verifica que tenga formato de usuario válido y termine en @gmail.com, @hotmail.com, @yahoo.com o @outlook.com
-        return /^[a-zA-Z0-9._%+-]+@(gmail\.com|hotmail\.com|yahoo\.com|outlook\.com)$/i.test(value.trim());
-    }, 'El correo debe ser @gmail.com, @hotmail.com, @yahoo.com o @outlook.com.');
+        if (this.optional(element)) return true;
+        return /^[a-zA-Z0-9._%+-]+@(gmail\.com|hotmail\.com|yahoo\.com|outlook\.com|icloud\.com|live\.com|piscinas\.com|multiservicios\.com)$/i.test(value.trim());
+    }, 'Ingresá un correo válido (@gmail.com, @hotmail.com, @yahoo.com, @outlook.com o institucional).');
 
     $('#formCliente').validate({
         errorClass: 'text-danger small mt-1 d-block',
+        errorElement: 'span',
+        highlight: function (element) {
+            $(element).addClass('is-invalid');
+        },
+        unhighlight: function (element) {
+            $(element).removeClass('is-invalid');
+        },
         rules: {
             NombreCliente: {
                 required: true,
-                minlength: 3
+                minlength: 3,
+                normalizer: function (value) { return $.trim(value); }
             },
             ApellidoPaterno: {
                 required: true,
-                minlength: 3
+                minlength: 3,
+                normalizer: function (value) { return $.trim(value); }
             },
             ApellidoMaterno: {
                 required: true,
-                minlength: 3
+                minlength: 3,
+                normalizer: function (value) { return $.trim(value); }
             },
             CorreoCliente: {
                 required: true,
                 email: true,
-                emailValido: true
+                emailValido: true,
+                normalizer: function (value) { return $.trim(value); }
             },
             TelefonoCliente: {
                 required: true,
@@ -51,12 +61,32 @@ $(document).ready(function () {
             },
             CorreoCliente: {
                 required: 'El correo es obligatorio.',
-                email: 'Ingrese un correo electrónico válido.',
-                emailValido: 'El correo debe terminar en @gmail.com, @hotmail.com, @yahoo.com o @outlook.com.'
+                email: 'Ingrese un correo electrónico válido.'
             },
             TelefonoCliente: {
                 required: 'El teléfono es obligatorio.'
             }
+        },
+        submitHandler: function (form) {
+            if (typeof Swal === 'undefined') {
+                form.submit();
+                return;
+            }
+
+            Swal.fire({
+                title: '¿Generar cotización?',
+                text: 'Se registrará la cotización y se descargará el PDF.',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#0d6efd',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Sí, generar',
+                cancelButtonText: 'Cancelar'
+            }).then(function (result) {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
         }
     });
 });

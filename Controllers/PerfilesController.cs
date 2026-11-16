@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using MultiserviciosPiscinas.Models;
 using MultiserviciosPiscinas.Services;
 using System.Security.Claims;
+using System.Text.RegularExpressions;
 
 namespace MultiserviciosPiscinas.Controllers
 {
@@ -48,6 +49,8 @@ namespace MultiserviciosPiscinas.Controllers
             var provincias = await _context.Provincia.OrderBy(p => p.Nombre).ToListAsync();
             ViewBag.Provincias = provincias;
 
+            string detallesPrevios = ViewBag.DireccionDetalles as string ?? "";
+
             ViewBag.SelectedProvinciaId = 0;
             ViewBag.SelectedCantonId = 0;
             ViewBag.SelectedDistritoId = 0;
@@ -73,7 +76,7 @@ namespace MultiserviciosPiscinas.Controllers
                 }
                 else
                 {
-                    detalles = ViewBag.DireccionDetalles as string ?? "";
+                    detalles = detallesPrevios;
                 }
 
                 if (targetDistritoId.HasValue && targetDistritoId.Value > 0)
@@ -161,6 +164,13 @@ namespace MultiserviciosPiscinas.Controllers
                 return NotFound();
             }
 
+            nombre = (nombre ?? string.Empty).Trim();
+            apellidoPaterno = (apellidoPaterno ?? string.Empty).Trim();
+            apellidoMaterno = (apellidoMaterno ?? string.Empty).Trim();
+            correo = (correo ?? string.Empty).Trim();
+            telefono = telefono?.Trim();
+            detalles = detalles?.Trim();
+
             // validaciones
             if (string.IsNullOrWhiteSpace(nombre))
             {
@@ -181,6 +191,10 @@ namespace MultiserviciosPiscinas.Controllers
             {
                 ModelState.AddModelError("", "El correo es obligatorio.");
             }
+            else if (!Regex.IsMatch(correo, @"^[a-zA-Z0-9._%+-]+@(gmail\.com|hotmail\.com|yahoo\.com|outlook\.com|icloud\.com|live\.com|piscinas\.com)$", RegexOptions.IgnoreCase))
+            {
+                ModelState.AddModelError("", "Ingresá un correo válido (@gmail.com, @hotmail.com, @yahoo.com u @outlook.com).");
+            }
             else
             {
                 // sin esta validación el SaveChanges falla con un mensaje genérico.
@@ -198,6 +212,10 @@ namespace MultiserviciosPiscinas.Controllers
                 if (string.IsNullOrWhiteSpace(telefono))
                 {
                     ModelState.AddModelError("", "El teléfono es obligatorio.");
+                }
+                else if (!Regex.IsMatch(telefono, @"^\d{1,8}$"))
+                {
+                    ModelState.AddModelError("", "El teléfono debe contener solo números y máximo 8 dígitos.");
                 }
 
                 if (!distritoId.HasValue || distritoId.Value <= 0)

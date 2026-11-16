@@ -45,6 +45,11 @@ $(document).ready(function () {
         return this.optional(element) || $.trim(value).length > 0;
     }, 'Este campo no puede contener solo espacios.');
 
+    $.validator.addMethod('correoValido', function (value, element) {
+        if (this.optional(element)) return true;
+        return /^[a-zA-Z0-9._%+-]+@(gmail\.com|hotmail\.com|yahoo\.com|outlook\.com|icloud\.com|live\.com|piscinas\.com)$/i.test(value.trim());
+    }, 'Ingresá un correo válido (@gmail.com, @hotmail.com, @yahoo.com u @outlook.com).');
+
     $form.validate({
         errorClass: 'text-danger small mt-1 d-block',
         errorElement: 'span',
@@ -77,7 +82,8 @@ $(document).ready(function () {
             },
             Correo: {
                 required: true,
-                email: true
+                email: true,
+                correoValido: true
             },
             Telefono: {
                 required: true,
