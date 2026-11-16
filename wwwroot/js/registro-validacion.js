@@ -16,8 +16,8 @@ $(document).ready(function () {
 
     $.validator.addMethod('correoValido', function (value, element) {
         if (this.optional(element)) return true;
-        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
-    }, 'Ingresá un correo válido.');
+        return /^[a-zA-Z0-9._%+-]+@(gmail\.com|hotmail\.com|yahoo\.com|outlook\.com|icloud\.com|live\.com|piscinas\.com)$/i.test(value.trim());
+    }, 'Ingresá un correo válido (@gmail.com, @hotmail.com, @yahoo.com u @outlook.com).');
 
     var urlVerificarDuplicado = $('#urlVerificarDuplicado').val();
     var validandoEnvio = false;

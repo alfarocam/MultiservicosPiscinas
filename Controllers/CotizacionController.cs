@@ -8,6 +8,7 @@ using MultiserviciosPiscinas.Models;
 using MultiserviciosPiscinas.Services;
 using System.Globalization;
 using System.Security.Claims;
+using System.Text.RegularExpressions;
 
 namespace MultiserviciosPiscinas.Controllers
 {
@@ -187,6 +188,12 @@ namespace MultiserviciosPiscinas.Controllers
                     return RedirectToAction("Crear");
                 }
 
+                model.NombreCliente = (model.NombreCliente ?? string.Empty).Trim();
+                model.ApellidoPaterno = (model.ApellidoPaterno ?? string.Empty).Trim();
+                model.ApellidoMaterno = (model.ApellidoMaterno ?? string.Empty).Trim();
+                model.CorreoCliente = (model.CorreoCliente ?? string.Empty).Trim();
+                model.TelefonoCliente = Generales.NormalizarTelefono(model.TelefonoCliente);
+
                 // Validar datos del cliente
                 if (string.IsNullOrWhiteSpace(model.NombreCliente) ||
                     string.IsNullOrWhiteSpace(model.ApellidoPaterno) ||
@@ -199,8 +206,22 @@ namespace MultiserviciosPiscinas.Controllers
                     return RedirectToAction("Crear");
                 }
 
-                // Limpiar guion del teléfono si lo trae
-                model.TelefonoCliente = model.TelefonoCliente.Replace("-", "");
+                if (!Regex.IsMatch(
+                        model.CorreoCliente,
+                        @"^[a-zA-Z0-9._%+-]+@(gmail\.com|hotmail\.com|yahoo\.com|outlook\.com|icloud\.com|live\.com|piscinas\.com|multiservicios\.com)$",
+                        RegexOptions.IgnoreCase))
+                {
+                    TempData["Mensaje"] = "Ingresá un correo válido (@gmail.com, @hotmail.com, @yahoo.com, @outlook.com o institucional).";
+                    TempData["TipoMensaje"] = "danger";
+                    return RedirectToAction("Crear");
+                }
+
+                if (!Regex.IsMatch(model.TelefonoCliente, @"^\d{8}$"))
+                {
+                    TempData["Mensaje"] = "El teléfono debe contener exactamente 8 dígitos.";
+                    TempData["TipoMensaje"] = "danger";
+                    return RedirectToAction("Crear");
+                }
 
                 // Buscar o crear cliente
                 int clienteId;

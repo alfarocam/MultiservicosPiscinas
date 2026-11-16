@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using MultiserviciosPiscinas.Models;
 using MultiserviciosPiscinas.Services;
 using System;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace MultiserviciosPiscinas.Controllers
@@ -66,6 +67,12 @@ namespace MultiserviciosPiscinas.Controllers
         }
 
 
+        private static bool EsCorreoValido(string correo) =>
+            Regex.IsMatch(
+                correo,
+                @"^[a-zA-Z0-9._%+-]+@(gmail\.com|hotmail\.com|yahoo\.com|outlook\.com|icloud\.com|live\.com|piscinas\.com|multiservicios\.com)$",
+                RegexOptions.IgnoreCase);
+
         [HttpGet]
         public async Task<IActionResult> Crear()
         {
@@ -84,6 +91,14 @@ namespace MultiserviciosPiscinas.Controllers
             nuevoColaborador.Correo = (nuevoColaborador.Correo ?? string.Empty).Trim();
             nuevoColaborador.Activo = true;
             nuevoColaborador.FechaCreacion = DateTime.Now;
+
+            if (string.IsNullOrWhiteSpace(nuevoColaborador.Correo) || !EsCorreoValido(nuevoColaborador.Correo))
+            {
+                ModelState.AddModelError("Correo", "Ingresá un correo válido (@gmail.com, @hotmail.com, @yahoo.com, @outlook.com o institucional).");
+                var listaRoles = await _context.Rol.ToListAsync();
+                ViewBag.Roles = new SelectList(listaRoles, "Id", "Nombre", nuevoColaborador.RolId);
+                return View(nuevoColaborador);
+            }
 
             bool existeCorreo = await _context.Usuario.AnyAsync(u => u.Correo == nuevoColaborador.Correo);
             if (existeCorreo)
@@ -180,6 +195,10 @@ namespace MultiserviciosPiscinas.Controllers
             if (string.IsNullOrWhiteSpace(correoLimpio))
             {
                 ModelState.AddModelError("Correo", "El correo electrónico es obligatorio.");
+            }
+            else if (!EsCorreoValido(correoLimpio))
+            {
+                ModelState.AddModelError("Correo", "Ingresá un correo válido (@gmail.com, @hotmail.com, @yahoo.com, @outlook.com o institucional).");
             }
             else if (await _context.Usuario.AnyAsync(u => u.Correo == correoLimpio && u.Id != id))
             {
