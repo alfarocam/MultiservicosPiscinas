@@ -23,6 +23,8 @@ public class DivisionTerritorialSeeder(
 
         try
         {
+            await AsegurarColumnasOperacionesAsync();
+
             var provincias = await ObtenerCatalogoAsync(
                 $"{BaseUrl}/provincias?limit={LimitePorPagina}", "idProvincia");
 
@@ -156,5 +158,24 @@ public class DivisionTerritorialSeeder(
         }
 
         return lista;
+    }
+
+    private async Task AsegurarColumnasOperacionesAsync()
+    {
+        try
+        {
+            const string sql = @"
+IF COL_LENGTH('ops.TAREA_SERVICIO', 'fecha_hora_registro') IS NULL
+    ALTER TABLE ops.TAREA_SERVICIO ADD fecha_hora_registro datetime NULL;
+
+IF COL_LENGTH('ops.INSPECCION', 'temperatura_c') IS NULL
+    ALTER TABLE ops.INSPECCION ADD temperatura_c float NULL;";
+
+            await dbContext.Database.ExecuteSqlRawAsync(sql);
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning("[SEEDER] No se pudieron verificar las columnas de ops: {Error}", ex.Message);
+        }
     }
 }
