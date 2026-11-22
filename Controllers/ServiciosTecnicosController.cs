@@ -434,9 +434,10 @@ namespace MultiserviciosPiscinas.Controllers
 
             // <!-- Validar que el técnico exista y sea válido -->
             var tecnicoNuevo = await _context.Usuario
+                .Include(u => u.Cliente)
                 .FirstOrDefaultAsync(u => u.Id == modelo.TecnicoId);
 
-            if (tecnicoNuevo == null || tecnicoNuevo.RolId != 2 || !tecnicoNuevo.Activo)
+            if (tecnicoNuevo == null || tecnicoNuevo.RolId != 2 || !tecnicoNuevo.Activo || tecnicoNuevo.Cliente != null)
             {
                 ModelState.AddModelError(nameof(modelo.TecnicoId), "El técnico seleccionado no existe, no es válido o no está activo.");
             }
@@ -562,7 +563,7 @@ namespace MultiserviciosPiscinas.Controllers
         private async Task CargarTecnicosDisponiblesAsync()
         {
             var tecnicos = await _context.Usuario
-                .Where(u => u.RolId == 2 && u.Activo)
+                .Where(u => u.RolId == 2 && u.Activo && u.Cliente == null)
                 .OrderBy(u => u.ApellidoPaterno)
                 .Select(u => new { Id = u.Id, NombreCompleto = u.Nombre + " " + u.ApellidoPaterno })
                 .ToListAsync();

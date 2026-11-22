@@ -25,6 +25,7 @@ public class DivisionTerritorialSeeder(
         {
             await AsegurarColumnasOperacionesAsync();
             await AsegurarCategoriasGastoOperativoAsync();
+            await AsegurarIntegridadRolesYDescripcionesSafeAsync();
 
             var provincias = await ObtenerCatalogoAsync(
                 $"{BaseUrl}/provincias?limit={LimitePorPagina}", "idProvincia");
@@ -170,7 +171,10 @@ IF COL_LENGTH('ops.TAREA_SERVICIO', 'fecha_hora_registro') IS NULL
     ALTER TABLE ops.TAREA_SERVICIO ADD fecha_hora_registro datetime NULL;
 
 IF COL_LENGTH('ops.INSPECCION', 'temperatura_c') IS NULL
-    ALTER TABLE ops.INSPECCION ADD temperatura_c float NULL;";
+    ALTER TABLE ops.INSPECCION ADD temperatura_c float NULL;
+
+IF COL_LENGTH('seg.USUARIO', 'telefono') IS NULL
+    ALTER TABLE seg.USUARIO ADD telefono varchar(20) NULL;";
 
             await dbContext.Database.ExecuteSqlRawAsync(sql);
         }
@@ -252,4 +256,67 @@ IF COL_LENGTH('ops.INSPECCION', 'temperatura_c') IS NULL
 
         return (true, $"Categoría '{nombreLimpio}' creada correctamente.", nuevaCategoria);
     }
+
+    private async Task AsegurarIntegridadRolesYDescripcionesSafeAsync()
+    {
+        try
+        {
+            await AsegurarIntegridadRolesYDescripcionesAsync(dbContext);
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning("[SEEDER] No se pudo verificar integridad de roles/usuario: {Error}", ex.Message);
+        }
+    }
+
+    public static async Task AsegurarIntegridadRolesYDescripcionesAsync(PiscinasYMultiserviciosContext context)
+    {
+        const string sql = @"
+IF COL_LENGTH('seg.USUARIO', 'telefono') IS NULL
+    ALTER TABLE seg.USUARIO ADD telefono varchar(20) NULL;
+
+UPDATE u
+SET u.rol_id = 3
+FROM seg.USUARIO u
+INNER JOIN cli.CLIENTE c ON c.usuario_id = u.id
+WHERE u.rol_id = 2 AND u.correo <> 'admin@piscinas.com';
+
+INSERT INTO cli.CLIENTE (usuario_id, notas)
+SELECT u.id, 'Cliente registrado automáticamente por integridad de rol.'
+FROM seg.USUARIO u
+LEFT JOIN cli.CLIENTE c ON c.usuario_id = u.id
+WHERE u.rol_id = 3 AND c.id IS NULL;";
+
+        await context.Database.ExecuteSqlRawAsync(sql);
+
+        var descripcionesPorDefecto = new Dictionary<int, string>
+        {
+            [1] = "Control total del sistema: gestión de usuarios, roles, clientes, piscinas, proyectos, agenda general, vehículos, inventario, finanzas, bitácora de auditoría y reportes.",
+            [2] = "Operación técnica: consulta y ejecución de servicios asignados, mi agenda, rutas del día, registro de parámetros del agua, consulta de inventario, mis gastos y anuncios.",
+            [3] = "Portal de cliente: acceso a tienda en línea y carrito, consulta de mis piscinas e historial de servicios, cotizaciones, facturación, encuestas de satisfacción y soporte."
+        };
+
+        var roles = await context.Rol.ToListAsync();
+        bool huboCambios = false;
+
+        foreach (var rol in roles)
+        {
+            if (descripcionesPorDefecto.TryGetValue(rol.Id, out var descripcionPrecisa) &&
+                EsDescripcionGenerica(rol.Descripcion))
+            {
+                rol.Descripcion = descripcionPrecisa;
+                huboCambios = true;
+            }
+        }
+
+        if (huboCambios)
+        {
+            await context.SaveChangesAsync();
+        }
+    }
+
+    private static bool EsDescripcionGenerica(string? descripcion) =>
+        string.IsNullOrWhiteSpace(descripcion) ||
+        descripcion.Contains("casi todos los permisos", StringComparison.OrdinalIgnoreCase) ||
+        descripcion.Contains("sin descripción", StringComparison.OrdinalIgnoreCase);
 }

@@ -22,7 +22,7 @@ namespace MultiserviciosPiscinas.Controllers
             var fechaSeleccionada = fecha ?? DateOnly.FromDateTime(DateTime.Today);
 
             ViewBag.Tecnicos = await _context.Usuario
-                .Where(u => u.RolId == ROL_TECNICO && u.Activo)
+                .Where(u => u.RolId == ROL_TECNICO && u.Activo && u.Cliente == null)
                 .OrderBy(u => u.Nombre)
                 .ToListAsync();
 

@@ -16,6 +16,8 @@ namespace MultiserviciosPiscinas.Repositories
 
         public async Task<DashboardDto> ObtenerDashboardAsync()
         {
+            await MultiserviciosPiscinas.Data.DivisionTerritorialSeeder.AsegurarIntegridadRolesYDescripcionesAsync(_context);
+
             var hoy = DateTime.Today;
 
             //-- Rango trimestral actual --
@@ -49,10 +51,10 @@ namespace MultiserviciosPiscinas.Repositories
             int facturasPendientes = await _context.Factura
                 .CountAsync(f => f.Estado == "Pendiente");
 
-            //Técnicos disponibles = usuarios con rol 2 (técnico) activos
+            //Técnicos disponibles = usuarios con rol 2 (técnico) activos sin perfil de cliente
             //Se usa RolId = 2 según la convención del sistema
             int tecnicosDisponibles = await _context.Usuario
-                .CountAsync(u => u.RolId == 2);
+                .CountAsync(u => u.RolId == 2 && u.Activo && u.Cliente == null);
 
             //------KPIs OPERATIVOS (trimestre)--------
 
@@ -130,6 +132,7 @@ namespace MultiserviciosPiscinas.Repositories
             //GRÁFICO 3: Visitas técnicas por técnico (top 5)
             var visitasPorTecnico = await _context.Cita
                 .Include(c => c.Tecnico)
+                .Where(c => c.Tecnico.RolId == 2 && c.Tecnico.Cliente == null)
                 .GroupBy(c => new { c.TecnicoId, c.Tecnico.Nombre, c.Tecnico.ApellidoPaterno })
                 .Select(g => new VisitasPorTecnicoDto
                 {

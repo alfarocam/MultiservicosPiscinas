@@ -76,26 +76,25 @@
                            value="@Model.Correo"
                            required />
                 </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">
+                        Teléfono
+                    </label>
+                    <input type="tel"
+                           id="telefono"
+                           name="telefono"
+                           inputmode="numeric"
+                           maxlength="8"
+                           class="form-control"
+                           placeholder="Ej: 88880000"
+                           value="@((Model.Cliente?.TelefonosCliente
+                                       ?.FirstOrDefault(t => t.EsPrincipal == 1)
+                                       ?.NumeroTelefono ?? Model.Telefono ?? "").Replace("-", "").Replace(" ", ""))"
+                           required />
+                </div>
 
                 @if (Model.Cliente != null)
                 {
-                    <div class="col-md-6">
-                        <label class="form-label fw-semibold">
-                            Teléfono
-                        </label>
-                        <input type="tel"
-                               id="telefono"
-                               name="telefono"
-                               inputmode="numeric"
-                               maxlength="8"
-                               class="form-control"
-                               placeholder="Ej: 88880000"
-                               value="@((Model.Cliente?.TelefonosCliente
-                                                               ?.FirstOrDefault(t => t.EsPrincipal == 1)
-                                                               ?.NumeroTelefono ?? "").Replace("-", "").Replace(" ", ""))"
-                               required />
-                    </div>
-
                     <div class="col-md-6">
                         <label class="form-label fw-semibold">
                             Provincia

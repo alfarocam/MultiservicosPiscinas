@@ -44,6 +44,14 @@ namespace MultiserviciosPiscinas.Controllers
                 usuario.Contrasena == contrasena &&
                 usuario.Activo == true)
             {
+                if (usuario.RolId == 2 &&
+                    !string.Equals(usuario.Correo, "admin@piscinas.com", StringComparison.OrdinalIgnoreCase) &&
+                    await _contexto.Cliente.AnyAsync(c => c.UsuarioId == usuario.Id))
+                {
+                    usuario.RolId = 3;
+                    await _contexto.SaveChangesAsync();
+                }
+
                 var declaraciones = new List<Claim>
                 {
                     new Claim(ClaimTypes.Name, usuario.Correo),

@@ -411,7 +411,7 @@ namespace MultiserviciosPiscinas.Controllers
         private async Task CargarTecnicosAsync()
         {
             var tecnicos = await _context.Usuario
-                .Where(u => u.RolId == 2 && u.Activo)
+                .Where(u => u.RolId == 2 && u.Activo && u.Cliente == null)
                 .OrderBy(u => u.ApellidoPaterno)
                 .Select(u => new
                 {

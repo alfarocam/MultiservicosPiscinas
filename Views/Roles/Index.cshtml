@@ -21,11 +21,11 @@
     </div>
 }
 
-<div class="c-page-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+<div class="c-page-header d-flex justify-content-between align-items-center flex-wrap gap-3">
     <h2 class="a-title mb-0">Usuarios, Roles y Permisos</h2>
-    <div class="d-flex gap-2">
-        <a asp-action="Asignar" class="btn c-btn-sm-primary"><i class="bi bi-person-workspace me-1"></i>Asignar rol</a>
-        <a asp-action="Crear" class="btn c-btn-sm-primary"><i class="bi bi-person-plus me-1"></i>Nuevo Colaborador</a>
+    <div class="d-flex flex-wrap align-items-center gap-2">
+        <a asp-action="Asignar" class="btn btn-outline-primary"><i class="bi bi-person-workspace me-1"></i>Asignar rol</a>
+        <a asp-action="Crear" class="btn btn-primary"><i class="bi bi-person-plus me-1"></i>Nuevo Colaborador</a>
     </div>
 </div>
 
@@ -145,7 +145,7 @@
     </div>
 </div>
 
-<div class="o-form-card">
+<div class="o-form-card mb-4">
     <h5 class="mb-3 fw-bold">Resumen de Roles</h5>
     <div class="table-responsive">
         <table id="tablaRoles" class="table table-hover align-middle">
@@ -155,6 +155,7 @@
                     <th class="a-text-muted small text-uppercase">Rol</th>
                     <th class="a-text-muted small text-uppercase">Descripción</th>
                     <th class="a-text-muted small text-uppercase">Usuarios asignados</th>
+                    <th class="a-text-muted small text-uppercase text-center">Acciones</th>
                 </tr>
             </thead>
             <tbody>
@@ -167,12 +168,102 @@
                         <td>
                             <span class="badge bg-secondary px-2 py-1">@rol.Usuario.Count usuarios</span>
                         </td>
+                        <td class="text-center">
+                            <button type="button"
+                                    class="btn btn-sm btn-outline-warning"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#modalEditarRol-@rol.Id">
+                                <i class="bi bi-pencil me-1"></i>Editar descripción
+                            </button>
+                        </td>
                     </tr>
                 }
             </tbody>
         </table>
     </div>
 </div>
+
+<div class="o-form-card">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+        <div>
+            <h5 class="mb-1 fw-bold">Matriz de Permisos por Rol (Módulo y Acción)</h5>
+            <p class="text-muted small mb-0">Consulte y administre los permisos habilitados para cada perfil del sistema.</p>
+        </div>
+    </div>
+
+    <form asp-action="GuardarMatrizPermisos" method="post">
+        @Html.AntiForgeryToken()
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th class="a-text-muted small text-uppercase">Módulo</th>
+                        <th class="a-text-muted small text-uppercase">Acción / Alcance</th>
+                        <th class="a-text-muted small text-uppercase text-center">Administrador</th>
+                        <th class="a-text-muted small text-uppercase text-center">Técnico</th>
+                        <th class="a-text-muted small text-uppercase text-center">Cliente</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var permiso in Model.MatrizPermisos)
+                    {
+                        <tr>
+                            <td class="fw-semibold">@permiso.Modulo</td>
+                            <td>@permiso.Accion</td>
+                            <td class="text-center">
+                                <input class="form-check-input" type="checkbox" checked="@permiso.Admin" disabled title="El administrador conserva los permisos administrativos del sistema" />
+                            </td>
+                            <td class="text-center">
+                                <input class="form-check-input" type="checkbox" name="permisosTecnico" value="@permiso.Clave" checked="@permiso.Tecnico" />
+                            </td>
+                            <td class="text-center">
+                                <input class="form-check-input" type="checkbox" name="permisosCliente" value="@permiso.Clave" checked="@permiso.Cliente" />
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div class="d-flex justify-content-end mt-3">
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-shield-check me-1"></i>Guardar permisos
+            </button>
+        </div>
+    </form>
+</div>
+
+@foreach (var rol in Model.Roles)
+{
+    <div class="modal fade" id="modalEditarRol-@rol.Id" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content text-start">
+                <form asp-action="EditarRol" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@rol.Id" />
+
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title fs-6"><i class="bi bi-shield-lock me-2"></i>Editar descripción: @rol.Nombre</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+
+                    <div class="modal-body">
+                        <label for="descRol-@rol.Id" class="form-label fw-bold text-dark">Descripción del rol:</label>
+                        <textarea id="descRol-@rol.Id" name="descripcion" class="form-control" rows="3" maxlength="255" required>@rol.Descripcion</textarea>
+                    </div>
+
+                    <div class="modal-footer bg-light d-flex justify-content-end">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                            <i class="bi bi-x-circle me-1"></i>Cancelar
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle-fill me-1"></i>Guardar descripción
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+}
 
 @section Scripts {
     <script src="~/js/roles-tabla.js" asp-append-version="true"></script>

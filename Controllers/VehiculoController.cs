@@ -28,7 +28,7 @@ namespace MultiserviciosPiscinas.Controllers
             // todos los usuarios del sistema (admins, clientes, etc.), por eso
             // aparecían en el desplegable personas que no son técnicos.
             var tecnicos = await _context.Usuario
-                .Where(u => u.RolId == 2 && u.Activo)
+                .Where(u => u.RolId == 2 && u.Activo && u.Cliente == null)
                 .OrderBy(u => u.ApellidoPaterno)
                 .Select(u => new {
                     u.Id,
