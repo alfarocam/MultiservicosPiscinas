@@ -2,22 +2,30 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using MultiserviciosPiscinas.Data;
 using MultiserviciosPiscinas.Models;
+using MultiserviciosPiscinas.Services;
 using System.Security.Claims;
 
 namespace MultiserviciosPiscinas.Controllers
 {
+    [Authorize(Roles = "1,2")]
     public class GastosController : Controller
     {
         private readonly PiscinasYMultiserviciosContext _context;
         private readonly IWebHostEnvironment _env;
+        private readonly BitacoraService _bitacora;
 
         private const string MotivoSinComprobante = "Rechazado automáticamente: el gasto no tiene comprobante adjunto.";
 
-        public GastosController(PiscinasYMultiserviciosContext context, IWebHostEnvironment env)
+        public GastosController(
+            PiscinasYMultiserviciosContext context,
+            IWebHostEnvironment env,
+            BitacoraService bitacora)
         {
             _context = context;
             _env = env;
+            _bitacora = bitacora;
         }
 
         
@@ -38,7 +46,7 @@ namespace MultiserviciosPiscinas.Controllers
         [HttpGet]
         public async Task<IActionResult> Registrar()
         {
-            ViewBag.Categorias = new SelectList(await _context.CategoriaGastoOperativo.ToListAsync(), "Id", "NombreCategoria");
+            ViewBag.Categorias = new SelectList(await ObtenerCategoriasAsync(), "Id", "NombreCategoria");
             return View(new GastoOperativo { Fecha = DateOnly.FromDateTime(DateTime.Today) });
         }
 
@@ -115,7 +123,7 @@ namespace MultiserviciosPiscinas.Controllers
                 ModelState.AddModelError("", "Error al guardar en base de datos: " + errorDetalle);
             }
 
-            ViewBag.Categorias = new SelectList(await _context.CategoriaGastoOperativo.ToListAsync(), "Id", "NombreCategoria", gasto.CategoriaId);
+            ViewBag.Categorias = new SelectList(await ObtenerCategoriasAsync(), "Id", "NombreCategoria", gasto.CategoriaId);
             return View(gasto);
         }
 
@@ -127,11 +135,21 @@ namespace MultiserviciosPiscinas.Controllers
             var gasto = await _context.GastoOperativo.FindAsync(id);
             if (gasto != null)
             {
+                string estadoAnterior = gasto.Estado;
+
                 if (string.IsNullOrEmpty(gasto.ComprobanteRuta))
                 {
                     gasto.Estado = "Rechazado";
                     gasto.MotivoRechazo = MotivoSinComprobante;
                     await _context.SaveChangesAsync();
+                    await _bitacora.RegistrarAsync(
+                        userClaims: User,
+                        accion: "UPDATE",
+                        tablaAfectada: "fin.GASTO_OPERATIVO",
+                        registroId: gasto.Id,
+                        valorAnterior: $"Estado: {estadoAnterior}",
+                        valorNuevo: $"Estado: {gasto.Estado} | Motivo: {gasto.MotivoRechazo}"
+                    );
                     TempData["MensajeError"] = "El gasto no tiene comprobante, por lo que fue RECHAZADO automáticamente.";
                     return RedirectToAction(nameof(Index));
                 }
@@ -139,6 +157,14 @@ namespace MultiserviciosPiscinas.Controllers
                 gasto.Estado = "Aprobado";
                 gasto.MotivoRechazo = null;
                 await _context.SaveChangesAsync();
+                await _bitacora.RegistrarAsync(
+                    userClaims: User,
+                    accion: "UPDATE",
+                    tablaAfectada: "fin.GASTO_OPERATIVO",
+                    registroId: gasto.Id,
+                    valorAnterior: $"Estado: {estadoAnterior}",
+                    valorNuevo: $"Estado: {gasto.Estado} | Monto: ₡{gasto.Monto:N2}"
+                );
                 TempData["MensajeExito"] = "El gasto fue APROBADO exitosamente.";
             }
             return RedirectToAction(nameof(Index));
@@ -154,13 +180,24 @@ namespace MultiserviciosPiscinas.Controllers
             {
                 if (string.IsNullOrWhiteSpace(motivoRechazo))
                 {
-                    TempData["MensajeError"] = "Debe escribir una justificacipon para rechazar el gasto.";
+                    TempData["MensajeError"] = "Debe escribir una justificación para rechazar el gasto.";
                     return RedirectToAction(nameof(Index));
                 }
 
+                string estadoAnterior = gasto.Estado;
+                string motivoLimpio = motivoRechazo.Trim();
+
                 gasto.Estado = "Rechazado";
-                gasto.MotivoRechazo = motivoRechazo;
+                gasto.MotivoRechazo = motivoLimpio;
                 await _context.SaveChangesAsync();
+                await _bitacora.RegistrarAsync(
+                    userClaims: User,
+                    accion: "UPDATE",
+                    tablaAfectada: "fin.GASTO_OPERATIVO",
+                    registroId: gasto.Id,
+                    valorAnterior: $"Estado: {estadoAnterior}",
+                    valorNuevo: $"Estado: {gasto.Estado} | Motivo: {motivoLimpio}"
+                );
                 TempData["MensajeExito"] = "El gasto fue RECHAZADO.";
             }
             return RedirectToAction(nameof(Index));
@@ -191,7 +228,7 @@ namespace MultiserviciosPiscinas.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            ViewBag.Categorias = new SelectList(await _context.CategoriaGastoOperativo.ToListAsync(), "Id", "NombreCategoria", gasto.CategoriaId);
+            ViewBag.Categorias = new SelectList(await ObtenerCategoriasAsync(), "Id", "NombreCategoria", gasto.CategoriaId);
             return View(gasto);
         }
 
@@ -247,8 +284,50 @@ namespace MultiserviciosPiscinas.Controllers
                 ModelState.AddModelError("", "Error al guardar la corrección: " + errorDetalle);
             }
 
-            ViewBag.Categorias = new SelectList(await _context.CategoriaGastoOperativo.ToListAsync(), "Id", "NombreCategoria", gastoForm.CategoriaId);
+            ViewBag.Categorias = new SelectList(await ObtenerCategoriasAsync(), "Id", "NombreCategoria", gastoForm.CategoriaId);
             return View(gastoForm);
+        }
+
+        [Authorize(Roles = "1")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CrearCategoria(string nombreCategoria, string? returnUrl = null)
+        {
+            var (exito, mensaje, nuevaCategoria) =
+                await DivisionTerritorialSeeder.RegistrarCategoriaGastoAsync(_context, nombreCategoria);
+
+            if (!exito || nuevaCategoria == null)
+            {
+                TempData["MensajeError"] = mensaje;
+                return RedirigirRetorno(returnUrl);
+            }
+
+            await _bitacora.RegistrarAsync(
+                userClaims: User,
+                accion: "INSERT",
+                tablaAfectada: "fin.CATEGORIA_GASTO_OPERATIVO",
+                registroId: nuevaCategoria.Id,
+                valorNuevo: $"Categoría: {nuevaCategoria.NombreCategoria}"
+            );
+
+            TempData["MensajeExito"] = mensaje;
+            return RedirigirRetorno(returnUrl);
+        }
+
+        private async Task<List<CategoriaGastoOperativo>> ObtenerCategoriasAsync()
+        {
+            await DivisionTerritorialSeeder.AsegurarCategoriasGastoOperativoAsync(_context);
+            return await _context.CategoriaGastoOperativo
+                .OrderBy(c => c.NombreCategoria)
+                .ToListAsync();
+        }
+
+        private IActionResult RedirigirRetorno(string? returnUrl)
+        {
+            if (!string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl))
+                return Redirect(returnUrl);
+
+            return RedirectToAction(nameof(Index));
         }
 
         private async Task<string> GuardarComprobanteAsync(IFormFile archivo)

@@ -5,6 +5,8 @@
 
     // Controlador al que regresa el botón Volver (Gastos o GastoOperativo).
     string volverController = ViewBag.VolverController ?? "Gastos";
+    bool esAdmin = User.IsInRole("1");
+    bool esTecnico = User.IsInRole("2");
 
     bool tieneComprobante = !string.IsNullOrEmpty(Model.ComprobanteRuta);
     bool esPdf = tieneComprobante && Model.ComprobanteRuta!.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase);
@@ -23,6 +25,21 @@
         <i class="bi bi-arrow-left me-1"></i>Volver
     </a>
 </div>
+
+@if (TempData["MensajeExito"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show mb-3" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>@TempData["MensajeExito"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+@if (TempData["MensajeError"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["MensajeError"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
 
 <div class="card shadow-sm mb-4">
     <div class="card-body">
@@ -70,9 +87,34 @@
                         <i class="bi bi-exclamation-triangle-fill me-2"></i><strong>Motivo del rechazo:</strong>
                         @(string.IsNullOrWhiteSpace(Model.MotivoRechazo) ? "—" : Model.MotivoRechazo)
                     </div>
+                    @if (!esAdmin || esTecnico)
+                    {
+                        <div class="mt-3">
+                            <a asp-controller="Gastos" asp-action="Corregir" asp-route-id="@Model.Id" class="btn btn-warning">
+                                <i class="bi bi-pencil-square me-1"></i>Corregir gasto
+                            </a>
+                        </div>
+                    }
                 </div>
             }
         </div>
+
+        @if (Model.Estado == "Pendiente" && esAdmin)
+        {
+            <hr class="my-4" />
+            <div class="d-flex flex-wrap justify-content-end gap-2">
+                <form asp-controller="@volverController" asp-action="Aprobar" method="post" class="d-inline">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@Model.Id" />
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-check-lg me-1"></i>Aprobar gasto
+                    </button>
+                </form>
+                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#modalRechazarDetalle">
+                    <i class="bi bi-x-lg me-1"></i>Rechazar gasto
+                </button>
+            </div>
+        }
     </div>
 </div>
 
@@ -104,3 +146,36 @@
         }
     </div>
 </div>
+
+@if (Model.Estado == "Pendiente" && esAdmin)
+{
+    <div class="modal fade" id="modalRechazarDetalle" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content text-start">
+                <form asp-controller="@volverController" asp-action="Rechazar" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@Model.Id" />
+
+                    <div class="modal-header bg-danger text-white">
+                        <h5 class="modal-title fs-6"><i class="bi bi-exclamation-triangle-fill me-2"></i>Motivo de Rechazo</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+
+                    <div class="modal-body">
+                        <label class="form-label fw-bold text-dark">Escriba la justificación:</label>
+                        <textarea name="motivoRechazo" class="form-control" rows="3" required placeholder="Ej: La foto del comprobante no es legible..."></textarea>
+                    </div>
+
+                    <div class="modal-footer bg-light d-flex justify-content-end">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                            <i class="bi bi-x-circle me-1"></i>Cancelar
+                        </button>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-check-circle-fill me-1"></i>Confirmar Rechazo
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+}

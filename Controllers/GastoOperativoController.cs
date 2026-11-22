@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using MultiserviciosPiscinas.Data;
 using MultiserviciosPiscinas.Models;
 using MultiserviciosPiscinas.Services;
 using System.Security.Claims;
@@ -21,7 +22,9 @@ namespace MultiserviciosPiscinas.Controllers
             var gastos = await _context.GastoOperativo
                 .Include(g => g.Categoria)
                 .Include(g => g.Usuario)
-                .OrderByDescending(g => g.Fecha)
+                .OrderBy(g => g.Estado == "Pendiente" ? 1 : (g.Estado == "Aprobado" ? 2 : 3))
+                .ThenByDescending(g => g.Fecha)
+                .ThenByDescending(g => g.Id)
                 .ToListAsync();
 
             return View(gastos);
@@ -143,8 +146,124 @@ namespace MultiserviciosPiscinas.Controllers
             return View("~/Views/Gastos/Detalle.cshtml", gasto);
         }
 
+        // POST: /GastoOperativo/Aprobar/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Aprobar(int id)
+        {
+            var gasto = await _context.GastoOperativo.FindAsync(id);
+            if (gasto != null)
+            {
+                string estadoAnterior = gasto.Estado;
+
+                if (string.IsNullOrEmpty(gasto.ComprobanteRuta))
+                {
+                    gasto.Estado = "Rechazado";
+                    gasto.MotivoRechazo = "Rechazado automáticamente: el gasto no tiene comprobante adjunto.";
+                    await _context.SaveChangesAsync();
+                    await _bitacora.RegistrarAsync(
+                        userClaims: User,
+                        accion: "UPDATE",
+                        tablaAfectada: "fin.GASTO_OPERATIVO",
+                        registroId: gasto.Id,
+                        valorAnterior: $"Estado: {estadoAnterior}",
+                        valorNuevo: $"Estado: {gasto.Estado} | Motivo: {gasto.MotivoRechazo}"
+                    );
+                    TempData["MensajeError"] = "El gasto no tiene comprobante, por lo que fue RECHAZADO automáticamente.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                gasto.Estado = "Aprobado";
+                gasto.MotivoRechazo = null;
+                await _context.SaveChangesAsync();
+                await _bitacora.RegistrarAsync(
+                    userClaims: User,
+                    accion: "UPDATE",
+                    tablaAfectada: "fin.GASTO_OPERATIVO",
+                    registroId: gasto.Id,
+                    valorAnterior: $"Estado: {estadoAnterior}",
+                    valorNuevo: $"Estado: {gasto.Estado} | Monto: ₡{gasto.Monto:N2}"
+                );
+                TempData["MensajeExito"] = "El gasto fue APROBADO exitosamente.";
+            }
+            return RedirectToAction(nameof(Index));
+        }
+
+        // POST: /GastoOperativo/Rechazar/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Rechazar(int id, string motivoRechazo)
+        {
+            var gasto = await _context.GastoOperativo.FindAsync(id);
+            if (gasto != null)
+            {
+                if (string.IsNullOrWhiteSpace(motivoRechazo))
+                {
+                    TempData["MensajeError"] = "Debe escribir una justificación para rechazar el gasto.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                string estadoAnterior = gasto.Estado;
+                string motivoLimpio = motivoRechazo.Trim();
+
+                gasto.Estado = "Rechazado";
+                gasto.MotivoRechazo = motivoLimpio;
+                await _context.SaveChangesAsync();
+                await _bitacora.RegistrarAsync(
+                    userClaims: User,
+                    accion: "UPDATE",
+                    tablaAfectada: "fin.GASTO_OPERATIVO",
+                    registroId: gasto.Id,
+                    valorAnterior: $"Estado: {estadoAnterior}",
+                    valorNuevo: $"Estado: {gasto.Estado} | Motivo: {motivoLimpio}"
+                );
+                TempData["MensajeExito"] = "El gasto fue RECHAZADO.";
+            }
+            return RedirectToAction(nameof(Index));
+        }
+
+        // POST: /GastoOperativo/CrearCategoria
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CrearCategoria(string nombreCategoria, string? returnUrl = null)
+        {
+            var (exito, mensaje, nuevaCategoria) =
+                await DivisionTerritorialSeeder.RegistrarCategoriaGastoAsync(_context, nombreCategoria);
+
+            if (!exito || nuevaCategoria == null)
+            {
+                TempData["MensajeError"] = mensaje;
+                return RedirigirRetorno(returnUrl);
+            }
+
+            await _bitacora.RegistrarAsync(
+                userClaims: User,
+                accion: "INSERT",
+                tablaAfectada: "fin.CATEGORIA_GASTO_OPERATIVO",
+                registroId: nuevaCategoria.Id,
+                valorNuevo: $"Categoría: {nuevaCategoria.NombreCategoria}"
+            );
+
+            TempData["MensajeExito"] = mensaje;
+            return RedirigirRetorno(returnUrl);
+        }
+
+        private IActionResult RedirigirRetorno(string? returnUrl)
+        {
+            if (!string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl))
+                return Redirect(returnUrl);
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        private async Task AsegurarCategoriasBaseAsync()
+        {
+            await DivisionTerritorialSeeder.AsegurarCategoriasGastoOperativoAsync(_context);
+        }
+
         private async Task CargarCategoriasAsync()
         {
+            await AsegurarCategoriasBaseAsync();
             ViewBag.Categorias = await _context.CategoriaGastoOperativo
                 .OrderBy(c => c.NombreCategoria)
                 .ToListAsync();

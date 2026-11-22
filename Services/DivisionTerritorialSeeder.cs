@@ -24,6 +24,7 @@ public class DivisionTerritorialSeeder(
         try
         {
             await AsegurarColumnasOperacionesAsync();
+            await AsegurarCategoriasGastoOperativoAsync();
 
             var provincias = await ObtenerCatalogoAsync(
                 $"{BaseUrl}/provincias?limit={LimitePorPagina}", "idProvincia");
@@ -177,5 +178,78 @@ IF COL_LENGTH('ops.INSPECCION', 'temperatura_c') IS NULL
         {
             logger.LogWarning("[SEEDER] No se pudieron verificar las columnas de ops: {Error}", ex.Message);
         }
+    }
+
+    private async Task AsegurarCategoriasGastoOperativoAsync()
+    {
+        try
+        {
+            bool estabaVacia = !await dbContext.CategoriaGastoOperativo.AnyAsync();
+            await AsegurarCategoriasGastoOperativoAsync(dbContext);
+            if (estabaVacia)
+            {
+                logger.LogInformation("[SEEDER] Categorías base de gastos operativos sembradas.");
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning("[SEEDER] No se pudieron sembrar las categorías de gastos operativos: {Error}", ex.Message);
+        }
+    }
+
+    public static async Task AsegurarCategoriasGastoOperativoAsync(PiscinasYMultiserviciosContext context)
+    {
+        if (await context.CategoriaGastoOperativo.AnyAsync())
+            return;
+
+        var categoriasBase = new[]
+        {
+            "Combustible",
+            "Alimentación / Viáticos",
+            "Materiales y Químicos",
+            "Repuestos y Herramientas",
+            "Peajes y Parqueo",
+            "Mantenimiento de Vehículo",
+            "Servicios Públicos / Operativos",
+            "Otros"
+        };
+
+        foreach (var nombre in categoriasBase)
+        {
+            context.CategoriaGastoOperativo.Add(new CategoriaGastoOperativo
+            {
+                NombreCategoria = nombre
+            });
+        }
+
+        await context.SaveChangesAsync();
+    }
+
+    public static async Task<(bool Exito, string Mensaje, CategoriaGastoOperativo? Categoria)> RegistrarCategoriaGastoAsync(
+        PiscinasYMultiserviciosContext context,
+        string? nombreCategoria)
+    {
+        if (string.IsNullOrWhiteSpace(nombreCategoria))
+            return (false, "El nombre de la categoría es obligatorio.", null);
+
+        string nombreLimpio = nombreCategoria.Trim();
+        if (nombreLimpio.Length > 100)
+            return (false, "El nombre de la categoría no puede superar los 100 caracteres.", null);
+
+        await AsegurarCategoriasGastoOperativoAsync(context);
+
+        var existentes = await context.CategoriaGastoOperativo.ToListAsync();
+        if (existentes.Any(c => string.Equals(c.NombreCategoria.Trim(), nombreLimpio, StringComparison.OrdinalIgnoreCase)))
+            return (false, $"La categoría '{nombreLimpio}' ya existe.", null);
+
+        var nuevaCategoria = new CategoriaGastoOperativo
+        {
+            NombreCategoria = nombreLimpio
+        };
+
+        context.CategoriaGastoOperativo.Add(nuevaCategoria);
+        await context.SaveChangesAsync();
+
+        return (true, $"Categoría '{nombreLimpio}' creada correctamente.", nuevaCategoria);
     }
 }
