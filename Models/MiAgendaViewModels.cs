@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace MultiserviciosPiscinas.Models;
 
@@ -48,11 +48,11 @@ public class ReprogramarCitaTecnicoViewModel
 
     [Required(ErrorMessage = "Debe seleccionar una nueva fecha.")]
     [Display(Name = "Nueva fecha")]
-    public DateOnly NuevaFecha { get; set; }
+    public DateOnly? NuevaFecha { get; set; }
 
     [Required(ErrorMessage = "Debe seleccionar una nueva hora.")]
     [Display(Name = "Nueva hora")]
-    public TimeOnly NuevaHora { get; set; }
+    public TimeOnly? NuevaHora { get; set; }
 
     [StringLength(500, ErrorMessage = "El motivo no puede superar los 500 caracteres.")]
     [Display(Name = "Motivo de reprogramación")]

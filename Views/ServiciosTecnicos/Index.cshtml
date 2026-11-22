@@ -145,7 +145,7 @@
                                     @if (servicio.Estado != "Cerrado" && servicio.Estado != "Cancelado")
                                     {
                                         <li>
-                                            <form asp-action="Finalizar" asp-route-id="@servicio.Id" method="post" onsubmit="return FinalizarServicio(event, this);" class="d-inline">
+                                            <form asp-action="Finalizar" asp-route-id="@servicio.Id" method="post" data-tiene-tareas="@(servicio.TareaServicio.Any() ? "true" : "false")" onsubmit="return FinalizarServicio(event, this);" class="d-inline">
                                                 @Html.AntiForgeryToken()
                                                 <button type="submit" class="dropdown-item text-success">
                                                     <i class="bi bi-check-circle-fill me-2"></i>Finalizar servicio

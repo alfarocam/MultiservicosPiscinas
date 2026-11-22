@@ -49,26 +49,55 @@ namespace MultiserviciosPiscinas.Controllers
                     "La piscina seleccionada no pertenece al cliente indicado.");
             }
 
-            var fechaHora = model.Fecha.ToDateTime(model.Hora);
+            var hoy = DateOnly.FromDateTime(DateTime.Today);
 
-            var horariosDelDia = await _context.Cita
-                .Where(c => c.TecnicoId == model.TecnicoId
-                         && c.Estado != "Cancelada"
-                         && c.FechaHora.Date == model.Fecha.ToDateTime(TimeOnly.MinValue).Date)
-                .Select(c => c.FechaHora)
-                .OrderBy(f => f)
-                .ToListAsync();
-
-            if (horariosDelDia.Any(h => h == fechaHora))
+            if (model.Fecha == default || model.Fecha.Year < 1753)
             {
-                var ocupados = string.Join(", ", horariosDelDia.Select(h => h.ToString("HH:mm")));
-                ModelState.AddModelError(nameof(model.Hora),
-                    $"El técnico ya tiene una cita a esa hora. Horarios ocupados ese día: {ocupados}.");
+                ModelState.Remove(nameof(model.Fecha));
+                ModelState.AddModelError(nameof(model.Fecha), "La fecha es obligatoria.");
+            }
+            else if (model.Fecha < hoy)
+            {
+                ModelState.AddModelError(nameof(model.Fecha),
+                    "La fecha seleccionada no es válida. No se puede programar una cita en una fecha que ya pasó.");
+            }
+
+            if (ModelState.TryGetValue(nameof(model.Hora), out var horaCrearEntry) && horaCrearEntry.Errors.Count > 0)
+            {
+                ModelState.Remove(nameof(model.Hora));
+                ModelState.AddModelError(nameof(model.Hora), "La hora es obligatoria.");
+            }
+
+            var fechaHora = default(DateTime);
+            if (model.Fecha.Year >= 1753)
+            {
+                fechaHora = model.Fecha.ToDateTime(model.Hora);
+
+                if (model.Fecha >= hoy && fechaHora <= DateTime.Now)
+                {
+                    ModelState.AddModelError(nameof(model.Hora),
+                        "La fecha y hora seleccionadas deben ser posteriores a la fecha y hora actual.");
+                }
+
+                var horariosDelDia = await _context.Cita
+                    .Where(c => c.TecnicoId == model.TecnicoId
+                             && c.Estado != "Cancelada"
+                             && c.FechaHora.Date == model.Fecha.ToDateTime(TimeOnly.MinValue).Date)
+                    .Select(c => c.FechaHora)
+                    .OrderBy(f => f)
+                    .ToListAsync();
+
+                if (horariosDelDia.Any(h => h == fechaHora))
+                {
+                    var ocupados = string.Join(", ", horariosDelDia.Select(h => h.ToString("HH:mm")));
+                    ModelState.AddModelError(nameof(model.Hora),
+                        $"El técnico ya tiene una cita a esa hora. Horarios ocupados ese día: {ocupados}.");
+                }
             }
 
             if (!ModelState.IsValid)
             {
-                await CargarViewBagCrearAsync(model.ClienteId);
+                await CargarViewBagCrearAsync(model.ClienteId, model.PiscinaId);
                 return View(model);
             }
 
@@ -155,17 +184,46 @@ namespace MultiserviciosPiscinas.Controllers
                 return NotFound();
             }
 
-            var fechaHoraNueva = model.Fecha.ToDateTime(model.Hora);
+            var hoy = DateOnly.FromDateTime(DateTime.Today);
 
-            var conflicto = await _context.Cita
-                .AnyAsync(c => c.Id != id
-                             && c.TecnicoId == model.TecnicoId
-                             && c.Estado != "Cancelada"
-                             && c.FechaHora == fechaHoraNueva);
-
-            if (conflicto)
+            if (model.Fecha == default || model.Fecha.Year < 1753)
             {
-                ModelState.AddModelError(nameof(model.Hora), "El técnico ya tiene otra cita a esa hora.");
+                ModelState.Remove(nameof(model.Fecha));
+                ModelState.AddModelError(nameof(model.Fecha), "La fecha es obligatoria.");
+            }
+            else if (model.Fecha < hoy)
+            {
+                ModelState.AddModelError(nameof(model.Fecha),
+                    "La fecha seleccionada no es válida. No se puede programar una cita en una fecha que ya pasó.");
+            }
+
+            if (ModelState.TryGetValue(nameof(model.Hora), out var horaEditarEntry) && horaEditarEntry.Errors.Count > 0)
+            {
+                ModelState.Remove(nameof(model.Hora));
+                ModelState.AddModelError(nameof(model.Hora), "La hora es obligatoria.");
+            }
+
+            var fechaHoraNueva = default(DateTime);
+            if (model.Fecha.Year >= 1753)
+            {
+                fechaHoraNueva = model.Fecha.ToDateTime(model.Hora);
+
+                if (model.Fecha >= hoy && fechaHoraNueva <= DateTime.Now)
+                {
+                    ModelState.AddModelError(nameof(model.Hora),
+                        "La fecha y hora seleccionadas deben ser posteriores a la fecha y hora actual.");
+                }
+
+                var conflicto = await _context.Cita
+                    .AnyAsync(c => c.Id != id
+                                 && c.TecnicoId == model.TecnicoId
+                                 && c.Estado != "Cancelada"
+                                 && c.FechaHora == fechaHoraNueva);
+
+                if (conflicto)
+                {
+                    ModelState.AddModelError(nameof(model.Hora), "El técnico ya tiene otra cita a esa hora.");
+                }
             }
 
             if (!ModelState.IsValid)
@@ -310,7 +368,7 @@ namespace MultiserviciosPiscinas.Controllers
             return Json(piscinas);
         }
 
-        private async Task CargarViewBagCrearAsync(int clienteSeleccionado = 0)
+        private async Task CargarViewBagCrearAsync(int clienteSeleccionado = 0, int piscinaSeleccionada = 0)
         {
             var clientes = await _context.Cliente
                 .Include(c => c.Usuario)
@@ -344,7 +402,7 @@ namespace MultiserviciosPiscinas.Controllers
                 piscinas = new List<object>();
             }
 
-            ViewBag.Piscinas = new Microsoft.AspNetCore.Mvc.Rendering.SelectList(piscinas, "Id", "Texto");
+            ViewBag.Piscinas = new Microsoft.AspNetCore.Mvc.Rendering.SelectList(piscinas, "Id", "Texto", piscinaSeleccionada);
 
             await CargarTecnicosAsync();
         }

@@ -57,7 +57,7 @@
 
                 @if (Model.Estado != "Cancelada")
                 {
-                    <form asp-action="Editar" asp-route-id="@Model.Id" method="post">
+                    <form id="formEditarCita" asp-action="Editar" asp-route-id="@Model.Id" method="post" novalidate="novalidate">
                         @Html.AntiForgeryToken()
                         <input type="hidden" asp-for="Id" />
 
@@ -176,3 +176,7 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script src="~/js/agenda-crear.js" asp-append-version="true"></script>
+}

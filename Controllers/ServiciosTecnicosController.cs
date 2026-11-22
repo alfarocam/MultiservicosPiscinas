@@ -332,6 +332,12 @@ namespace MultiserviciosPiscinas.Controllers
                 return RedirectToAction(nameof(Detalle), new { id = servicio.Id });
             }
 
+            if (!servicio.TareaServicio.Any())
+            {
+                TempData["MensajeError"] = "No se puede finalizar el servicio porque no tiene tareas registradas. Debe detallar primero el trabajo realizado.";
+                return RedirectToAction(nameof(Detalle), new { id = servicio.Id });
+            }
+
             var ahora = DateTime.Now;
 
             var valorAnterior =
@@ -739,7 +745,24 @@ namespace MultiserviciosPiscinas.Controllers
                 ModelState.AddModelError("", "No se puede reprogramar una cita completada o cancelada.");
             }
 
-            var nuevaFechaHora = modelo.NuevaFecha.ToDateTime(modelo.NuevaHora);
+            if (!modelo.NuevaFecha.HasValue || modelo.NuevaFecha.Value.Year < 1753)
+            {
+                ModelState.Remove(nameof(modelo.NuevaFecha));
+                ModelState.AddModelError(nameof(modelo.NuevaFecha), "Debe seleccionar una nueva fecha.");
+            }
+
+            if (!modelo.NuevaHora.HasValue)
+            {
+                ModelState.Remove(nameof(modelo.NuevaHora));
+                ModelState.AddModelError(nameof(modelo.NuevaHora), "Debe seleccionar una nueva hora.");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return View(modelo);
+            }
+
+            var nuevaFechaHora = modelo.NuevaFecha!.Value.ToDateTime(modelo.NuevaHora!.Value);
 
             if (nuevaFechaHora <= DateTime.Now)
             {

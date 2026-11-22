@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -33,6 +33,14 @@ namespace MultiserviciosPiscinas.Migrations
                 table: "DIRECCION_CLIENTE",
                 type: "float",
                 nullable: true);
+
+            migrationBuilder.Sql(@"
+IF COL_LENGTH('ops.TAREA_SERVICIO', 'fecha_hora_registro') IS NULL
+    ALTER TABLE ops.TAREA_SERVICIO ADD fecha_hora_registro datetime NULL;
+
+IF COL_LENGTH('ops.INSPECCION', 'temperatura_c') IS NULL
+    ALTER TABLE ops.INSPECCION ADD temperatura_c float NULL;
+");
         }
 
         /// <inheritdoc />

@@ -1,17 +1,17 @@
-﻿@model MultiserviciosPiscinas.Models.GastoOperativo
+@model MultiserviciosPiscinas.Models.GastoOperativo
 
 @{
-    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
     ViewData["Title"] = "Corregir Gasto Rechazado";
+    bool tieneComprobante = !string.IsNullOrEmpty(Model.ComprobanteRuta);
 }
 
-<div class="d-flex justify-content-between align-items-center mb-3">
+<div class="c-page-header d-flex justify-content-between align-items-center">
     <h2 class="mb-0">Corregir Gasto Rechazado</h2>
-    <a asp-action="Index" class="btn btn-secondary">Volver</a>
+    <a asp-action="Index" class="btn btn-success"><i class="bi bi-arrow-left me-1"></i>Volver</a>
 </div>
 
 <div class="alert alert-danger shadow-sm mb-4">
-    <i class="bi bi-exclamation-triangle-fill me-2"></i><strong>Motivo del rechazo por el Administrador:</strong> @Model.MotivoRechazo
+    <i class="bi bi-exclamation-triangle-fill me-2"></i><strong>Motivo del rechazo por el Administrador:</strong> @(string.IsNullOrWhiteSpace(Model.MotivoRechazo) ? "—" : Model.MotivoRechazo)
 </div>
 
 <div class="card border-0 shadow-sm">
@@ -19,6 +19,7 @@
         <form asp-action="Corregir" method="post" enctype="multipart/form-data">
             @Html.AntiForgeryToken()
             <input type="hidden" asp-for="Id" />
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
             <div class="row g-3">
                 <div class="col-md-6">
@@ -42,8 +43,28 @@
                 </div>
 
                 <div class="col-md-12">
-                    <label class="form-label fw-bold">Subir Nuevo Comprobante (Opcional)</label>
+                    <label class="form-label fw-bold">
+                        @(tieneComprobante ? "Subir Nuevo Comprobante (Opcional)" : "Subir Comprobante (Requerido para pasar a Pendiente)")
+                    </label>
+                    <div class="mb-2">
+                        @if (tieneComprobante)
+                        {
+                            <span class="small text-success me-2">
+                                <i class="bi bi-file-check me-1"></i>Comprobante actual adjunto.
+                            </span>
+                            <a href="@Model.ComprobanteRuta" target="_blank" class="btn btn-outline-primary btn-sm">
+                                <i class="bi bi-box-arrow-up-right me-1"></i>Ver comprobante actual
+                            </a>
+                        }
+                        else
+                        {
+                            <span class="small text-danger">
+                                <i class="bi bi-file-earmark-x me-1"></i>Este gasto no tiene comprobante adjunto.
+                            </span>
+                        }
+                    </div>
                     <input type="file" name="comprobanteArchivo" class="form-control" accept="image/*,application/pdf" />
+                    <div class="form-text">Para que el gasto vuelva a estado Pendiente de aprobación debe contar con un comprobante adjunto.</div>
                 </div>
             </div>
 
