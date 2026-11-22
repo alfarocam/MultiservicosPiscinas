@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MultiserviciosPiscinas.Models;
@@ -5,6 +6,7 @@ using MultiserviciosPiscinas.Services;
 
 namespace MultiserviciosPiscinas.Controllers
 {
+    [Authorize(Roles = "1")]
     public class ClientesController : Controller
     {
         private readonly PiscinasYMultiserviciosContext _context;

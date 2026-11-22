@@ -31,9 +31,21 @@ namespace MultiserviciosPiscinas.Controllers
         
         public async Task<IActionResult> Index()
         {
-            var gastos = await _context.GastoOperativo
+            var query = _context.GastoOperativo
                 .Include(g => g.Categoria)
                 .Include(g => g.Usuario)
+                .AsQueryable();
+
+            if (!User.IsInRole("1"))
+            {
+                var usuarioId = await ObtenerUsuarioActualIdAsync();
+                if (usuarioId == null)
+                    return RedirectToAction("InicioSesion", "Auth");
+
+                query = query.Where(g => g.UsuarioId == usuarioId.Value);
+            }
+
+            var gastos = await query
                 .OrderBy(g => g.Estado == "Pendiente" ? 1 : (g.Estado == "Aprobado" ? 2 : 3))
                 .ThenByDescending(g => g.Fecha)
                 .ThenByDescending(g => g.Id)
@@ -215,6 +227,9 @@ namespace MultiserviciosPiscinas.Controllers
 
             if (gasto == null) return NotFound();
 
+            if (!await PuedeAccederAGastoAsync(gasto.UsuarioId))
+                return Forbid();
+
             ViewBag.VolverController = "Gastos";
             return View(gasto);
         }
@@ -223,7 +238,15 @@ namespace MultiserviciosPiscinas.Controllers
         public async Task<IActionResult> Corregir(int id)
         {
             var gasto = await _context.GastoOperativo.FindAsync(id);
-            if (gasto == null || gasto.Estado != "Rechazado")
+            if (gasto == null)
+            {
+                return RedirectToAction(nameof(Index));
+            }
+
+            if (!await PuedeAccederAGastoAsync(gasto.UsuarioId))
+                return Forbid();
+
+            if (gasto.Estado != "Rechazado")
             {
                 return RedirectToAction(nameof(Index));
             }
@@ -240,6 +263,9 @@ namespace MultiserviciosPiscinas.Controllers
             {
                 var gastoExistente = await _context.GastoOperativo.FindAsync(gastoForm.Id);
                 if (gastoExistente == null) return NotFound();
+
+                if (!await PuedeAccederAGastoAsync(gastoExistente.UsuarioId))
+                    return Forbid();
 
                 gastoExistente.CategoriaId = gastoForm.CategoriaId;
                 gastoExistente.Monto = gastoForm.Monto;
@@ -320,6 +346,28 @@ namespace MultiserviciosPiscinas.Controllers
             return await _context.CategoriaGastoOperativo
                 .OrderBy(c => c.NombreCategoria)
                 .ToListAsync();
+        }
+
+        private async Task<int?> ObtenerUsuarioActualIdAsync()
+        {
+            var correo = (User.FindFirst(ClaimTypes.Email)?.Value ?? User.Identity?.Name)?.Trim();
+            if (string.IsNullOrEmpty(correo))
+                return null;
+
+            var usuario = await _context.Usuario
+                .AsNoTracking()
+                .FirstOrDefaultAsync(u => u.Correo == correo);
+
+            return usuario?.Id;
+        }
+
+        private async Task<bool> PuedeAccederAGastoAsync(int gastoUsuarioId)
+        {
+            if (User.IsInRole("1"))
+                return true;
+
+            var usuarioId = await ObtenerUsuarioActualIdAsync();
+            return usuarioId.HasValue && gastoUsuarioId == usuarioId.Value;
         }
 
         private IActionResult RedirigirRetorno(string? returnUrl)

@@ -6,6 +6,7 @@ using MultiserviciosPiscinas.Services;
 
 namespace MultiserviciosPiscinas.Controllers
 {
+    [Authorize(Roles = "1")]
     public class AgendaController(
         PiscinasYMultiserviciosContext context,
         BitacoraService bitacora) : Controller

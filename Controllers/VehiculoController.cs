@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using MultiserviciosPiscinas.Models;
 
 namespace MultiserviciosPiscinas.Controllers
 {
+    [Authorize(Roles = "1")]
     public class VehiculoController : Controller
     {
         private readonly PiscinasYMultiserviciosContext _context;

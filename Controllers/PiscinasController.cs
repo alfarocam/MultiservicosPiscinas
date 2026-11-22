@@ -19,6 +19,9 @@ namespace MultiserviciosPiscinas.Controllers
             if (User.IsInRole("3"))
                 return RedirectToAction(nameof(MisPiscinas));
 
+            if (!User.IsInRole("1"))
+                return Forbid();
+
             var piscinas = _contexto.Piscina
                 .Include(p => p.Cliente)
                     .ThenInclude(c => c.Usuario)
