@@ -2,6 +2,7 @@ using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using MultiserviciosPiscinas.Models;
+using MultiserviciosPiscinas.Services;
 
 namespace MultiserviciosPiscinas.Data;
 
@@ -26,6 +27,7 @@ public class DivisionTerritorialSeeder(
             await AsegurarColumnasOperacionesAsync();
             await AsegurarCategoriasGastoOperativoAsync();
             await AsegurarIntegridadRolesYDescripcionesSafeAsync();
+            await AsegurarIntegridadClientesYTelefonosSafeAsync();
 
             var provincias = await ObtenerCatalogoAsync(
                 $"{BaseUrl}/provincias?limit={LimitePorPagina}", "idProvincia");
@@ -269,6 +271,18 @@ IF COL_LENGTH('seg.USUARIO', 'telefono') IS NULL
         }
     }
 
+    private async Task AsegurarIntegridadClientesYTelefonosSafeAsync()
+    {
+        try
+        {
+            await AsegurarIntegridadClientesYTelefonosAsync(dbContext);
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning("[SEEDER] No se pudo verificar integridad de clientes/teléfonos: {Error}", ex.Message);
+        }
+    }
+
     public static async Task AsegurarIntegridadRolesYDescripcionesAsync(PiscinasYMultiserviciosContext context)
     {
         const string sql = @"
@@ -282,10 +296,10 @@ INNER JOIN cli.CLIENTE c ON c.usuario_id = u.id
 WHERE u.rol_id = 2 AND u.correo <> 'admin@piscinas.com';
 
 INSERT INTO cli.CLIENTE (usuario_id, notas)
-SELECT u.id, 'Cliente registrado automáticamente por integridad de rol.'
+SELECT u.id, ''
 FROM seg.USUARIO u
 LEFT JOIN cli.CLIENTE c ON c.usuario_id = u.id
-WHERE u.rol_id = 3 AND c.id IS NULL;";
+WHERE u.rol_id = 3 AND u.activo = 1 AND c.id IS NULL;";
 
         await context.Database.ExecuteSqlRawAsync(sql);
 
@@ -310,6 +324,251 @@ WHERE u.rol_id = 3 AND c.id IS NULL;";
         }
 
         if (huboCambios)
+        {
+            await context.SaveChangesAsync();
+        }
+
+        await AsegurarIntegridadClientesYTelefonosAsync(context);
+    }
+
+    public static async Task AsegurarIntegridadClientesYTelefonosAsync(PiscinasYMultiserviciosContext context)
+    {
+        // 1. Limpiar textos de prueba heredados en notas
+        await context.Database.ExecuteSqlRawAsync(
+            "UPDATE cli.CLIENTE SET notas = '' WHERE notas LIKE 'Cliente semilla%';");
+
+        // 2. Deduplicar clientes repetidos que compartan tanto el mismo nombre como el mismo teléfono
+        var clientes = await context.Cliente
+            .Include(c => c.Usuario)
+            .Include(c => c.TelefonosCliente)
+            .Include(c => c.DireccionCliente)
+            .OrderBy(c => c.Id)
+            .ToListAsync();
+
+        var gruposDuplicados = clientes
+            .Where(c => c.Usuario != null)
+            .Select(c => new
+            {
+                Cliente = c,
+                NombreKey = string.Join(
+                    " ",
+                    $"{c.Usuario.Nombre} {c.Usuario.ApellidoPaterno}"
+                        .Split(' ', StringSplitOptions.RemoveEmptyEntries))
+                    .ToUpperInvariant(),
+                TelefonoKey = Generales.NormalizarTelefono(
+                    c.TelefonosCliente
+                        .OrderByDescending(t => t.EsPrincipal)
+                        .ThenBy(t => t.Id)
+                        .FirstOrDefault()?.NumeroTelefono)
+            })
+            .Where(x => !string.IsNullOrWhiteSpace(x.NombreKey) && !string.IsNullOrEmpty(x.TelefonoKey))
+            .GroupBy(x => new { x.NombreKey, x.TelefonoKey })
+            .Where(g => g.Count() > 1)
+            .Select(g => g.Select(x => x.Cliente).ToList())
+            .ToList();
+
+        bool huboFusiones = false;
+
+        foreach (var grupo in gruposDuplicados)
+        {
+            var ordenados = grupo
+                .OrderByDescending(c => c.TelefonosCliente.Any(t => Generales.EsTelefonoValido(t.NumeroTelefono)))
+                .ThenByDescending(c => c.DireccionCliente.Any())
+                .ThenBy(c => c.Id)
+                .ToList();
+
+            var principal = ordenados[0];
+
+            foreach (var dup in ordenados.Skip(1))
+            {
+                await context.Database.ExecuteSqlRawAsync(
+                    "UPDATE act.PISCINA SET cliente_id = @p0 WHERE cliente_id = @p1;",
+                    principal.Id, dup.Id);
+
+                await context.Database.ExecuteSqlRawAsync(
+                    "UPDATE pry.PROYECTO_CONSTRUCCION SET cliente_id = @p0 WHERE cliente_id = @p1;",
+                    principal.Id, dup.Id);
+
+                await context.Database.ExecuteSqlRawAsync(
+                    "UPDATE ven.COTIZACION SET cliente_id = @p0 WHERE cliente_id = @p1;",
+                    principal.Id, dup.Id);
+
+                await context.Database.ExecuteSqlRawAsync(
+                    "UPDATE ven.FACTURA SET cliente_id = @p0 WHERE cliente_id = @p1;",
+                    principal.Id, dup.Id);
+
+                await context.Database.ExecuteSqlRawAsync(
+                    "DELETE ic FROM ven.ITEM_CARRITO ic INNER JOIN ven.CARRITO car ON car.id = ic.carrito_id WHERE car.cliente_id = @p0; DELETE FROM ven.CARRITO WHERE cliente_id = @p0;",
+                    dup.Id);
+
+                bool principalTieneDirPrincipal = await context.DireccionCliente
+                    .AnyAsync(d => d.ClienteId == principal.Id && d.EsPrincipal == 1);
+
+                if (principalTieneDirPrincipal)
+                {
+                    await context.Database.ExecuteSqlRawAsync(
+                        "UPDATE cli.DIRECCION_CLIENTE SET cliente_id = @p0, es_principal = 0 WHERE cliente_id = @p1;",
+                        principal.Id, dup.Id);
+                }
+                else
+                {
+                    await context.Database.ExecuteSqlRawAsync(
+                        "UPDATE cli.DIRECCION_CLIENTE SET cliente_id = @p0 WHERE cliente_id = @p1;",
+                        principal.Id, dup.Id);
+                }
+
+                bool principalTieneTelefono = await context.TelefonosCliente
+                    .AnyAsync(t => t.ClienteId == principal.Id);
+
+                if (!principalTieneTelefono)
+                {
+                    var telefonoDup = dup.TelefonosCliente
+                        .OrderByDescending(t => Generales.EsTelefonoValido(t.NumeroTelefono))
+                        .ThenByDescending(t => t.EsPrincipal)
+                        .ThenBy(t => t.Id)
+                        .FirstOrDefault();
+
+                    if (telefonoDup != null)
+                    {
+                        await context.Database.ExecuteSqlRawAsync(
+                            "UPDATE cli.TELEFONOS_CLIENTE SET cliente_id = @p0, es_principal = 1 WHERE id = @p1;",
+                            principal.Id, telefonoDup.Id);
+                    }
+                }
+
+                await context.Database.ExecuteSqlRawAsync(
+                    "DELETE FROM cli.TELEFONOS_CLIENTE WHERE cliente_id = @p0;",
+                    dup.Id);
+
+                await context.Database.ExecuteSqlRawAsync(
+                    "DELETE FROM cli.CLIENTE WHERE id = @p0;",
+                    dup.Id);
+
+                if (dup.UsuarioId != principal.UsuarioId &&
+                    dup.Usuario.RolId != 1 &&
+                    !string.Equals(dup.Usuario.Correo, "admin@piscinas.com", StringComparison.OrdinalIgnoreCase))
+                {
+                    await context.Database.ExecuteSqlRawAsync(
+                        "UPDATE ops.CITA SET tecnico_id = @p0 WHERE tecnico_id = @p1;",
+                        principal.UsuarioId, dup.UsuarioId);
+
+                    await context.Database.ExecuteSqlRawAsync(
+                        "UPDATE fin.GASTO_OPERATIVO SET usuario_id = @p0 WHERE usuario_id = @p1;",
+                        principal.UsuarioId, dup.UsuarioId);
+
+                    await context.Database.ExecuteSqlRawAsync(
+                        "UPDATE aud.BITACORA_AUDITORIA SET usuario_id = @p0 WHERE usuario_id = @p1;",
+                        principal.UsuarioId, dup.UsuarioId);
+
+                    await context.Database.ExecuteSqlRawAsync(
+                        "UPDATE ops.NOTIFICACION SET usuario_id = @p0 WHERE usuario_id = @p1;",
+                        principal.UsuarioId, dup.UsuarioId);
+
+                    await context.Database.ExecuteSqlRawAsync(
+                        "UPDATE crm.ANUNCIO SET autor_id = @p0 WHERE autor_id = @p1;",
+                        principal.UsuarioId, dup.UsuarioId);
+
+                    await context.Database.ExecuteSqlRawAsync(
+                        "UPDATE log.RUTA_OPTIMIZADA SET tecnico_id = @p0 WHERE tecnico_id = @p1;",
+                        principal.UsuarioId, dup.UsuarioId);
+
+                    await context.Database.ExecuteSqlRawAsync(
+                        "UPDATE log.VEHICULO SET tecnico_id = @p0 WHERE tecnico_id = @p1;",
+                        principal.UsuarioId, dup.UsuarioId);
+
+                    await context.Database.ExecuteSqlRawAsync(
+                        "UPDATE ven.FACTURA SET creado_por = @p0 WHERE creado_por = @p1;",
+                        principal.UsuarioId, dup.UsuarioId);
+
+                    await context.Database.ExecuteSqlRawAsync(
+                        "DELETE FROM seg.USUARIO WHERE id = @p0;",
+                        dup.UsuarioId);
+                }
+
+                huboFusiones = true;
+            }
+        }
+
+        if (huboFusiones)
+        {
+            context.ChangeTracker.Clear();
+        }
+
+        // 3. Normalizar todos los teléfonos al formato 8888-8888 y asegurar unicidad entre clientes
+        var clientesActualizados = await context.Cliente
+            .Include(c => c.TelefonosCliente)
+            .OrderBy(c => c.Id)
+            .ToListAsync();
+
+        var telefonosUsados = new HashSet<string>(StringComparer.Ordinal);
+        bool huboCambiosTelefonos = false;
+
+        foreach (var cliente in clientesActualizados)
+        {
+            var telefonos = cliente.TelefonosCliente
+                .OrderByDescending(t => t.EsPrincipal)
+                .ThenBy(t => t.Id)
+                .ToList();
+
+            var principalTel = telefonos.FirstOrDefault();
+
+            if (telefonos.Count > 1)
+            {
+                context.TelefonosCliente.RemoveRange(telefonos.Skip(1));
+                huboCambiosTelefonos = true;
+            }
+
+            string digitos = string.Empty;
+            if (principalTel != null && Generales.EsTelefonoValido(principalTel.NumeroTelefono))
+            {
+                var candidatoActual = Generales.NormalizarTelefono(principalTel.NumeroTelefono);
+                if (!telefonosUsados.Contains(candidatoActual))
+                {
+                    digitos = candidatoActual;
+                }
+            }
+
+            if (string.IsNullOrEmpty(digitos))
+            {
+                int candidato = 88011000 + cliente.Id;
+                while (telefonosUsados.Contains(candidato.ToString("D8")))
+                {
+                    candidato++;
+                }
+                digitos = candidato.ToString("D8");
+            }
+
+            telefonosUsados.Add(digitos);
+            string formateado = Generales.FormatearTelefono(digitos);
+
+            if (principalTel != null)
+            {
+                if (!string.Equals(principalTel.NumeroTelefono, formateado, StringComparison.Ordinal) ||
+                    principalTel.EsPrincipal != 1)
+                {
+                    principalTel.NumeroTelefono = formateado;
+                    principalTel.EsPrincipal = 1;
+                    if (string.IsNullOrWhiteSpace(principalTel.TipoTelefono))
+                    {
+                        principalTel.TipoTelefono = "Principal";
+                    }
+                    huboCambiosTelefonos = true;
+                }
+            }
+            else
+            {
+                context.TelefonosCliente.Add(new TelefonosCliente
+                {
+                    ClienteId = cliente.Id,
+                    TipoTelefono = "Principal",
+                    NumeroTelefono = formateado,
+                    EsPrincipal = 1
+                });
+                huboCambiosTelefonos = true;
+            }
+        }
+
+        if (huboCambiosTelefonos)
         {
             await context.SaveChangesAsync();
         }

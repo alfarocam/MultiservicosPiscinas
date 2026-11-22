@@ -196,9 +196,9 @@ namespace MultiserviciosPiscinas.Controllers
             {
                 ModelState.AddModelError("", "El correo es obligatorio.");
             }
-            else if (!Regex.IsMatch(correo, @"^[a-zA-Z0-9._%+-]+@(gmail\.com|hotmail\.com|yahoo\.com|outlook\.com|icloud\.com|live\.com|piscinas\.com)$", RegexOptions.IgnoreCase))
+            else if (!Regex.IsMatch(correo, @"^[a-zA-Z0-9._%+-]+@(gmail\.com|hotmail\.com|yahoo\.com|outlook\.com|icloud\.com|live\.com|piscinas\.com|multiservicios\.com|test\.com|correo\.com|ejemplo\.com)$", RegexOptions.IgnoreCase))
             {
-                ModelState.AddModelError("", "Ingresá un correo válido (@gmail.com, @hotmail.com, @yahoo.com u @outlook.com).");
+                ModelState.AddModelError("", "Ingresá un correo válido (@gmail.com, @hotmail.com, @yahoo.com, @outlook.com o institucional).");
             }
             else
             {
@@ -216,9 +216,22 @@ namespace MultiserviciosPiscinas.Controllers
             {
                 ModelState.AddModelError("", "El teléfono es obligatorio.");
             }
-            else if (!Regex.IsMatch(telefono, @"^\d{1,8}$"))
+            else if (!Generales.EsTelefonoValido(telefono))
             {
-                ModelState.AddModelError("", "El teléfono debe contener solo números y máximo 8 dígitos.");
+                ModelState.AddModelError("", "El teléfono debe contener 8 dígitos con el formato 8888-8888.");
+            }
+            else
+            {
+                var telefonoNormalizado = Generales.NormalizarTelefono(telefono);
+                int? clienteActualId = usuarioDb.Cliente?.Id;
+                bool telefonoEnUso = await _context.TelefonosCliente.AnyAsync(t =>
+                    (!clienteActualId.HasValue || t.ClienteId != clienteActualId.Value) &&
+                    t.NumeroTelefono.Trim().Replace("-", "").Replace(" ", "") == telefonoNormalizado);
+
+                if (telefonoEnUso)
+                {
+                    ModelState.AddModelError("", "El teléfono ya está registrado por otro cliente.");
+                }
             }
 
             if (usuarioDb.Cliente != null)
@@ -242,6 +255,7 @@ namespace MultiserviciosPiscinas.Controllers
                 return View(usuarioDb);
             }
 
+            var telefonoFormateado = Generales.FormatearTelefono(telefono);
             var telefonoAnterior = await ObtenerTelefonoUsuarioAsync(usuarioDb);
             var valorAnterior = $"Nombre: {usuarioDb.Nombre} {usuarioDb.ApellidoPaterno} {usuarioDb.ApellidoMaterno} | Correo: {usuarioDb.Correo} | Teléfono: {telefonoAnterior ?? "N/A"}";
 
@@ -259,7 +273,7 @@ namespace MultiserviciosPiscinas.Controllers
 
                 if (telefonoPrincipal != null)
                 {
-                    telefonoPrincipal.NumeroTelefono = telefono!;
+                    telefonoPrincipal.NumeroTelefono = telefonoFormateado;
                     _context.TelefonosCliente.Update(telefonoPrincipal);
                 }
                 else
@@ -268,7 +282,7 @@ namespace MultiserviciosPiscinas.Controllers
                     {
                         ClienteId = usuarioDb.Cliente.Id,
                         TipoTelefono = "Principal",
-                        NumeroTelefono = telefono!,
+                        NumeroTelefono = telefonoFormateado,
                         EsPrincipal = 1
                     };
                     await _context.TelefonosCliente.AddAsync(nuevoTelefono);
@@ -302,7 +316,7 @@ namespace MultiserviciosPiscinas.Controllers
             {
                 _context.Update(usuarioDb);
                 await _context.SaveChangesAsync();
-                await GuardarTelefonoUsuarioAsync(usuarioDb, telefono);
+                await GuardarTelefonoUsuarioAsync(usuarioDb, telefonoFormateado);
 
                 // La sesión identifica al usuario por su correo, así que hay que
                 // rehacer la cookie: si no, al cambiarlo, las pantallas que lo
@@ -314,7 +328,7 @@ namespace MultiserviciosPiscinas.Controllers
                     "UPDATE",
                     "seg.USUARIO",
                     usuarioDb.Id,
-                    $"Nombre: {usuarioDb.Nombre} {usuarioDb.ApellidoPaterno} {usuarioDb.ApellidoMaterno} | Correo: {usuarioDb.Correo} | Teléfono: {telefono}",
+                    $"Nombre: {usuarioDb.Nombre} {usuarioDb.ApellidoPaterno} {usuarioDb.ApellidoMaterno} | Correo: {usuarioDb.Correo} | Teléfono: {telefonoFormateado}",
                     valorAnterior);
 
                 TempData["MensajeExito"] = "Información del perfil actualizada correctamente.";

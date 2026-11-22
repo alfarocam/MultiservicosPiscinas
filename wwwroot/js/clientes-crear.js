@@ -1,6 +1,19 @@
 $(document).ready(function () {
-    var $form = $('#formCrearCliente');
+    var $form = $('#formCrearCliente, #formEditarCliente').first();
     if (!$form.length) return;
+
+    var $telefono = $('#Telefono');
+    if ($telefono.length) {
+        $telefono.attr('maxlength', '9').on('input', function () {
+            var val = $(this).val().replace(/\D/g, '').slice(0, 8);
+            if (val.length > 4) {
+                val = val.substring(0, 4) + '-' + val.substring(4, 8);
+            }
+            if ($(this).val() !== val) {
+                $(this).val(val);
+            }
+        }).trigger('input');
+    }
 
     var urlVerificarDuplicado = $('#urlVerificarDuplicado').val();
     var validandoEnvio = false;
@@ -45,10 +58,15 @@ $(document).ready(function () {
         return this.optional(element) || $.trim(value).length > 0;
     }, 'Este campo no puede contener solo espacios.');
 
+    $.validator.addMethod('telefonoValido', function (value, element) {
+        if (this.optional(element)) return true;
+        return /^\d{4}-\d{4}$/.test($.trim(value));
+    }, 'El teléfono debe tener el formato 8888-8888 (8 dígitos).');
+
     $.validator.addMethod('correoValido', function (value, element) {
         if (this.optional(element)) return true;
-        return /^[a-zA-Z0-9._%+-]+@(gmail\.com|hotmail\.com|yahoo\.com|outlook\.com|icloud\.com|live\.com|piscinas\.com)$/i.test(value.trim());
-    }, 'Ingresá un correo válido (@gmail.com, @hotmail.com, @yahoo.com u @outlook.com).');
+        return /^[a-zA-Z0-9._%+-]+@(gmail\.com|hotmail\.com|yahoo\.com|outlook\.com|icloud\.com|live\.com|piscinas\.com|multiservicios\.com|test\.com|correo\.com|ejemplo\.com)$/i.test(value.trim());
+    }, 'Ingresá un correo válido (@gmail.com, @hotmail.com, @yahoo.com, @outlook.com o institucional).');
 
     $form.validate({
         errorClass: 'text-danger small mt-1 d-block',
@@ -70,24 +88,28 @@ $(document).ready(function () {
         rules: {
             Nombre: {
                 required: true,
-                noSoloEspacios: true
+                noSoloEspacios: true,
+                normalizer: function (value) { return $.trim(value); }
             },
             ApellidoPaterno: {
                 required: true,
-                noSoloEspacios: true
+                noSoloEspacios: true,
+                normalizer: function (value) { return $.trim(value); }
             },
             ApellidoMaterno: {
                 required: true,
-                noSoloEspacios: true
+                noSoloEspacios: true,
+                normalizer: function (value) { return $.trim(value); }
             },
             Correo: {
                 required: true,
                 email: true,
-                correoValido: true
+                correoValido: true,
+                normalizer: function (value) { return $.trim(value); }
             },
             Telefono: {
                 required: true,
-                noSoloEspacios: true
+                telefonoValido: true
             },
             provinciaId: {
                 required: true
@@ -100,7 +122,8 @@ $(document).ready(function () {
             },
             Direccion: {
                 required: true,
-                noSoloEspacios: true
+                noSoloEspacios: true,
+                normalizer: function (value) { return $.trim(value); }
             }
         },
         messages: {
@@ -142,8 +165,13 @@ $(document).ready(function () {
             validandoEnvio = true;
             var correo = $.trim($('#Correo').val() || '');
             var telefono = $.trim($('#Telefono').val() || '');
+            var excluirClienteId = $('#excluirClienteId').val() || '';
 
-            $.getJSON(urlVerificarDuplicado, { correo: correo, telefono: telefono })
+            $.getJSON(urlVerificarDuplicado, {
+                correo: correo,
+                telefono: telefono,
+                excluirClienteId: excluirClienteId
+            })
                 .done(function (data) {
                     if (data && data.existe) {
                         validandoEnvio = false;

@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using MultiserviciosPiscinas.DTOs.Cotizacion;
 using MultiserviciosPiscinas.Interfaces;
 using MultiserviciosPiscinas.Models;
+using MultiserviciosPiscinas.Services;
 
 namespace MultiserviciosPiscinas.Repositories;
 
@@ -120,11 +121,17 @@ public class CotizacionRepository : ICotizacionRepository
 
     public async Task<ClienteBusquedaDto?> BuscarClientePorCorreoOTelefonoAsync(string valor)
     {
+        if (string.IsNullOrWhiteSpace(valor))
+            return null;
+
+        var valorTrim = valor.Trim();
+        var telefonoNormalizado = Generales.NormalizarTelefono(valorTrim);
+
         // Buscar por correo
         var cliente = await _context.Cliente
             .Include(c => c.Usuario)
             .Include(c => c.TelefonosCliente)
-            .FirstOrDefaultAsync(c => c.Usuario.Correo == valor);
+            .FirstOrDefaultAsync(c => c.Usuario.Correo == valorTrim);
 
         if (cliente != null)
         {
@@ -145,25 +152,29 @@ public class CotizacionRepository : ICotizacionRepository
             };
         }
 
-        // Buscar por teléfono
-        var telefonoCliente = await _context.TelefonosCliente
-            .Include(t => t.Cliente)
-                .ThenInclude(c => c.Usuario)
-            .FirstOrDefaultAsync(t => t.NumeroTelefono == valor);
-
-        if (telefonoCliente?.Cliente != null)
+        // Buscar por teléfono normalizado
+        if (!string.IsNullOrEmpty(telefonoNormalizado))
         {
-            return new ClienteBusquedaDto
+            var telefonoCliente = await _context.TelefonosCliente
+                .Include(t => t.Cliente)
+                    .ThenInclude(c => c.Usuario)
+                .FirstOrDefaultAsync(t =>
+                    t.NumeroTelefono.Trim().Replace("-", "").Replace(" ", "") == telefonoNormalizado);
+
+            if (telefonoCliente?.Cliente != null)
             {
-                ClienteId = telefonoCliente.ClienteId,
-                NombreCompleto = $"{telefonoCliente.Cliente.Usuario.Nombre} {telefonoCliente.Cliente.Usuario.ApellidoPaterno}".Trim(),
-                Nombre = telefonoCliente.Cliente.Usuario.Nombre,
-                ApellidoPaterno = telefonoCliente.Cliente.Usuario.ApellidoPaterno ?? "",
-                ApellidoMaterno = telefonoCliente.Cliente.Usuario.ApellidoMaterno ?? "",
-                Correo = telefonoCliente.Cliente.Usuario.Correo,
-                Telefono = telefonoCliente.NumeroTelefono,
-                Encontrado = true
-            };
+                return new ClienteBusquedaDto
+                {
+                    ClienteId = telefonoCliente.ClienteId,
+                    NombreCompleto = $"{telefonoCliente.Cliente.Usuario.Nombre} {telefonoCliente.Cliente.Usuario.ApellidoPaterno}".Trim(),
+                    Nombre = telefonoCliente.Cliente.Usuario.Nombre,
+                    ApellidoPaterno = telefonoCliente.Cliente.Usuario.ApellidoPaterno ?? "",
+                    ApellidoMaterno = telefonoCliente.Cliente.Usuario.ApellidoMaterno ?? "",
+                    Correo = telefonoCliente.Cliente.Usuario.Correo,
+                    Telefono = telefonoCliente.NumeroTelefono,
+                    Encontrado = true
+                };
+            }
         }
 
         return null;
@@ -199,7 +210,7 @@ public class CotizacionRepository : ICotizacionRepository
             await _context.Database.ExecuteSqlRawAsync(
                 "INSERT INTO cli.CLIENTE (usuario_id, notas) VALUES (@p0, @p1)",
                 nuevoUsuarioId,
-                "Cliente registrado automáticamente en cotización."
+                ""
             );
 
             // Obtener el ClienteId recién creado
@@ -215,7 +226,7 @@ public class CotizacionRepository : ICotizacionRepository
                     "INSERT INTO cli.TELEFONOS_CLIENTE (cliente_id, tipo_telefono, numero_telefono, es_principal) VALUES (@p0, @p1, @p2, @p3)",
                     clienteId,
                     "Móvil",
-                    telefono,
+                    Generales.FormatearTelefono(telefono),
                     1
                 );
             }

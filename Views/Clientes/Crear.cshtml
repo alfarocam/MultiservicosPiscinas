@@ -3,6 +3,11 @@
 @{
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
     ViewData["Title"] = "Nuevo Cliente";
+    int selectedProvinciaId = ViewBag.SelectedProvinciaId ?? 0;
+    int selectedCantonId = ViewBag.SelectedCantonId ?? 0;
+    int selectedDistritoId = ViewBag.SelectedDistritoId ?? 0;
+    var cantones = ViewBag.Cantones as IEnumerable<MultiserviciosPiscinas.Models.Canton> ?? Enumerable.Empty<MultiserviciosPiscinas.Models.Canton>();
+    var distritos = ViewBag.Distritos as IEnumerable<MultiserviciosPiscinas.Models.Distrito> ?? Enumerable.Empty<MultiserviciosPiscinas.Models.Distrito>();
 }
 
 <input type="hidden" id="urlCantones" value="@Url.Action("GetCantones", "Perfiles")" />
@@ -60,7 +65,10 @@
 
                 <div class="col-md-6">
                     <label asp-for="Telefono" class="form-label fw-semibold"></label>
-                    <input asp-for="Telefono" class="form-control" placeholder="Ej: 8888-0000" required />
+                    <input asp-for="Telefono" type="tel" inputmode="numeric"
+                           pattern="[0-9]{4}-[0-9]{4}" maxlength="9"
+                           title="El teléfono debe tener 8 dígitos con formato 8888-8888"
+                           class="form-control" placeholder="Ej: 8888-8888" required />
                     <span asp-validation-for="Telefono" class="text-danger small"></span>
                 </div>
             </div>
@@ -77,23 +85,70 @@
                         <option value="">Seleccione una provincia...</option>
                         @foreach (var provincia in ViewBag.Provincias)
                         {
-                            <option value="@provincia.Id">@provincia.Nombre</option>
+                            if (provincia.Id == selectedProvinciaId)
+                            {
+                                <option value="@provincia.Id" selected="selected">@provincia.Nombre</option>
+                            }
+                            else
+                            {
+                                <option value="@provincia.Id">@provincia.Nombre</option>
+                            }
                         }
                     </select>
                 </div>
 
                 <div class="col-md-4">
                     <label class="form-label fw-semibold">Cantón</label>
-                    <select id="cantonSelect" name="cantonId" class="form-select" disabled required>
-                        <option value="">Seleccione un cantón...</option>
-                    </select>
+                    @if (!cantones.Any())
+                    {
+                        <select id="cantonSelect" name="cantonId" class="form-select" disabled required>
+                            <option value="">Seleccione un cantón...</option>
+                        </select>
+                    }
+                    else
+                    {
+                        <select id="cantonSelect" name="cantonId" class="form-select" required>
+                            <option value="">Seleccione un cantón...</option>
+                            @foreach (var canton in cantones)
+                            {
+                                if (canton.Id == selectedCantonId)
+                                {
+                                    <option value="@canton.Id" selected="selected">@canton.Nombre</option>
+                                }
+                                else
+                                {
+                                    <option value="@canton.Id">@canton.Nombre</option>
+                                }
+                            }
+                        </select>
+                    }
                 </div>
 
                 <div class="col-md-4">
                     <label class="form-label fw-semibold">Distrito</label>
-                    <select id="distritoSelect" asp-for="DistritoId" class="form-select" disabled required>
-                        <option value="">Seleccione un distrito...</option>
-                    </select>
+                    @if (!distritos.Any())
+                    {
+                        <select id="distritoSelect" asp-for="DistritoId" class="form-select" disabled required>
+                            <option value="">Seleccione un distrito...</option>
+                        </select>
+                    }
+                    else
+                    {
+                        <select id="distritoSelect" asp-for="DistritoId" class="form-select" required>
+                            <option value="">Seleccione un distrito...</option>
+                            @foreach (var distrito in distritos)
+                            {
+                                if (distrito.Id == selectedDistritoId)
+                                {
+                                    <option value="@distrito.Id" selected="selected">@distrito.Nombre</option>
+                                }
+                                else
+                                {
+                                    <option value="@distrito.Id">@distrito.Nombre</option>
+                                }
+                            }
+                        </select>
+                    }
                     <span asp-validation-for="DistritoId" class="text-danger small"></span>
                 </div>
 

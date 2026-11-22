@@ -208,7 +208,7 @@ namespace MultiserviciosPiscinas.Controllers
 
                 if (!Regex.IsMatch(
                         model.CorreoCliente,
-                        @"^[a-zA-Z0-9._%+-]+@(gmail\.com|hotmail\.com|yahoo\.com|outlook\.com|icloud\.com|live\.com|piscinas\.com|multiservicios\.com)$",
+                        @"^[a-zA-Z0-9._%+-]+@(gmail\.com|hotmail\.com|yahoo\.com|outlook\.com|icloud\.com|live\.com|piscinas\.com|multiservicios\.com|test\.com|correo\.com|ejemplo\.com)$",
                         RegexOptions.IgnoreCase))
                 {
                     TempData["Mensaje"] = "Ingresá un correo válido (@gmail.com, @hotmail.com, @yahoo.com, @outlook.com o institucional).";
@@ -223,9 +223,12 @@ namespace MultiserviciosPiscinas.Controllers
                     return RedirectToAction("Crear");
                 }
 
-                // Buscar o crear cliente
+                var telefonoFormateado = Generales.FormatearTelefono(model.TelefonoCliente);
+
+                // Buscar o crear cliente (por correo o teléfono para evitar duplicados)
                 int clienteId;
-                var clienteExistente = await _cotizacionRepositorio.BuscarClientePorCorreoOTelefonoAsync(model.CorreoCliente);
+                var clienteExistente = await _cotizacionRepositorio.BuscarClientePorCorreoOTelefonoAsync(model.CorreoCliente)
+                    ?? await _cotizacionRepositorio.BuscarClientePorCorreoOTelefonoAsync(telefonoFormateado);
 
                 if (clienteExistente != null && clienteExistente.Encontrado)
                 {
@@ -238,7 +241,7 @@ namespace MultiserviciosPiscinas.Controllers
                         model.ApellidoPaterno,
                         model.ApellidoMaterno,
                         model.CorreoCliente,
-                        model.TelefonoCliente
+                        telefonoFormateado
                     );
                 }
 
@@ -255,7 +258,7 @@ namespace MultiserviciosPiscinas.Controllers
                     NumeroCotizacion = numeroCotizacion,
                     NombreCliente = model.NombreCliente,
                     CorreoCliente = model.CorreoCliente,
-                    TelefonoCliente = model.TelefonoCliente,
+                    TelefonoCliente = telefonoFormateado,
                     FechaEmision = cotizacion.FechaEmision,
                     FechaVigencia = cotizacion.FechaVigencia,
                     NumeroSinpe = _configuracion["DatosContacto:NumeroSinpe"],

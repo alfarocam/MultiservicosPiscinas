@@ -120,9 +120,9 @@ if (window.jQuery && $.fn.dataTable) {
         responsive: true,
         autoWidth: false,
         language: {
-            search: "",
+            search: "Buscar:",
             searchPlaceholder: "Buscar...",
-            lengthMenu: "Mostrar _MENU_",
+            lengthMenu: "Mostrar _MENU_ registros",
             info: "_START_ a _END_ de _TOTAL_",
             infoEmpty: "0 a 0 de 0",
             infoFiltered: "(de _MAX_)",

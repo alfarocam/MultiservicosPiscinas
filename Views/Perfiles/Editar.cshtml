@@ -84,12 +84,15 @@
                            id="telefono"
                            name="telefono"
                            inputmode="numeric"
-                           maxlength="8"
+                           pattern="[0-9]{4}-[0-9]{4}"
+                           maxlength="9"
+                           title="El teléfono debe tener 8 dígitos con formato 8888-8888"
                            class="form-control"
-                           placeholder="Ej: 88880000"
-                           value="@((Model.Cliente?.TelefonosCliente
-                                       ?.FirstOrDefault(t => t.EsPrincipal == 1)
-                                       ?.NumeroTelefono ?? Model.Telefono ?? "").Replace("-", "").Replace(" ", ""))"
+                           placeholder="Ej: 8888-8888"
+                           value="@(MultiserviciosPiscinas.Services.Generales.FormatearTelefono(
+                                       Model.Cliente?.TelefonosCliente
+                                           ?.FirstOrDefault(t => t.EsPrincipal == 1)
+                                           ?.NumeroTelefono ?? Model.Telefono))"
                            required />
                 </div>
 

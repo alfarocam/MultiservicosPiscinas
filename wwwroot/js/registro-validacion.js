@@ -1,22 +1,25 @@
 $(document).ready(function () {
     var $telefono = $('#Telefono');
 
-    // Bloquea letras/símbolos y recorta a máximo 8 dígitos (estándar Costa Rica)
-    $telefono.attr('maxlength', '8').on('input', function () {
+    // Bloquea letras/símbolos y aplica formato 8888-8888 (estándar Costa Rica)
+    $telefono.attr('maxlength', '9').on('input', function () {
         var soloNumeros = $(this).val().replace(/\D/g, '').slice(0, 8);
+        if (soloNumeros.length > 4) {
+            soloNumeros = soloNumeros.substring(0, 4) + '-' + soloNumeros.substring(4, 8);
+        }
         if ($(this).val() !== soloNumeros) {
             $(this).val(soloNumeros);
         }
-    });
+    }).trigger('input');
 
     $.validator.addMethod('telefonoCostaRica', function (value, element) {
         if (this.optional(element)) return true;
-        return /^\d{1,8}$/.test(value);
-    }, 'El teléfono debe contener solo números y máximo 8 dígitos.');
+        return /^\d{4}-\d{4}$/.test($.trim(value));
+    }, 'El teléfono debe tener el formato 8888-8888 (8 dígitos).');
 
     $.validator.addMethod('correoValido', function (value, element) {
         if (this.optional(element)) return true;
-        return /^[a-zA-Z0-9._%+-]+@(gmail\.com|hotmail\.com|yahoo\.com|outlook\.com|icloud\.com|live\.com|piscinas\.com)$/i.test(value.trim());
+        return /^[a-zA-Z0-9._%+-]+@(gmail\.com|hotmail\.com|yahoo\.com|outlook\.com|icloud\.com|live\.com|piscinas\.com|multiservicios\.com)$/i.test(value.trim());
     }, 'Ingresá un correo válido (@gmail.com, @hotmail.com, @yahoo.com u @outlook.com).');
 
     var urlVerificarDuplicado = $('#urlVerificarDuplicado').val();
@@ -120,7 +123,10 @@ $(document).ready(function () {
             var correo = $.trim($('#Correo').val() || '');
             var telefono = $.trim($('#Telefono').val() || '');
 
-            $.getJSON(urlVerificarDuplicado, { correo: correo, telefono: telefono })
+            $.getJSON(urlVerificarDuplicado, {
+                correo: correo,
+                telefono: telefono
+            })
                 .done(function (data) {
                     if (data && data.existe) {
                         validandoEnvio = false;
