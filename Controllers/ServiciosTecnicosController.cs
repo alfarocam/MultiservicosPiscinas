@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using MultiserviciosPiscinas.Data;
 using MultiserviciosPiscinas.Models;
 using System.Security.Claims;
 
@@ -18,6 +19,8 @@ namespace MultiserviciosPiscinas.Controllers
 
             if (usuarioId == null)
                 return RedirectToAction("InicioSesion", "Auth");
+
+            await DivisionTerritorialSeeder.CerrarCitasVencidasAsync(_context);
 
             var consulta = _context.Servicio
                 .Include(s => s.TareaServicio)
@@ -629,6 +632,8 @@ namespace MultiserviciosPiscinas.Controllers
 
             if (usuarioId == null)
                 return RedirectToAction("InicioSesion", "Auth");
+
+            await DivisionTerritorialSeeder.CerrarCitasVencidasAsync(_context);
 
             var fechaConsulta = fecha ?? DateOnly.FromDateTime(DateTime.Today);
 

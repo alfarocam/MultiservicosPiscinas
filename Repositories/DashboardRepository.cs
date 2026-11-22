@@ -17,6 +17,7 @@ namespace MultiserviciosPiscinas.Repositories
         public async Task<DashboardDto> ObtenerDashboardAsync()
         {
             await MultiserviciosPiscinas.Data.DivisionTerritorialSeeder.AsegurarIntegridadRolesYDescripcionesAsync(_context);
+            await MultiserviciosPiscinas.Data.DivisionTerritorialSeeder.CerrarCitasVencidasAsync(_context);
 
             var hoy = DateTime.Today;
 

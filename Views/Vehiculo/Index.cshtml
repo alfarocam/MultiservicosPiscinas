@@ -1,7 +1,7 @@
 @model IEnumerable<MultiserviciosPiscinas.Models.Vehiculo>
 
 @{
-    ViewData["Title"] = "Registar Vehiculos de la empresa";
+    ViewData["Title"] = "Vehículos de la Empresa";
 }
 
 <style>
@@ -24,7 +24,7 @@
         }
 </style>
 
-<div class="c-page-header">
+<div class="c-page-header d-flex justify-content-between align-items-center flex-wrap gap-2">
     <h2>Vehículos de la Empresa</h2>
     <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalNuevoVehiculo">
         <i class="bi bi-plus-circle me-1"></i>Registrar Vehículo
@@ -50,7 +50,7 @@
 <div class="card shadow-sm">
     <div class="card-body">
         <div class="table-responsive">
-            <table id="tablaVehiculo" class="table table-hover align-middle">
+            <table id="tablaVehiculo" class="table table-hover align-middle w-100">
                 <thead class="table-light">
                     <tr>
                         <th>Placa</th>
@@ -126,12 +126,12 @@
                         <i class="bi bi-x-lg"></i>
                     </button>
                 </div>
-                <form asp-action="Crear" method="post">
+                <form id="formCrearVehiculo" asp-action="Crear" method="post" novalidate>
                     @Html.AntiForgeryToken()
                     <div class="modal-body">
                         <div class="mb-3">
-                            <label class="form-label fw-bold">Placa:</label>
-                            <input type="text" name="Placa" class="form-control" placeholder="Ej: CL-123456" required />
+                            <label for="crearPlaca" class="form-label fw-bold">Placa:</label>
+                            <input type="text" id="crearPlaca" name="Placa" class="form-control" maxlength="7" placeholder="Ej: ABC-123 o 123456" required />
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-bold">Marca:</label>
@@ -152,7 +152,7 @@
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                             <i class="bi bi-x-circle me-1"></i>Cancelar
                         </button>
-                        <button type="submit" class="btn btn-success"><i class="bi bi-save me-1"></i>Guardar Vehiculo</button>
+                        <button type="submit" class="btn btn-success"><i class="bi bi-save me-1"></i>Guardar Vehículo</button>
                     </div>
                 </form>
             </div>
@@ -166,13 +166,13 @@
                     <h5 class="modal-title"><i class="bi bi-pencil"></i> Actualizar Datos de Vehículo</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <form asp-action="Editar" method="post">
+                <form id="formEditarVehiculo" asp-action="Editar" method="post" novalidate>
                     @Html.AntiForgeryToken()
                     <input type="hidden" id="editId" name="Id" />
                     <div class="modal-body">
                         <div class="mb-3">
-                            <label class="form-label fw-semibold">Placa:</label>
-                            <input type="text" id="editPlaca" name="Placa" class="form-control" required />
+                            <label for="editPlaca" class="form-label fw-semibold">Placa:</label>
+                            <input type="text" id="editPlaca" name="Placa" class="form-control" maxlength="7" placeholder="Ej: ABC-123 o 123456" required />
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-semibold">Marca:</label>

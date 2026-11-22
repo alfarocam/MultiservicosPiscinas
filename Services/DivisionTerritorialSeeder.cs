@@ -29,6 +29,7 @@ public class DivisionTerritorialSeeder(
             await AsegurarCategoriasProductoAsync();
             await AsegurarIntegridadRolesYDescripcionesSafeAsync();
             await AsegurarIntegridadClientesYTelefonosSafeAsync();
+            await CerrarCitasVencidasSafeAsync();
 
             var provincias = await ObtenerCatalogoAsync(
                 $"{BaseUrl}/provincias?limit={LimitePorPagina}", "idProvincia");
@@ -282,6 +283,48 @@ IF COL_LENGTH('seg.USUARIO', 'telefono') IS NULL
         {
             logger.LogWarning("[SEEDER] No se pudo verificar integridad de clientes/teléfonos: {Error}", ex.Message);
         }
+    }
+
+    private async Task CerrarCitasVencidasSafeAsync()
+    {
+        try
+        {
+            await CerrarCitasVencidasAsync(dbContext);
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning("[SEEDER] No se pudieron cerrar citas vencidas: {Error}", ex.Message);
+        }
+    }
+
+    public static async Task CerrarCitasVencidasAsync(PiscinasYMultiserviciosContext context)
+    {
+        var ahora = DateTime.Now;
+
+        var citasVencidas = await context.Cita
+            .Include(c => c.Servicio)
+            .Where(c => c.FechaHora < ahora
+                     && c.Estado != "Completada"
+                     && c.Estado != "Cancelada")
+            .ToListAsync();
+
+        if (citasVencidas.Count == 0)
+            return;
+
+        foreach (var cita in citasVencidas)
+        {
+            cita.Estado = "Completada";
+
+            if (cita.Servicio != null
+                && cita.Servicio.Estado != "Cerrado"
+                && cita.Servicio.Estado != "Cancelado")
+            {
+                cita.Servicio.Estado = "Cerrado";
+                cita.Servicio.FechaCierre ??= DateOnly.FromDateTime(cita.FechaHora);
+            }
+        }
+
+        await context.SaveChangesAsync();
     }
 
     private async Task AsegurarCategoriasProductoAsync()

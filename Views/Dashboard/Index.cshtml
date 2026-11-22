@@ -210,9 +210,9 @@
                             <td>
                                 @{
                                     var badgeClass = item.Estado switch {
-                                        "Completado" or "Cerrado" => "c-badge-green",
-                                        "En progreso" or "Abierto" => "c-badge-blue",
-                                        "Cancelado" => "c-badge-red",
+                                        "Completado" or "Completada" or "Cerrado" => "c-badge-green",
+                                        "En progreso" or "Abierto" or "Confirmada" or "En camino" => "c-badge-blue",
+                                        "Cancelado" or "Cancelada" => "c-badge-red",
                                         "Pendiente" => "c-badge-amber",
                                         _ => "c-badge-gray"
                                     };

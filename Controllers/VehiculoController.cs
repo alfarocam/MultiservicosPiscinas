@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using MultiserviciosPiscinas.Models;
+using System.Text.RegularExpressions;
 
 namespace MultiserviciosPiscinas.Controllers
 {
@@ -45,41 +46,33 @@ namespace MultiserviciosPiscinas.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Crear(Vehiculo vehiculo)
         {
-            // Nota: acá NO se usa ModelState.IsValid a secas. "Vehiculo" es la
-            // entidad de Entity Framework tal cual, y tiene propiedades como
-            // "Tecnico" (la navegación) y "Estado" que son de tipo no-nulable pero
-            // que el formulario nunca envía (Estado se asigna un poco más abajo, y
-            // "Tecnico" no se completa nunca acá, solo su Id). Por eso
-            // ModelState.IsValid daba "false" SIEMPRE, incluso llenando bien el
-            // formulario: ASP.NET Core marca esas propiedades como inválidas por
-            // venir en null. La validación real solo debe mirar los campos que el
-            // usuario efectivamente llena.
-            if (string.IsNullOrWhiteSpace(vehiculo.Placa)
-                || string.IsNullOrWhiteSpace(vehiculo.Marca)
-                || vehiculo.TecnicoId <= 0)
+            if (!ValidarDatosVehiculo(vehiculo, out var placaNormalizada, out var mensajeError))
             {
-                TempData["MensajeError"] = "Debe completar Placa, Marca y seleccionar un Técnico válido.";
+                TempData["MensajeError"] = mensajeError;
                 return RedirectToAction(nameof(Index));
             }
 
             try
             {
                 bool placaExiste = await _context.Vehiculo
-                    .AnyAsync(v => v.Placa.ToLower() == vehiculo.Placa.ToLower());
+                    .AnyAsync(v => v.Placa.ToLower() == placaNormalizada.ToLower());
 
                 if (placaExiste)
                 {
-                    TempData["MensajeError"] = $"¡Error! La placa '{vehiculo.Placa}' ya está registrada en el sistema.";
+                    TempData["MensajeError"] = $"¡Error! La placa '{placaNormalizada}' ya está registrada en el sistema.";
                     return RedirectToAction(nameof(Index));
                 }
 
                 // registro exitoso
+                vehiculo.Placa = placaNormalizada;
+                vehiculo.Marca = vehiculo.Marca.Trim();
+                vehiculo.Modelo = string.IsNullOrWhiteSpace(vehiculo.Modelo) ? null : vehiculo.Modelo.Trim();
                 vehiculo.Estado = "Activo";
 
                 _context.Vehiculo.Add(vehiculo);
                 await _context.SaveChangesAsync();
 
-                TempData["MensajeExito"] = $"Vehiiculo registrado con exito (ID Interno: #{vehiculo.Id}) y asignado como Activo.";
+                TempData["MensajeExito"] = $"Vehículo registrado con éxito (ID Interno: #{vehiculo.Id}) y asignado como Activo.";
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception)
@@ -97,30 +90,36 @@ namespace MultiserviciosPiscinas.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Editar(Vehiculo vehiculo)
         {
+            if (!ValidarDatosVehiculo(vehiculo, out var placaNormalizada, out var mensajeError))
+            {
+                TempData["MensajeError"] = mensajeError;
+                return RedirectToAction(nameof(Index));
+            }
+
             try
             {
                 var vehiculoExistente = await _context.Vehiculo.FindAsync(vehiculo.Id);
 
                 if (vehiculoExistente == null)
                 {
-                    TempData["MensajeError"] = "No se encontró el vehiculo para actualizar.";
+                    TempData["MensajeError"] = "No se encontró el vehículo para actualizar.";
                     return RedirectToAction(nameof(Index));
                 }
 
 
                 bool placaDuplicada = await _context.Vehiculo
-                    .AnyAsync(v => v.Placa.ToLower() == vehiculo.Placa.ToLower() && v.Id != vehiculo.Id);
+                    .AnyAsync(v => v.Placa.ToLower() == placaNormalizada.ToLower() && v.Id != vehiculo.Id);
 
                 if (placaDuplicada)
                 {
-                    TempData["MensajeError"] = $"¡Error! La placa '{vehiculo.Placa}' pertenece a otro vehículo.";
+                    TempData["MensajeError"] = $"¡Error! La placa '{placaNormalizada}' pertenece a otro vehículo.";
                     return RedirectToAction(nameof(Index));
                 }
 
 
-                vehiculoExistente.Placa = vehiculo.Placa;
-                vehiculoExistente.Marca = vehiculo.Marca;
-                vehiculoExistente.Modelo = vehiculo.Modelo;
+                vehiculoExistente.Placa = placaNormalizada;
+                vehiculoExistente.Marca = vehiculo.Marca.Trim();
+                vehiculoExistente.Modelo = string.IsNullOrWhiteSpace(vehiculo.Modelo) ? null : vehiculo.Modelo.Trim();
                 vehiculoExistente.TecnicoId = vehiculo.TecnicoId;
 
                 _context.Update(vehiculoExistente);
@@ -138,6 +137,40 @@ namespace MultiserviciosPiscinas.Controllers
                 TempData["MensajeError"] = "No se pudo actualizar el vehículo. Ocurrió un error al guardar en la base de datos.";
                 return RedirectToAction(nameof(Index));
             }
+        }
+
+        private static bool ValidarDatosVehiculo(Vehiculo vehiculo, out string placaNormalizada, out string? mensajeError)
+        {
+            placaNormalizada = string.Empty;
+
+            if (string.IsNullOrWhiteSpace(vehiculo.Placa)
+                || string.IsNullOrWhiteSpace(vehiculo.Marca)
+                || vehiculo.TecnicoId <= 0)
+            {
+                mensajeError = "Debe completar Placa, Marca y seleccionar un Técnico válido.";
+                return false;
+            }
+
+            if (!NormalizarYValidarPlaca(vehiculo.Placa, out placaNormalizada))
+            {
+                mensajeError = "Formato de placa inválido. Use ABC-123 (letras y números) o 123456 (solo números).";
+                return false;
+            }
+
+            mensajeError = null;
+            return true;
+        }
+
+        private static bool NormalizarYValidarPlaca(string? placa, out string placaNormalizada)
+        {
+            placaNormalizada = (placa ?? string.Empty).Trim().ToUpperInvariant();
+
+            if (Regex.IsMatch(placaNormalizada, @"^[A-Z]{3}\d{3}$"))
+            {
+                placaNormalizada = $"{placaNormalizada[..3]}-{placaNormalizada[3..]}";
+            }
+
+            return Regex.IsMatch(placaNormalizada, @"^([A-Z]{3}-\d{3}|\d{6})$");
         }
     }
 }

@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using MultiserviciosPiscinas.Data;
 using MultiserviciosPiscinas.Models;
 using System.Security.Claims;
 
@@ -203,6 +204,8 @@ namespace MultiserviciosPiscinas.Controllers
             if (tecnicoId == null)
                 return RedirectToAction("InicioSesion", "Auth");
 
+            await DivisionTerritorialSeeder.CerrarCitasVencidasAsync(_contexto);
+
             var citas = await _contexto.Cita
                 .Include(c => c.Piscina)
                     .ThenInclude(p => p.Cliente)
@@ -316,6 +319,25 @@ namespace MultiserviciosPiscinas.Controllers
             if (cita.Tipo != "Mantenimiento" && cita.Tipo != "Inspección")
             {
                 ModelState.AddModelError("", "Solo se pueden registrar parámetros en visitas de mantenimiento o inspección.");
+            }
+
+            var fechaMinima = new DateOnly(2020, 1, 1);
+            var fechaMaxima = DateOnly.FromDateTime(DateTime.Today);
+
+            if (ModelState.TryGetValue(nameof(modelo.FechaInspeccion), out var fechaEntry) && fechaEntry.Errors.Count > 0)
+            {
+                ModelState.Remove(nameof(modelo.FechaInspeccion));
+                ModelState.AddModelError(nameof(modelo.FechaInspeccion), "La fecha de inspección es obligatoria.");
+            }
+            else if (modelo.FechaInspeccion < fechaMinima)
+            {
+                ModelState.AddModelError(nameof(modelo.FechaInspeccion),
+                    "La fecha de inspección no puede ser anterior al 01/01/2020.");
+            }
+            else if (modelo.FechaInspeccion > fechaMaxima)
+            {
+                ModelState.AddModelError(nameof(modelo.FechaInspeccion),
+                    "La fecha de inspección no puede ser posterior a la fecha actual.");
             }
 
             if (!ModelState.IsValid)

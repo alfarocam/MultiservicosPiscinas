@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using MultiserviciosPiscinas.Data;
 using MultiserviciosPiscinas.Models;
 using MultiserviciosPiscinas.Services;
 
@@ -16,6 +17,8 @@ namespace MultiserviciosPiscinas.Controllers
 
         public async Task<IActionResult> Index()
         {
+            await DivisionTerritorialSeeder.CerrarCitasVencidasAsync(_context);
+
             var citas = await _context.Cita
                 .Include(c => c.Piscina)
                     .ThenInclude(p => p.Cliente)
