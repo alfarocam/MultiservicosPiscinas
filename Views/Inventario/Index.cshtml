@@ -7,7 +7,12 @@
     <h2>Inventario</h2>
     @if (User.IsInRole("1"))
     {
-        <a asp-action="Crear" class="btn btn-primary"><i class="bi bi-plus-circle me-1"></i>Nuevo producto</a>
+        <div class="d-flex flex-wrap gap-2">
+            <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalCategorias">
+                <i class="bi bi-tags me-1"></i>Categorías
+            </button>
+            <a asp-action="Crear" class="btn btn-primary"><i class="bi bi-plus-circle me-1"></i>Nuevo producto</a>
+        </div>
     }
 </div>
 
@@ -18,20 +23,13 @@
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 }
-
-<div class="c-filter-bar mb-3">
-    <form method="get" asp-action="Index" class="d-flex gap-2 align-items-center flex-wrap w-100">
-        <input type="text" name="busqueda" value="@ViewBag.Busqueda"
-               class="form-control c-filter-input" placeholder="Buscar por nombre..." />
-        <button type="submit" class="btn btn-success">
-            <i class="bi bi-search me-1"></i>Buscar
-        </button>
-        @if (!string.IsNullOrWhiteSpace(ViewBag.Busqueda as string))
-        {
-            <a asp-action="Index" class="btn btn-outline-secondary"><i class="bi bi-x-lg me-1"></i>Limpiar</a>
-        }
-    </form>
-</div>
+@if (TempData["MensajeError"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["MensajeError"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
 
 <div class="card shadow-sm">
     <div class="card-body">
@@ -121,6 +119,66 @@
         </div>
     </div>
 </div>
+
+@if (User.IsInRole("1"))
+{
+    var categoriasInventario = (ViewBag.Categorias as List<MultiserviciosPiscinas.Models.CategoriaProducto>)
+        ?? new List<MultiserviciosPiscinas.Models.CategoriaProducto>();
+
+    <div class="modal fade" id="modalCategorias" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content text-start">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title fs-6"><i class="bi bi-tags-fill me-2"></i>Categorías de Inventario</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+                    <form asp-controller="Inventario" asp-action="CrearCategoria" method="post" class="mb-4">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="returnUrl" value="@Context.Request.Path" />
+                        <label for="nombreCategoriaNueva" class="form-label fw-bold text-dark">Agregar nueva categoría:</label>
+                        <div class="input-group">
+                            <input type="text" id="nombreCategoriaNueva" name="nombreCategoria" class="form-control" maxlength="100" required placeholder="Ej: Químicos, Accesorios de Limpieza..." />
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-plus-circle me-1"></i>Agregar
+                            </button>
+                        </div>
+                    </form>
+
+                    <label class="form-label fw-bold text-dark">Categorías existentes:</label>
+                    @if (categoriasInventario.Any())
+                    {
+                        <div class="d-flex flex-column gap-2">
+                            @foreach (var cat in categoriasInventario)
+                            {
+                                <form asp-controller="Inventario" asp-action="EditarCategoria" method="post" class="d-flex gap-2 align-items-center">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@cat.Id" />
+                                    <input type="hidden" name="returnUrl" value="@Context.Request.Path" />
+                                    <input type="text" name="nombreCategoria" value="@cat.NombreCategoria" class="form-control form-control-sm" maxlength="100" required />
+                                    <button type="submit" class="btn btn-sm btn-outline-primary text-nowrap">
+                                        <i class="bi bi-save me-1"></i>Guardar
+                                    </button>
+                                </form>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted small mb-0">No hay categorías registradas.</p>
+                    }
+                </div>
+
+                <div class="modal-footer bg-light d-flex justify-content-end">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle me-1"></i>Cerrar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
 
 @section Scripts {
     <script src="~/js/inventario.js" asp-append-version="true"></script>

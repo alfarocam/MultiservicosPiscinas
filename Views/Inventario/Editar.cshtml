@@ -11,6 +11,21 @@
     </a>
 </div>
 
+@if (TempData["MensajeExito"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show mb-3" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>@TempData["MensajeExito"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+@if (TempData["MensajeError"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["MensajeError"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
 <div class="card border-0 shadow-sm">
     <div class="card-body">
         <form asp-action="Editar" asp-route-id="@Model.Id" method="post" enctype="multipart/form-data">
@@ -30,7 +45,12 @@
                 </div>
 
                 <div class="col-md-6">
-                    <label asp-for="CategoriaId" class="form-label">Categoría</label>
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <label asp-for="CategoriaId" class="form-label mb-0">Categoría</label>
+                        <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none" data-bs-toggle="modal" data-bs-target="#modalCrearCategoria">
+                            <i class="bi bi-plus-circle me-1"></i>Nueva categoría
+                        </button>
+                    </div>
                     <select asp-for="CategoriaId" class="form-select">
                         <option value="">-- Seleccione una categoría --</option>
                         @foreach (var cat in (ViewBag.Categorias as List<MultiserviciosPiscinas.Models.CategoriaProducto>) ?? new List<MultiserviciosPiscinas.Models.CategoriaProducto>())
@@ -94,6 +114,36 @@
             </div>
 
         </form>
+    </div>
+</div>
+
+<div class="modal fade" id="modalCrearCategoria" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content text-start">
+            <form asp-controller="Inventario" asp-action="CrearCategoria" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="returnUrl" value="@Context.Request.Path" />
+
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title fs-6"><i class="bi bi-tags-fill me-2"></i>Nueva Categoría de Inventario</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+                    <label for="nombreCategoriaEditar" class="form-label fw-bold text-dark">Nombre de la categoría:</label>
+                    <input type="text" id="nombreCategoriaEditar" name="nombreCategoria" class="form-control" maxlength="100" required placeholder="Ej: Químicos, Accesorios de Limpieza..." />
+                </div>
+
+                <div class="modal-footer bg-light d-flex justify-content-end">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle me-1"></i>Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-circle-fill me-1"></i>Guardar categoría
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using MultiserviciosPiscinas.Data;
 using MultiserviciosPiscinas.Models;
 using MultiserviciosPiscinas.Services;
 
@@ -17,8 +18,11 @@ namespace MultiserviciosPiscinas.Controllers
         // GET: /Inventario
         public async Task<IActionResult> Index(string? busqueda)
         {
+            await CargarCategoriasAsync();
+
             var query = _context.Producto
                 .Include(p => p.Categoria)
+                .Where(p => !p.Categoria.NombreCategoria.Contains("Servicio"))
                 .AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(busqueda))
@@ -66,7 +70,7 @@ namespace MultiserviciosPiscinas.Controllers
 
             if (!ModelState.IsValid)
             {
-                await CargarCategoriasAsync();
+                await CargarCategoriasAsync(producto.CategoriaId);
                 return View(producto);
             }
 
@@ -266,11 +270,80 @@ namespace MultiserviciosPiscinas.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        // POST: /Inventario/CrearCategoria
+        [Authorize(Roles = "1")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CrearCategoria(string nombreCategoria, string? returnUrl = null)
+        {
+            var (exito, mensaje, nuevaCategoria) =
+                await DivisionTerritorialSeeder.RegistrarCategoriaProductoAsync(_context, nombreCategoria);
+
+            if (!exito || nuevaCategoria == null)
+            {
+                TempData["MensajeError"] = mensaje;
+                return RedirigirRetorno(returnUrl);
+            }
+
+            await _bitacora.RegistrarAsync(
+                userClaims: User,
+                accion: "INSERT",
+                tablaAfectada: "inv.CATEGORIA_PRODUCTO",
+                registroId: nuevaCategoria.Id,
+                valorNuevo: $"Categoría: {nuevaCategoria.NombreCategoria}"
+            );
+
+            TempData["MensajeExito"] = mensaje;
+            return RedirigirRetorno(returnUrl);
+        }
+
+        // POST: /Inventario/EditarCategoria
+        [Authorize(Roles = "1")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditarCategoria(int id, string nombreCategoria, string? returnUrl = null)
+        {
+            var (exito, mensaje, nombreAnterior, categoria) =
+                await DivisionTerritorialSeeder.EditarCategoriaProductoAsync(_context, id, nombreCategoria);
+
+            if (!exito || categoria == null)
+            {
+                TempData["MensajeError"] = mensaje;
+                return RedirigirRetorno(returnUrl);
+            }
+
+            await _bitacora.RegistrarAsync(
+                userClaims: User,
+                accion: "UPDATE",
+                tablaAfectada: "inv.CATEGORIA_PRODUCTO",
+                registroId: categoria.Id,
+                valorAnterior: $"Categoría: {nombreAnterior}",
+                valorNuevo: $"Categoría: {categoria.NombreCategoria}"
+            );
+
+            TempData["MensajeExito"] = mensaje;
+            return RedirigirRetorno(returnUrl);
+        }
+
+        private IActionResult RedirigirRetorno(string? returnUrl)
+        {
+            if (!string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl))
+                return Redirect(returnUrl);
+
+            return RedirectToAction(nameof(Index));
+        }
+
         private async Task CargarCategoriasAsync(int categoriaSeleccionada = 0)
         {
-            ViewBag.Categorias = await _context.CategoriaProducto
+            await DivisionTerritorialSeeder.AsegurarCategoriasProductoAsync(_context);
+
+            var categorias = await _context.CategoriaProducto
                 .OrderBy(c => c.NombreCategoria)
                 .ToListAsync();
+
+            ViewBag.Categorias = categorias
+                .Where(c => !c.NombreCategoria.Contains("Servicio", StringComparison.OrdinalIgnoreCase))
+                .ToList();
 
             ViewBag.CategoriaSeleccionada = categoriaSeleccionada;
         }

@@ -26,6 +26,7 @@ public class DivisionTerritorialSeeder(
         {
             await AsegurarColumnasOperacionesAsync();
             await AsegurarCategoriasGastoOperativoAsync();
+            await AsegurarCategoriasProductoAsync();
             await AsegurarIntegridadRolesYDescripcionesSafeAsync();
             await AsegurarIntegridadClientesYTelefonosSafeAsync();
 
@@ -281,6 +282,108 @@ IF COL_LENGTH('seg.USUARIO', 'telefono') IS NULL
         {
             logger.LogWarning("[SEEDER] No se pudo verificar integridad de clientes/teléfonos: {Error}", ex.Message);
         }
+    }
+
+    private async Task AsegurarCategoriasProductoAsync()
+    {
+        try
+        {
+            bool estabaVacia = !await dbContext.CategoriaProducto.AnyAsync();
+            await AsegurarCategoriasProductoAsync(dbContext);
+            if (estabaVacia)
+            {
+                logger.LogInformation("[SEEDER] Categorías base de inventario sembradas.");
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning("[SEEDER] No se pudieron sembrar las categorías de inventario: {Error}", ex.Message);
+        }
+    }
+
+    public static async Task AsegurarCategoriasProductoAsync(PiscinasYMultiserviciosContext context)
+    {
+        if (await context.CategoriaProducto.AnyAsync())
+            return;
+
+        var categoriasBase = new[]
+        {
+            "Químicos",
+            "Equipos y Bombas",
+            "Accesorios de Limpieza",
+            "Repuestos y Tubos"
+        };
+
+        foreach (var nombre in categoriasBase)
+        {
+            context.CategoriaProducto.Add(new CategoriaProducto
+            {
+                NombreCategoria = nombre
+            });
+        }
+
+        await context.SaveChangesAsync();
+    }
+
+    private static (bool Valido, string MensajeError, string NombreLimpio) ValidarNombreCategoriaProducto(string? nombreCategoria)
+    {
+        if (string.IsNullOrWhiteSpace(nombreCategoria))
+            return (false, "El nombre de la categoría es obligatorio.", string.Empty);
+
+        string nombreLimpio = nombreCategoria.Trim();
+        if (nombreLimpio.Length > 100)
+            return (false, "El nombre de la categoría no puede superar los 100 caracteres.", string.Empty);
+
+        return (true, string.Empty, nombreLimpio);
+    }
+
+    public static async Task<(bool Exito, string Mensaje, CategoriaProducto? Categoria)> RegistrarCategoriaProductoAsync(
+        PiscinasYMultiserviciosContext context,
+        string? nombreCategoria)
+    {
+        var (valido, mensajeError, nombreLimpio) = ValidarNombreCategoriaProducto(nombreCategoria);
+        if (!valido)
+            return (false, mensajeError, null);
+
+        await AsegurarCategoriasProductoAsync(context);
+
+        var existentes = await context.CategoriaProducto.ToListAsync();
+        if (existentes.Any(c => string.Equals(c.NombreCategoria.Trim(), nombreLimpio, StringComparison.OrdinalIgnoreCase)))
+            return (false, $"La categoría '{nombreLimpio}' ya existe.", null);
+
+        var nuevaCategoria = new CategoriaProducto
+        {
+            NombreCategoria = nombreLimpio
+        };
+
+        context.CategoriaProducto.Add(nuevaCategoria);
+        await context.SaveChangesAsync();
+
+        return (true, $"Categoría '{nombreLimpio}' creada correctamente.", nuevaCategoria);
+    }
+
+    public static async Task<(bool Exito, string Mensaje, string? NombreAnterior, CategoriaProducto? Categoria)> EditarCategoriaProductoAsync(
+        PiscinasYMultiserviciosContext context,
+        int id,
+        string? nombreCategoria)
+    {
+        var (valido, mensajeError, nombreLimpio) = ValidarNombreCategoriaProducto(nombreCategoria);
+        if (!valido)
+            return (false, mensajeError, null, null);
+
+        var categoria = await context.CategoriaProducto.FindAsync(id);
+        if (categoria == null)
+            return (false, "La categoría seleccionada no existe.", null, null);
+
+        var existentes = await context.CategoriaProducto.ToListAsync();
+        if (existentes.Any(c => c.Id != id && string.Equals(c.NombreCategoria.Trim(), nombreLimpio, StringComparison.OrdinalIgnoreCase)))
+            return (false, $"Ya existe otra categoría con el nombre '{nombreLimpio}'.", null, null);
+
+        string nombreAnterior = categoria.NombreCategoria;
+        categoria.NombreCategoria = nombreLimpio;
+        await context.SaveChangesAsync();
+
+        return (true, $"Categoría actualizada a '{nombreLimpio}' correctamente.", nombreAnterior, categoria);
     }
 
     public static async Task AsegurarIntegridadRolesYDescripcionesAsync(PiscinasYMultiserviciosContext context)
