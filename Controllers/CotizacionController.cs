@@ -1,13 +1,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using MultiserviciosPiscinas.DTOs.Cotizacion;
-using MultiserviciosPiscinas.DTOs.Factura;
 using MultiserviciosPiscinas.Interfaces;
-using MultiserviciosPiscinas.Models;
 using MultiserviciosPiscinas.Services;
 using System.Globalization;
-using System.Security.Claims;
 using System.Text.RegularExpressions;
 
 namespace MultiserviciosPiscinas.Controllers
@@ -16,40 +12,100 @@ namespace MultiserviciosPiscinas.Controllers
     public class CotizacionController : Controller
     {
         private readonly ICotizacionRepository _cotizacionRepositorio;
-        private readonly IFacturaRepository _facturaRepositorio;
         private readonly CotizacionPdfService _pdfService;
-        private readonly FacturaPdfService _facturaPdfService;
         private readonly IConfiguration _configuracion;
-        private readonly PiscinasYMultiserviciosContext _context;
+        private readonly BitacoraService _bitacora;
         private readonly ILogger<CotizacionController> _logger;
 
         public CotizacionController(
             ICotizacionRepository cotizacionRepositorio,
-            IFacturaRepository facturaRepositorio,
             CotizacionPdfService pdfService,
-            FacturaPdfService facturaPdfService,
             IConfiguration configuracion,
-            PiscinasYMultiserviciosContext context,
+            BitacoraService bitacora,
             ILogger<CotizacionController> logger)
         {
             _cotizacionRepositorio = cotizacionRepositorio;
-            _facturaRepositorio = facturaRepositorio;
             _pdfService = pdfService;
-            _facturaPdfService = facturaPdfService;
             _configuracion = configuracion;
-            _context = context;
+            _bitacora = bitacora;
             _logger = logger;
         }
 
         public async Task<IActionResult> Index()
         {
-            var cotizaciones = await _facturaRepositorio.ObtenerCotizacionesFacturablesAsync();
+            var cotizaciones = await _cotizacionRepositorio.ObtenerTodasLasCotizacionesAsync();
             return View(cotizaciones);
         }
 
         public IActionResult Crear()
         {
             return View();
+        }
+
+        public async Task<IActionResult> Detalle(int id)
+        {
+            var detalle = await _cotizacionRepositorio.ObtenerDetalleCotizacionAdminAsync(id);
+            if (detalle == null)
+                return NotFound();
+
+            return View(detalle);
+        }
+
+        public async Task<IActionResult> DescargarPdf(int id)
+        {
+            var detalle = await _cotizacionRepositorio.ObtenerDetalleCotizacionAdminAsync(id);
+            if (detalle == null)
+                return NotFound();
+
+            var pdfDto = new CotizacionPdfDto
+            {
+                NumeroCotizacion = detalle.NumeroCotizacion,
+                NombreCliente = detalle.NombreCliente,
+                CorreoCliente = detalle.CorreoCliente,
+                TelefonoCliente = detalle.TelefonoCliente ?? string.Empty,
+                FechaEmision = detalle.FechaEmision,
+                FechaVigencia = detalle.FechaVigencia,
+                NumeroSinpe = _configuracion["DatosContacto:NumeroSinpe"],
+                Lineas = detalle.Lineas,
+                Subtotal = detalle.Subtotal,
+                ImpuestoTotal = detalle.ImpuestoTotal,
+                Total = detalle.Total
+            };
+
+            var bytes = _pdfService.GenerarPdf(pdfDto);
+            return File(bytes, "application/pdf", $"Cotizacion-{detalle.NumeroCotizacion}.pdf");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CambiarEstado(int id, string nuevoEstado)
+        {
+            if (nuevoEstado != "Aceptada" && nuevoEstado != "Rechazada")
+            {
+                TempData["Mensaje"] = "El estado solicitado no es válido.";
+                TempData["TipoMensaje"] = "danger";
+                return RedirectToAction(nameof(Index));
+            }
+
+            var (exito, estadoAnterior) = await _cotizacionRepositorio.ActualizarEstadoCotizacionAsync(id, nuevoEstado);
+            if (!exito)
+            {
+                TempData["Mensaje"] = "La cotización no existe, ya fue procesada o cuenta con una factura emitida.";
+                TempData["TipoMensaje"] = "warning";
+                return RedirectToAction(nameof(Index));
+            }
+
+            await _bitacora.RegistrarAsync(
+                userClaims: User,
+                accion: "UPDATE",
+                tablaAfectada: "ven.COTIZACION",
+                registroId: id,
+                valorAnterior: $"Cotización: COT-{id:D5} | Estado: {estadoAnterior}",
+                valorNuevo: $"Cotización: COT-{id:D5} | Estado: {nuevoEstado}");
+
+            TempData["Mensaje"] = $"La cotización COT-{id:D5} pasó a estado {nuevoEstado}.";
+            TempData["TipoMensaje"] = "success";
+            return RedirectToAction(nameof(Index));
         }
 
         [HttpGet]
@@ -283,100 +339,6 @@ namespace MultiserviciosPiscinas.Controllers
                 TempData["Mensaje"] = "Ocurrió un error al generar la cotización. Intenta de nuevo.";
                 TempData["TipoMensaje"] = "danger";
                 return RedirectToAction("Crear");
-            }
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> Facturar(int id)
-        {
-            var modelo = await _facturaRepositorio.ObtenerCotizacionParaFacturarAsync(id);
-            if (modelo == null)
-            {
-                TempData["Mensaje"] = "La cotización no existe o no está disponible para facturar.";
-                TempData["TipoMensaje"] = "warning";
-                return RedirectToAction("Index");
-            }
-
-            return View(modelo);
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Facturar(int cotizacionId, FacturarCotizacionViewModel model)
-        {
-            var modeloActual = await _facturaRepositorio.ObtenerCotizacionParaFacturarAsync(cotizacionId);
-            if (modeloActual == null)
-            {
-                TempData["Mensaje"] = "La cotización no existe o no está disponible para facturar.";
-                TempData["TipoMensaje"] = "warning";
-                return RedirectToAction("Index");
-            }
-
-            if (model.Comprobante == null || model.Comprobante.Length == 0)
-            {
-                ModelState.AddModelError(nameof(model.Comprobante), "Debe subir el comprobante de pago.");
-                return View(modeloActual);
-            }
-
-            var extensionesPermitidas = new[] { ".jpg", ".jpeg", ".png" };
-            var extension = Path.GetExtension(model.Comprobante.FileName).ToLower();
-
-            if (!extensionesPermitidas.Contains(extension))
-            {
-                ModelState.AddModelError(nameof(model.Comprobante), "Solo se permiten imágenes JPG o PNG.");
-                return View(modeloActual);
-            }
-
-            var correo = User.FindFirst(ClaimTypes.Email)?.Value;
-            if (string.IsNullOrEmpty(correo))
-                return RedirectToAction("InicioSesion", "Auth");
-
-            var usuario = await _context.Usuario.FirstOrDefaultAsync(u => u.Correo == correo);
-            if (usuario == null)
-                return RedirectToAction("InicioSesion", "Auth");
-
-            try
-            {
-                var carpeta = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "comprobantes", "facturas");
-                if (!Directory.Exists(carpeta))
-                    Directory.CreateDirectory(carpeta);
-
-                var nombreArchivo = $"{Guid.NewGuid()}{extension}";
-                var rutaCompleta = Path.Combine(carpeta, nombreArchivo);
-
-                using (var stream = new FileStream(rutaCompleta, FileMode.Create))
-                {
-                    await model.Comprobante.CopyToAsync(stream);
-                }
-
-                var comprobanteRuta = $"/comprobantes/facturas/{nombreArchivo}";
-
-                var diasVencimiento = int.Parse(_configuracion["Facturacion:DiasVencimientoFactura"] ?? "30", CultureInfo.InvariantCulture);
-                var factura = await _facturaRepositorio.CrearFacturaAsync(cotizacionId, comprobanteRuta, usuario.Id, diasVencimiento);
-
-                var pdfDto = new FacturaPdfDto
-                {
-                    NumeroFactura = factura.NumeroConsecutivo,
-                    NombreCliente = modeloActual.NombreCliente,
-                    FechaEmision = factura.FechaEmision,
-                    FechaVencimiento = factura.FechaVencimiento,
-                    CondicionPago = factura.CondicionPago,
-                    Lineas = modeloActual.Lineas,
-                    Subtotal = factura.Subtotal,
-                    ImpuestoTotal = factura.ImpuestoTotal,
-                    Total = factura.Total,
-                    ComprobanteRutaFisica = rutaCompleta
-                };
-
-                var bytes = _facturaPdfService.GenerarPdf(pdfDto);
-
-                return File(bytes, "application/pdf", $"Factura-{factura.NumeroConsecutivo}.pdf");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error al generar la factura.");
-                ModelState.AddModelError(string.Empty, "Ocurrió un error al generar la factura. Intenta de nuevo.");
-                return View(modeloActual);
             }
         }
     }

@@ -23,4 +23,9 @@ public interface ICotizacionRepository
     Task<List<CotizacionClienteListadoDto>> ObtenerCotizacionesPorClienteAsync(string correoCliente);
     Task<CotizacionClienteDetalleDto?> ObtenerDetalleCotizacionClienteAsync(int id, string correoCliente);
     Task<bool> AceptarCotizacionAsync(int id, string correoCliente);
+
+    // Administración de cotizaciones
+    Task<List<CotizacionAdminListadoDto>> ObtenerTodasLasCotizacionesAsync();
+    Task<CotizacionAdminDetalleViewModel?> ObtenerDetalleCotizacionAdminAsync(int id);
+    Task<(bool Exito, string? EstadoAnterior)> ActualizarEstadoCotizacionAsync(int id, string nuevoEstado);
 }

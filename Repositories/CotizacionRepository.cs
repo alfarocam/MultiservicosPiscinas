@@ -368,6 +368,123 @@ public class CotizacionRepository : ICotizacionRepository
         return true;
     }
 
+    public async Task<List<CotizacionAdminListadoDto>> ObtenerTodasLasCotizacionesAsync()
+    {
+        var filas = await _context.Cotizacion
+            .AsNoTracking()
+            .Include(c => c.Cliente)
+                .ThenInclude(cl => cl.Usuario)
+            .Include(c => c.Factura)
+            .OrderByDescending(c => c.FechaEmision)
+            .ThenByDescending(c => c.Id)
+            .Select(c => new
+            {
+                c.Id,
+                c.Cliente.Usuario.Nombre,
+                c.Cliente.Usuario.ApellidoPaterno,
+                c.Cliente.Usuario.ApellidoMaterno,
+                c.Cliente.Usuario.Correo,
+                c.FechaEmision,
+                c.FechaVigencia,
+                c.Total,
+                c.Estado,
+                FacturaId = c.Factura != null ? (int?)c.Factura.Id : null,
+                NumeroFactura = c.Factura != null ? c.Factura.NumeroConsecutivo : null
+            })
+            .ToListAsync();
+
+        return filas
+            .Select(c => new CotizacionAdminListadoDto
+            {
+                Id = c.Id,
+                NumeroCotizacion = $"COT-{c.Id:D5}",
+                NombreCliente = FormatearNombreCompleto(c.Nombre, c.ApellidoPaterno, c.ApellidoMaterno),
+                CorreoCliente = c.Correo,
+                FechaEmision = c.FechaEmision,
+                FechaVigencia = c.FechaVigencia,
+                Total = c.Total,
+                Estado = c.Estado,
+                FacturaId = c.FacturaId,
+                NumeroFactura = c.NumeroFactura
+            })
+            .ToList();
+    }
+
+    public async Task<CotizacionAdminDetalleViewModel?> ObtenerDetalleCotizacionAdminAsync(int id)
+    {
+        var cotizacion = await _context.Cotizacion
+            .AsNoTracking()
+            .Include(c => c.Cliente)
+                .ThenInclude(cl => cl.Usuario)
+            .Include(c => c.Cliente)
+                .ThenInclude(cl => cl.TelefonosCliente)
+            .Include(c => c.DetalleCotizacion)
+                .ThenInclude(d => d.Producto)
+            .Include(c => c.Factura)
+            .FirstOrDefaultAsync(c => c.Id == id);
+
+        if (cotizacion == null)
+            return null;
+
+        var telefonoPrincipal = cotizacion.Cliente.TelefonosCliente
+            .FirstOrDefault(t => t.EsPrincipal == 1)?.NumeroTelefono
+            ?? cotizacion.Cliente.TelefonosCliente.FirstOrDefault()?.NumeroTelefono;
+
+        return new CotizacionAdminDetalleViewModel
+        {
+            Id = cotizacion.Id,
+            NumeroCotizacion = $"COT-{cotizacion.Id:D5}",
+            NombreCliente = FormatearNombreCompleto(
+                cotizacion.Cliente.Usuario.Nombre,
+                cotizacion.Cliente.Usuario.ApellidoPaterno,
+                cotizacion.Cliente.Usuario.ApellidoMaterno),
+            CorreoCliente = cotizacion.Cliente.Usuario.Correo,
+            TelefonoCliente = telefonoPrincipal,
+            FechaEmision = cotizacion.FechaEmision,
+            FechaVigencia = cotizacion.FechaVigencia,
+            Subtotal = cotizacion.Subtotal,
+            DescuentoTotal = cotizacion.DescuentoTotal,
+            ImpuestoTotal = cotizacion.ImpuestoTotal,
+            Total = cotizacion.Total,
+            Estado = cotizacion.Estado,
+            FacturaId = cotizacion.Factura?.Id,
+            NumeroFactura = cotizacion.Factura?.NumeroConsecutivo,
+            Lineas = cotizacion.DetalleCotizacion
+                .Select(d => new ItemCarritoDto
+                {
+                    ProductoId = d.ProductoId,
+                    Nombre = d.Producto.Nombre,
+                    Descripcion = d.Producto.Descripcion,
+                    PrecioUnitario = d.PrecioUnitario,
+                    Cantidad = d.CantidadPropuesta,
+                    LineaImpuesto = d.Impuesto
+                })
+                .ToList()
+        };
+    }
+
+    public async Task<(bool Exito, string? EstadoAnterior)> ActualizarEstadoCotizacionAsync(int id, string nuevoEstado)
+    {
+        var cotizacion = await _context.Cotizacion
+            .Include(c => c.Factura)
+            .FirstOrDefaultAsync(c => c.Id == id);
+
+        if (cotizacion == null || cotizacion.Estado != "Enviada" || cotizacion.Factura != null)
+            return (false, null);
+
+        var estadoAnterior = cotizacion.Estado;
+        cotizacion.Estado = nuevoEstado;
+        await _context.SaveChangesAsync();
+
+        return (true, estadoAnterior);
+    }
+
+    private static string FormatearNombreCompleto(string? nombre, string? apellidoPaterno, string? apellidoMaterno)
+    {
+        return string.Join(" ", new[] { nombre, apellidoPaterno, apellidoMaterno }
+            .Where(s => !string.IsNullOrWhiteSpace(s)));
+    }
+
     private string GenerarContrasenAleatoria(int longitud = 12)
     {
         const string caracteres = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%";

@@ -1,0 +1,124 @@
+@model MultiserviciosPiscinas.DTOs.Cotizacion.CotizacionAdminDetalleViewModel
+
+@{
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    ViewData["Title"] = $"Cotización {Model.NumeroCotizacion}";
+
+    var badgeEstado = Model.Estado switch
+    {
+        "Aceptada" => "c-badge-green",
+        "Enviada" or "Pendiente" => "c-badge-amber",
+        "Rechazada" => "c-badge-red",
+        _ => "c-badge-gray"
+    };
+}
+
+<div class="c-page-header d-flex flex-wrap justify-content-between align-items-center gap-2">
+    <h2 class="mb-0">Detalle de Cotización — @Model.NumeroCotizacion</h2>
+    <div class="d-flex flex-wrap gap-2">
+        <a asp-action="DescargarPdf" asp-route-id="@Model.Id" class="btn btn-primary">
+            <i class="bi bi-file-earmark-pdf me-1"></i>Descargar PDF
+        </a>
+        <a asp-action="Index" class="btn btn-success">
+            <i class="bi bi-arrow-left me-1"></i>Volver a Cotizaciones
+        </a>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-8">
+        <div class="o-form-card">
+            <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                    <p class="mb-1"><strong>N° Cotización:</strong> @Model.NumeroCotizacion</p>
+                    <p class="mb-1"><strong>Cliente:</strong> @Model.NombreCliente</p>
+                    <p class="mb-1"><strong>Correo:</strong> @Model.CorreoCliente</p>
+                    <p class="mb-0"><strong>Teléfono:</strong> @(string.IsNullOrWhiteSpace(Model.TelefonoCliente) ? "—" : Model.TelefonoCliente)</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p class="mb-1"><strong>Fecha de Emisión:</strong> @Model.FechaEmision.ToString("dd/MM/yyyy")</p>
+                    <p class="mb-1"><strong>Vigencia hasta:</strong> @Model.FechaVigencia.ToString("dd/MM/yyyy")</p>
+                    <p class="mb-1"><strong>Estado:</strong> <span class="c-badge @badgeEstado">@Model.Estado</span></p>
+                    <p class="mb-0">
+                        <strong>Factura:</strong>
+                        @if (Model.FacturaId.HasValue && !string.IsNullOrEmpty(Model.NumeroFactura))
+                        {
+                            <span class="c-badge c-badge-blue me-2">@Model.NumeroFactura</span>
+                            <a asp-controller="Facturacion" asp-action="DetalleAdmin" asp-route-id="@Model.FacturaId.Value" class="btn btn-outline-primary btn-sm">
+                                <i class="bi bi-receipt me-1"></i>Ver factura
+                            </a>
+                        }
+                        else
+                        {
+                            <span class="text-muted">Sin facturar</span>
+                        }
+                    </p>
+                </div>
+            </div>
+
+            <hr />
+
+            <h5 class="mb-3">Detalle de Productos / Servicios</h5>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Producto</th>
+                            <th class="text-end">Precio Unit.</th>
+                            <th class="text-end">Cantidad</th>
+                            <th class="text-end">Subtotal</th>
+                            <th class="text-end">IVA</th>
+                            <th class="text-end">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var linea in Model.Lineas)
+                        {
+                            <tr>
+                                <td>
+                                    <strong>@linea.Nombre</strong>
+                                    @if (!string.IsNullOrWhiteSpace(linea.Descripcion))
+                                    {
+                                        <br />
+                                        <small class="a-text-muted">@linea.Descripcion</small>
+                                    }
+                                </td>
+                                <td class="text-end">₡@linea.PrecioUnitario.ToString("N2")</td>
+                                <td class="text-end">@linea.Cantidad.ToString("N2")</td>
+                                <td class="text-end">₡@linea.LineaSubtotal.ToString("N2")</td>
+                                <td class="text-end">₡@linea.LineaImpuesto.ToString("N2")</td>
+                                <td class="text-end"><strong>₡@linea.LineaTotal.ToString("N2")</strong></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="o-form-card">
+            <h5 class="mb-3">Resumen de Cotización</h5>
+            <div class="d-flex justify-content-between mb-2">
+                <span>Subtotal:</span>
+                <span>₡@Model.Subtotal.ToString("N2")</span>
+            </div>
+            @if (Model.DescuentoTotal > 0)
+            {
+                <div class="d-flex justify-content-between mb-2">
+                    <span>Descuento:</span>
+                    <span>-₡@Model.DescuentoTotal.ToString("N2")</span>
+                </div>
+            }
+            <div class="d-flex justify-content-between mb-2">
+                <span>IVA:</span>
+                <span>₡@Model.ImpuestoTotal.ToString("N2")</span>
+            </div>
+            <hr />
+            <div class="d-flex justify-content-between">
+                <strong>Total:</strong>
+                <strong class="fs-5 text-success">₡@Model.Total.ToString("N2")</strong>
+            </div>
+        </div>
+    </div>
+</div>

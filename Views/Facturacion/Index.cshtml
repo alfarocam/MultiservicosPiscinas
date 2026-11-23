@@ -1,0 +1,185 @@
+@model MultiserviciosPiscinas.DTOs.Factura.FacturacionIndexViewModel
+
+@{
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    ViewData["Title"] = "Facturación";
+}
+
+<div class="c-page-header d-flex justify-content-between align-items-center">
+    <h2 class="mb-0">Facturación</h2>
+    <a asp-controller="Cotizacion" asp-action="Crear" class="btn btn-primary">
+        <i class="bi bi-plus-circle me-1"></i>Nueva cotización
+    </a>
+</div>
+
+@if (TempData["Mensaje"] != null)
+{
+    var tipoAlert = TempData["TipoMensaje"]?.ToString() ?? "success";
+
+    <div class="alert alert-@tipoAlert alert-dismissible fade show mb-3" role="alert">
+        @TempData["Mensaje"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="o-form-card mb-4">
+    <div class="c-card-header mb-3">
+        <div class="c-card-header-title">
+            <span>Facturas emitidas</span>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table id="tablaFacturas" class="table table-hover align-middle w-100">
+            <thead class="table-light">
+                <tr>
+                    <th>N° Factura</th>
+                    <th>Cliente</th>
+                    <th>Origen</th>
+                    <th>Fecha Emisión</th>
+                    <th>Vencimiento</th>
+                    <th>Total</th>
+                    <th>Estado</th>
+                    <th class="text-center">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var f in Model.Facturas)
+                {
+                    var badgeEstado = f.Estado switch
+                    {
+                        "Pagada" or "Completada" => "c-badge-green",
+                        "Pendiente" => "c-badge-amber",
+                        "Anulada" or "Cancelada" => "c-badge-red",
+                        _ => "c-badge-gray"
+                    };
+
+                    <tr>
+                        <td><strong>@f.NumeroFactura</strong></td>
+                        <td>
+                            <div>@f.NombreCliente</div>
+                            <small class="text-muted">@f.CorreoCliente</small>
+                        </td>
+                        <td>
+                            @if (!string.IsNullOrEmpty(f.NumeroCotizacion))
+                            {
+                                <span class="c-badge c-badge-blue">@f.NumeroCotizacion</span>
+                            }
+                            else
+                            {
+                                <span class="c-badge c-badge-teal">Tienda</span>
+                            }
+                        </td>
+                        <td data-order="@f.FechaEmision.ToString("yyyyMMdd")">@f.FechaEmision.ToString("dd/MM/yyyy")</td>
+                        <td data-order="@f.FechaVencimiento.ToString("yyyyMMdd")">@f.FechaVencimiento.ToString("dd/MM/yyyy")</td>
+                        <td class="c-price"><strong>₡@f.Total.ToString("N2")</strong></td>
+                        <td><span class="c-badge @badgeEstado">@f.Estado</span></td>
+                        <td class="text-center">
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-three-dots-vertical me-1"></i>Acciones
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                                    <li>
+                                        <a asp-action="DetalleAdmin" asp-route-id="@f.Id" class="dropdown-item">
+                                            <i class="bi bi-eye me-2 text-info"></i>Ver detalle
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a asp-action="DescargarPdfAdmin" asp-route-id="@f.Id" class="dropdown-item">
+                                            <i class="bi bi-file-earmark-pdf me-2 text-danger"></i>Descargar PDF
+                                        </a>
+                                    </li>
+                                    @if (f.Estado == "Pendiente")
+                                    {
+                                        <li>
+                                            <form class="js-cambiar-estado-factura d-inline"
+                                                  asp-action="CambiarEstado"
+                                                  method="post"
+                                                  data-accion="marcar como pagada"
+                                                  data-numero="@f.NumeroFactura">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="id" value="@f.Id" />
+                                                <input type="hidden" name="nuevoEstado" value="Pagada" />
+                                                <button type="submit" class="dropdown-item text-success">
+                                                    <i class="bi bi-check-lg me-2 text-success"></i>Marcar como pagada
+                                                </button>
+                                            </form>
+                                        </li>
+                                        <li>
+                                            <form class="js-cambiar-estado-factura d-inline"
+                                                  asp-action="CambiarEstado"
+                                                  method="post"
+                                                  data-accion="anular"
+                                                  data-numero="@f.NumeroFactura">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="id" value="@f.Id" />
+                                                <input type="hidden" name="nuevoEstado" value="Anulada" />
+                                                <button type="submit" class="dropdown-item text-danger">
+                                                    <i class="bi bi-x-lg me-2 text-danger"></i>Anular
+                                                </button>
+                                            </form>
+                                        </li>
+                                    }
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="o-form-card">
+    <div class="c-card-header mb-3">
+        <div class="c-card-header-title">
+            <span>Emitir factura desde cotizaciones aceptadas</span>
+        </div>
+    </div>
+
+    @if (!Model.CotizacionesFacturables.Any())
+    {
+        <div class="alert alert-info mb-0">
+            <i class="bi bi-info-circle me-2"></i>No hay cotizaciones aceptadas disponibles para facturar en este momento. Puede crear una nueva en <a asp-controller="Cotizacion" asp-action="Crear" class="alert-link">Cotizaciones</a>.
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table id="tablaCotizacionesFacturables" class="table table-hover align-middle w-100">
+                <thead class="table-light">
+                    <tr>
+                        <th>N° Cotización</th>
+                        <th>Cliente</th>
+                        <th>Fecha Emisión</th>
+                        <th>Total</th>
+                        <th>Estado</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var cot in Model.CotizacionesFacturables)
+                    {
+                        <tr>
+                            <td><strong>@cot.NumeroCotizacion</strong></td>
+                            <td>@cot.NombreCliente</td>
+                            <td data-order="@cot.FechaEmision.ToString("yyyyMMdd")">@cot.FechaEmision.ToString("dd/MM/yyyy")</td>
+                            <td class="c-price"><strong>₡@cot.Total.ToString("N2")</strong></td>
+                            <td><span class="c-badge c-badge-green">@cot.Estado</span></td>
+                            <td class="text-center">
+                                <a asp-controller="Facturacion" asp-action="Facturar" asp-route-id="@cot.Id" class="btn btn-sm btn-success">
+                                    <i class="bi bi-receipt me-1"></i>Facturar
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script src="~/js/facturacion-tabla.js" asp-append-version="true"></script>
+}
