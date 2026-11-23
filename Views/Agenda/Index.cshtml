@@ -87,7 +87,7 @@
                                         <td class="fw-semibold">@cita.Piscina.Cliente.Usuario.Nombre @cita.Piscina.Cliente.Usuario.ApellidoPaterno</td>
                                         <td>@cita.Piscina.Tipo — @cita.Piscina.VolumenM3 m³</td>
                                         <td>@cita.Tecnico.Nombre @cita.Tecnico.ApellidoPaterno</td>
-                                        <td>@cita.FechaHora.ToString("dd/MM/yyyy HH:mm")</td>
+                                        <td data-order="@cita.FechaHora.ToString("yyyyMMddHHmmss")">@cita.FechaHora.ToString("dd/MM/yyyy HH:mm")</td>
                                         <td>@cita.Tipo</td>
                                         <td><span class="c-badge @BadgeClass(cita.Estado)">@cita.Estado</span></td>
                                         <td class="text-center">

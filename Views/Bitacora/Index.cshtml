@@ -5,7 +5,7 @@
 }
 
 <div class="c-page-header">
-    <h2></i>Bitácora</h2>
+    <h2>Bitácora</h2>
 </div>
 
 @if (ViewBag.MensajeError != null)
@@ -63,7 +63,7 @@
                         <th>Fecha y Hora</th>
                         <th>Colaborador / Usuario</th>
                         <th>Operación</th>
-                        <th>ID Reg.</th>
+                        <th>Módulo afectado</th>
                         <th class="text-center">Acciones</th>
                     </tr>
                 </thead>
@@ -92,7 +92,7 @@
                                 <td data-order="@item.FechaHora.ToString("yyyyMMddHHmmss")">@item.FechaHora.ToString("dd/MM/yyyy HH:mm")</td>
                                 <td class="fw-semibold">@(item.Usuario != null ? $"{item.Usuario.Nombre} {item.Usuario.ApellidoPaterno}" : $"ID: {item.UsuarioId}")</td>
                                 <td><span class="c-badge @badgeClass">@textoAccion</span></td>
-                                <td>@item.RegistroId</td>
+                                <td>@MultiserviciosPiscinas.Services.BitacoraService.ObtenerNombreModulo(item.TablaAfectada)</td>
                                 <td class="text-center">
                                     <div class="dropdown">
                                         <button class="btn btn-sm btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">

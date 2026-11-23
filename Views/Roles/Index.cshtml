@@ -91,8 +91,8 @@
                                 <span class="c-badge c-badge-red">Inactivo</span>
                             }
                         </td>
-                        <td>@usuario.FechaCreacion.ToString("dd/MM/yyyy HH:mm")</td>
-                        <td>
+                        <td data-order="@usuario.FechaCreacion.ToString("yyyyMMddHHmmss")">@usuario.FechaCreacion.ToString("dd/MM/yyyy HH:mm")</td>
+                        <td data-order="@(usuario.FechaModificacion.HasValue ? usuario.FechaModificacion.Value.ToString("yyyyMMddHHmmss") : "0")">
                             @if (usuario.FechaModificacion.HasValue)
                             {
                                 @usuario.FechaModificacion.Value.ToString("dd/MM/yyyy HH:mm")

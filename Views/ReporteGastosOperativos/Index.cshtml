@@ -134,7 +134,7 @@ else
                     @foreach (var gasto in Model.Detalle)
                     {
                         <tr>
-                            <td>@gasto.Fecha.ToString("dd/MM/yyyy")</td>
+                            <td data-order="@gasto.Fecha.ToString("yyyyMMdd")">@gasto.Fecha.ToString("dd/MM/yyyy")</td>
                             <td>@gasto.NombreCategoria</td>
                             <td>@(gasto.Descripcion ?? "-")</td>
                             <td><span class="c-price">₡@gasto.Monto.ToString("N2")</span></td>
