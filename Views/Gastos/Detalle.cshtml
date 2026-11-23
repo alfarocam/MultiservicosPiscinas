@@ -152,7 +152,7 @@
     <div class="modal fade" id="modalRechazarDetalle" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content text-start">
-                <form asp-controller="@volverController" asp-action="Rechazar" method="post">
+                <form class="js-form-rechazar-gasto" asp-controller="@volverController" asp-action="Rechazar" method="post" novalidate>
                     @Html.AntiForgeryToken()
                     <input type="hidden" name="id" value="@Model.Id" />
 
@@ -163,7 +163,8 @@
 
                     <div class="modal-body">
                         <label class="form-label fw-bold text-dark">Escriba la justificación:</label>
-                        <textarea name="motivoRechazo" class="form-control" rows="3" required placeholder="Ej: La foto del comprobante no es legible..."></textarea>
+                        <textarea name="motivoRechazo" class="form-control" rows="3" maxlength="500" placeholder="Ej: La foto del comprobante no es legible..."></textarea>
+                        <span class="text-danger small" data-valmsg-for="motivoRechazo"></span>
                     </div>
 
                     <div class="modal-footer bg-light d-flex justify-content-end">
@@ -178,4 +179,8 @@
             </div>
         </div>
     </div>
+}
+
+@section Scripts {
+    <script src="~/js/gastos-form.js" asp-append-version="true"></script>
 }
