@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MultiserviciosPiscinas.Models;
+using MultiserviciosPiscinas.Services;
 using System.Security.Claims;
 
 namespace MultiserviciosPiscinas.Controllers
@@ -9,10 +10,12 @@ namespace MultiserviciosPiscinas.Controllers
     [Authorize(Roles = "1,2")]
     public class RutaOptimizadaController(
         PiscinasYMultiserviciosContext context,
-        IConfiguration configuration) : Controller
+        IConfiguration configuration,
+        BitacoraService bitacora) : Controller
     {
         private readonly PiscinasYMultiserviciosContext _context = context;
         private readonly IConfiguration _configuration = configuration;
+        private readonly BitacoraService _bitacora = bitacora;
 
         private const int ROL_TECNICO = 2;
 
@@ -84,7 +87,149 @@ namespace MultiserviciosPiscinas.Controllers
                 EstadoCita = c.Estado
             }).ToList();
 
+            var rutaExistente = await _context.RutaOptimizada
+                .AsNoTracking()
+                .Where(r => r.TecnicoId == tecnicoId.Value && r.Fecha == fechaSeleccionada)
+                .OrderByDescending(r => r.GeneradaEn)
+                .Select(r => new { r.Id })
+                .FirstOrDefaultAsync();
+
+            if (rutaExistente != null)
+            {
+                model.RutaId = rutaExistente.Id;
+            }
+
             return View(model);
+        }
+
+        [Authorize(Roles = "1")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> GuardarRuta([FromBody] GuardarRutaRequest? request)
+        {
+            if (request == null || request.TecnicoId <= 0 || request.Fecha == default || request.Paradas == null || request.Paradas.Count < 2)
+            {
+                return BadRequest(new { success = false, mensaje = "Se requieren al menos dos paradas válidas para guardar la ruta." });
+            }
+
+            if (request.Paradas.Any(p => p.CitaId <= 0) ||
+                request.Paradas.Select(p => p.CitaId).Distinct().Count() != request.Paradas.Count)
+            {
+                return BadRequest(new { success = false, mensaje = "Las paradas enviadas contienen citas inválidas o duplicadas." });
+            }
+
+            var tecnicoValido = await _context.Usuario
+                .AsNoTracking()
+                .AnyAsync(u => u.Id == request.TecnicoId && u.RolId == ROL_TECNICO && u.Activo && u.Cliente == null);
+
+            if (!tecnicoValido)
+            {
+                return BadRequest(new { success = false, mensaje = "El técnico seleccionado no es válido." });
+            }
+
+            var inicioDelDia = request.Fecha.ToDateTime(TimeOnly.MinValue);
+            var finDelDia = inicioDelDia.AddDays(1);
+            var citaIds = request.Paradas.Select(p => p.CitaId).ToList();
+
+            var citasValidasCount = await _context.Cita
+                .CountAsync(c => citaIds.Contains(c.Id)
+                              && c.TecnicoId == request.TecnicoId
+                              && c.Estado != "Cancelada"
+                              && c.FechaHora >= inicioDelDia
+                              && c.FechaHora < finDelDia);
+
+            if (citasValidasCount != citaIds.Count)
+            {
+                return BadRequest(new { success = false, mensaje = "Algunas citas no pertenecen al técnico en la fecha indicada o fueron canceladas." });
+            }
+
+            await using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                var rutaExistente = await _context.RutaOptimizada
+                    .Include(r => r.VisitaRuta)
+                    .OrderByDescending(r => r.GeneradaEn)
+                    .FirstOrDefaultAsync(r => r.TecnicoId == request.TecnicoId && r.Fecha == request.Fecha);
+
+                bool esActualizacion = rutaExistente != null;
+                string? valorAnterior = null;
+                RutaOptimizada ruta;
+
+                var distanciaTotal = Math.Round(Math.Max(0, request.DistanciaTotalKm), 2);
+                var duracionTotal = Math.Max(0, request.DuracionTotalMin);
+                var enlace = string.IsNullOrWhiteSpace(request.EnlaceGoogleMaps) ? null : request.EnlaceGoogleMaps.Trim();
+
+                if (rutaExistente != null)
+                {
+                    valorAnterior = $"Visitas: {rutaExistente.VisitaRuta.Count} | Distancia: {(rutaExistente.DistanciaTotalKm ?? 0):0.0} km | Duración: {rutaExistente.DuracionTotalMin ?? 0} min";
+                    _context.VisitaRuta.RemoveRange(rutaExistente.VisitaRuta);
+
+                    rutaExistente.DistanciaTotalKm = distanciaTotal;
+                    rutaExistente.DuracionTotalMin = duracionTotal;
+                    rutaExistente.GeneradaEn = DateTime.Now;
+                    rutaExistente.EnlaceGoogleMaps = enlace;
+                    ruta = rutaExistente;
+                }
+                else
+                {
+                    ruta = new RutaOptimizada
+                    {
+                        TecnicoId = request.TecnicoId,
+                        Fecha = request.Fecha,
+                        DistanciaTotalKm = distanciaTotal,
+                        DuracionTotalMin = duracionTotal,
+                        GeneradaEn = DateTime.Now,
+                        EnlaceGoogleMaps = enlace
+                    };
+                    _context.RutaOptimizada.Add(ruta);
+                }
+
+                await _context.SaveChangesAsync();
+
+                var visitas = request.Paradas
+                    .OrderBy(p => p.OrdenVisita)
+                    .Select((p, idx) => new VisitaRuta
+                    {
+                        RutaId = ruta.Id,
+                        CitaId = p.CitaId,
+                        OrdenVisita = idx + 1,
+                        DistanciaTramoKm = p.DistanciaTramoKm.HasValue
+                            ? Math.Round(Math.Max(0, p.DistanciaTramoKm.Value), 2)
+                            : null,
+                        DuracionTramoMin = p.DuracionTramoMin.HasValue
+                            ? Math.Max(0, p.DuracionTramoMin.Value)
+                            : null
+                    })
+                    .ToList();
+
+                _context.VisitaRuta.AddRange(visitas);
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                await _bitacora.RegistrarAsync(
+                    userClaims: User,
+                    accion: esActualizacion ? "UPDATE" : "INSERT",
+                    tablaAfectada: "log.RUTA_OPTIMIZADA",
+                    registroId: ruta.Id,
+                    valorAnterior: valorAnterior,
+                    valorNuevo: $"Técnico ID: {ruta.TecnicoId} | Fecha: {ruta.Fecha:dd/MM/yyyy} | Visitas: {visitas.Count} | Distancia: {distanciaTotal:0.0} km | Duración: {duracionTotal} min");
+
+                return Json(new
+                {
+                    success = true,
+                    rutaId = ruta.Id,
+                    mensaje = "Ruta optimizada guardada correctamente."
+                });
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                return StatusCode(StatusCodes.Status500InternalServerError, new
+                {
+                    success = false,
+                    mensaje = "Ocurrió un error al guardar la ruta optimizada."
+                });
+            }
         }
 
         [Authorize(Roles = "2")]

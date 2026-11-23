@@ -24,6 +24,7 @@ namespace MultiserviciosPiscinas.Services
             "act.PISCINA" => "Piscinas",
             "pry.PROYECTO_CONSTRUCCION" => "Proyectos",
             "log.VEHICULO" => "Vehículos de la Empresa",
+            "log.RUTA_OPTIMIZADA" => "Ruta Optimizada",
             "" => "Sistema",
             var t => t
         };

@@ -45,11 +45,14 @@ function FinalizarServicio(event, form) {
     return false;
 }
 
-function ConfirmarEliminacion(event, form) {
+function confirmarFormularioConSwal(event, form, defaults) {
     event.preventDefault();
 
-    var titulo = form.getAttribute('data-titulo') || '¿Confirmar eliminación?';
-    var texto = form.getAttribute('data-texto') || 'Esta acción no se puede deshacer.';
+    var titulo = form.getAttribute('data-titulo') || defaults.titulo;
+    var texto = form.getAttribute('data-texto') || defaults.texto;
+    var confirmText = form.getAttribute('data-confirm') || defaults.confirmText;
+    var confirmColor = form.getAttribute('data-color') || defaults.confirmColor;
+    var icono = form.getAttribute('data-icon') || defaults.icon;
 
     if (typeof Swal === 'undefined') {
         if (confirm(texto)) {
@@ -61,11 +64,11 @@ function ConfirmarEliminacion(event, form) {
     Swal.fire({
         title: titulo,
         text: texto,
-        icon: 'warning',
+        icon: icono,
         showCancelButton: true,
-        confirmButtonText: 'Sí, eliminar',
+        confirmButtonText: confirmText,
         cancelButtonText: 'Cancelar',
-        confirmButtonColor: '#dc3545',
+        confirmButtonColor: confirmColor,
         cancelButtonColor: '#6c757d'
     }).then((result) => {
         if (result.isConfirmed) {
@@ -74,4 +77,24 @@ function ConfirmarEliminacion(event, form) {
     });
 
     return false;
+}
+
+function ConfirmarEliminacion(event, form) {
+    return confirmarFormularioConSwal(event, form, {
+        titulo: '¿Confirmar eliminación?',
+        texto: 'Esta acción no se puede deshacer.',
+        confirmText: 'Sí, eliminar',
+        confirmColor: '#dc3545',
+        icon: 'warning'
+    });
+}
+
+function ConfirmarAccion(event, form) {
+    return confirmarFormularioConSwal(event, form, {
+        titulo: '¿Confirmar acción?',
+        texto: '¿Desea continuar con esta acción?',
+        confirmText: 'Sí, continuar',
+        confirmColor: '#0d6efd',
+        icon: 'question'
+    });
 }
