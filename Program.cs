@@ -122,6 +122,8 @@ else
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
+app.UseStatusCodePagesWithReExecute("/Home/Error", "?statusCode={0}");
+
 app.UseRouting();
 
 app.UseSession();

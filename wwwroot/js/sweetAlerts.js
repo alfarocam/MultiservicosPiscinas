@@ -44,3 +44,34 @@ function FinalizarServicio(event, form) {
 
     return false;
 }
+
+function ConfirmarEliminacion(event, form) {
+    event.preventDefault();
+
+    var titulo = form.getAttribute('data-titulo') || '¿Confirmar eliminación?';
+    var texto = form.getAttribute('data-texto') || 'Esta acción no se puede deshacer.';
+
+    if (typeof Swal === 'undefined') {
+        if (confirm(texto)) {
+            form.submit();
+        }
+        return false;
+    }
+
+    Swal.fire({
+        title: titulo,
+        text: texto,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#dc3545',
+        cancelButtonColor: '#6c757d'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            form.submit();
+        }
+    });
+
+    return false;
+}
