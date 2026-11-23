@@ -1,13 +1,13 @@
 $(document).ready(function () {
-    // Regla personalizada para el formato de teléfono (acepta con o sin guion, ej. 1234-5678 o 12345678)
+    // Regla personalizada para el formato de teléfono (8 dígitos con formato 8888-8888)
     $.validator.addMethod('telefonoValido', function (value, element) {
         if (this.optional(element)) return true;
-        return /^\d{4}-?\d{4}$/.test($.trim(value));
-    }, 'El teléfono debe tener el formato 1234-5678 (8 dígitos).');
+        return /^\d{4}-\d{4}$/.test($.trim(value));
+    }, 'El teléfono debe tener el formato 8888-8888 (8 dígitos).');
 
     $.validator.addMethod('emailValido', function (value, element) {
         if (this.optional(element)) return true;
-        return /^[a-zA-Z0-9._%+-]+@(gmail\.com|hotmail\.com|yahoo\.com|outlook\.com|icloud\.com|live\.com|piscinas\.com|multiservicios\.com)$/i.test(value.trim());
+        return /^[a-zA-Z0-9._%+-]+@(gmail\.com|hotmail\.com|yahoo\.com|outlook\.com|icloud\.com|live\.com|piscinas\.com|multiservicios\.com|test\.com|correo\.com|ejemplo\.com)$/i.test(value.trim());
     }, 'Ingresá un correo válido (@gmail.com, @hotmail.com, @yahoo.com, @outlook.com o institucional).');
 
     $('#formCliente').validate({

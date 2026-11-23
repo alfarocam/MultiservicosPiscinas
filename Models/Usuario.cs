@@ -1,5 +1,6 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MultiserviciosPiscinas.Models;
 
@@ -22,6 +23,9 @@ public partial class Usuario
     public bool Activo { get; set; }
 
     public DateTime FechaCreacion { get; set; }
+
+    [NotMapped]
+    public string? Telefono { get; set; }
 
     public virtual ICollection<Anuncio> Anuncio { get; set; } = new List<Anuncio>();
 

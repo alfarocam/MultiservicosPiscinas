@@ -99,11 +99,11 @@
                             }
                 </td>
 
-                <td>
+                <td data-order="@servicio.FechaApertura.ToString("yyyyMMdd")">
                     @servicio.FechaApertura.ToString("dd/MM/yyyy")
                 </td>
 
-                <td>
+                <td data-order="@(servicio.FechaCierre.HasValue ? servicio.FechaCierre.Value.ToString("yyyyMMdd") : "0")">
                     @(servicio.FechaCierre.HasValue
                                         ? servicio.FechaCierre.Value.ToString("dd/MM/yyyy")
                                         : "—")

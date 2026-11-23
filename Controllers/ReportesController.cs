@@ -28,7 +28,11 @@ namespace MultiserviciosPiscinas.Controllers
 
         public async Task<IActionResult> Index()
         {
-            ViewBag.Tecnicos = await _context.Usuario.Where(u => u.RolId == 2 || u.RolId == 3).ToListAsync(); // Asumiendo roles técnicos
+            ViewBag.Tecnicos = await _context.Usuario
+                .Where(u => u.RolId == 2 && u.Activo && u.Cliente == null)
+                .OrderBy(u => u.Nombre)
+                .ThenBy(u => u.ApellidoPaterno)
+                .ToListAsync();
             return View();
         }
 

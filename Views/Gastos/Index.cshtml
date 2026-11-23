@@ -1,14 +1,13 @@
 @model IEnumerable<MultiserviciosPiscinas.Models.GastoOperativo>
 
 @{
-    ViewData["Title"] = "Gestión de Gastos";
-
     // El rol Administrador es RolId 1 (antes se deducía por si el correo empezaba con "admin").
     bool esAdmin = User.IsInRole("1");
+    ViewData["Title"] = esAdmin ? "Gestión de Gastos" : "Mis Gastos";
 }
 
 <div class="c-page-header d-flex justify-content-between align-items-center">
-    <h2 class="a-title">Gestión de Gastos (Viáticos / Materiales)</h2>
+    <h2 class="a-title">@(esAdmin ? "Gestión de Gastos (Viáticos / Materiales)" : "Mis Gastos (Viáticos / Materiales)")</h2>
     <div class="d-flex flex-wrap gap-2">
         @if (esAdmin)
         {

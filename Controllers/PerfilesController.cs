@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using MultiserviciosPiscinas.Data;
 using MultiserviciosPiscinas.Models;
 using MultiserviciosPiscinas.Services;
 using System.Security.Claims;
@@ -19,6 +20,8 @@ namespace MultiserviciosPiscinas.Controllers
         //info asociada de roles y clientes
         public async Task<IActionResult> Detalle()
         {
+            await DivisionTerritorialSeeder.AsegurarIntegridadRolesYDescripcionesAsync(_context);
+
             string? correoLogueado = User.Identity?.Name;
 
             if (string.IsNullOrEmpty(correoLogueado))
@@ -42,6 +45,7 @@ namespace MultiserviciosPiscinas.Controllers
                 return await CerrarSesionPorCorreoInvalidoAsync();
             }
 
+            usuario.Telefono = await ObtenerTelefonoUsuarioAsync(usuario);
             return View(usuario);
         }
         private async Task CargarListasDireccionAsync(Usuario usuario, int? distritoId = null)
@@ -134,6 +138,7 @@ namespace MultiserviciosPiscinas.Controllers
                 return await CerrarSesionPorCorreoInvalidoAsync();
             }
 
+            usuario.Telefono = await ObtenerTelefonoUsuarioAsync(usuario);
             await CargarListasDireccionAsync(usuario);
 
             return View(usuario);
@@ -191,9 +196,9 @@ namespace MultiserviciosPiscinas.Controllers
             {
                 ModelState.AddModelError("", "El correo es obligatorio.");
             }
-            else if (!Regex.IsMatch(correo, @"^[a-zA-Z0-9._%+-]+@(gmail\.com|hotmail\.com|yahoo\.com|outlook\.com|icloud\.com|live\.com|piscinas\.com)$", RegexOptions.IgnoreCase))
+            else if (!Regex.IsMatch(correo, @"^[a-zA-Z0-9._%+-]+@(gmail\.com|hotmail\.com|yahoo\.com|outlook\.com|icloud\.com|live\.com|piscinas\.com|multiservicios\.com|test\.com|correo\.com|ejemplo\.com)$", RegexOptions.IgnoreCase))
             {
-                ModelState.AddModelError("", "Ingresá un correo válido (@gmail.com, @hotmail.com, @yahoo.com u @outlook.com).");
+                ModelState.AddModelError("", "Ingresá un correo válido (@gmail.com, @hotmail.com, @yahoo.com, @outlook.com o institucional).");
             }
             else
             {
@@ -207,17 +212,30 @@ namespace MultiserviciosPiscinas.Controllers
                 }
             }
 
+            if (string.IsNullOrWhiteSpace(telefono))
+            {
+                ModelState.AddModelError("", "El teléfono es obligatorio.");
+            }
+            else if (!Generales.EsTelefonoValido(telefono))
+            {
+                ModelState.AddModelError("", "El teléfono debe contener 8 dígitos con el formato 8888-8888.");
+            }
+            else
+            {
+                var telefonoNormalizado = Generales.NormalizarTelefono(telefono);
+                int? clienteActualId = usuarioDb.Cliente?.Id;
+                bool telefonoEnUso = await _context.TelefonosCliente.AnyAsync(t =>
+                    (!clienteActualId.HasValue || t.ClienteId != clienteActualId.Value) &&
+                    t.NumeroTelefono.Trim().Replace("-", "").Replace(" ", "") == telefonoNormalizado);
+
+                if (telefonoEnUso)
+                {
+                    ModelState.AddModelError("", "El teléfono ya está registrado por otro cliente.");
+                }
+            }
+
             if (usuarioDb.Cliente != null)
             {
-                if (string.IsNullOrWhiteSpace(telefono))
-                {
-                    ModelState.AddModelError("", "El teléfono es obligatorio.");
-                }
-                else if (!Regex.IsMatch(telefono, @"^\d{1,8}$"))
-                {
-                    ModelState.AddModelError("", "El teléfono debe contener solo números y máximo 8 dígitos.");
-                }
-
                 if (!distritoId.HasValue || distritoId.Value <= 0)
                 {
                     ModelState.AddModelError("", "Debe seleccionar una provincia, cantón y distrito válidos.");
@@ -231,12 +249,15 @@ namespace MultiserviciosPiscinas.Controllers
 
             if (!ModelState.IsValid)
             {
+                usuarioDb.Telefono = telefono;
                 ViewBag.DireccionDetalles = detalles;
                 await CargarListasDireccionAsync(usuarioDb, distritoId);
                 return View(usuarioDb);
             }
 
-            var valorAnterior = $"Nombre: {usuarioDb.Nombre} | Correo: {usuarioDb.Correo}";
+            var telefonoFormateado = Generales.FormatearTelefono(telefono);
+            var telefonoAnterior = await ObtenerTelefonoUsuarioAsync(usuarioDb);
+            var valorAnterior = $"Nombre: {usuarioDb.Nombre} {usuarioDb.ApellidoPaterno} {usuarioDb.ApellidoMaterno} | Correo: {usuarioDb.Correo} | Teléfono: {telefonoAnterior ?? "N/A"}";
 
             // act usuario
             usuarioDb.Nombre = nombre;
@@ -252,7 +273,7 @@ namespace MultiserviciosPiscinas.Controllers
 
                 if (telefonoPrincipal != null)
                 {
-                    telefonoPrincipal.NumeroTelefono = telefono!;
+                    telefonoPrincipal.NumeroTelefono = telefonoFormateado;
                     _context.TelefonosCliente.Update(telefonoPrincipal);
                 }
                 else
@@ -261,7 +282,7 @@ namespace MultiserviciosPiscinas.Controllers
                     {
                         ClienteId = usuarioDb.Cliente.Id,
                         TipoTelefono = "Principal",
-                        NumeroTelefono = telefono!,
+                        NumeroTelefono = telefonoFormateado,
                         EsPrincipal = 1
                     };
                     await _context.TelefonosCliente.AddAsync(nuevoTelefono);
@@ -295,6 +316,7 @@ namespace MultiserviciosPiscinas.Controllers
             {
                 _context.Update(usuarioDb);
                 await _context.SaveChangesAsync();
+                await GuardarTelefonoUsuarioAsync(usuarioDb, telefonoFormateado);
 
                 // La sesión identifica al usuario por su correo, así que hay que
                 // rehacer la cookie: si no, al cambiarlo, las pantallas que lo
@@ -306,7 +328,7 @@ namespace MultiserviciosPiscinas.Controllers
                     "UPDATE",
                     "seg.USUARIO",
                     usuarioDb.Id,
-                    $"Nombre: {usuarioDb.Nombre} | Correo: {usuarioDb.Correo}",
+                    $"Nombre: {usuarioDb.Nombre} {usuarioDb.ApellidoPaterno} {usuarioDb.ApellidoMaterno} | Correo: {usuarioDb.Correo} | Teléfono: {telefonoFormateado}",
                     valorAnterior);
 
                 TempData["MensajeExito"] = "Información del perfil actualizada correctamente.";
@@ -315,6 +337,7 @@ namespace MultiserviciosPiscinas.Controllers
             catch
             {
                 ModelState.AddModelError("", "Error al guardar los datos. Inténtalo de nuevo.");
+                usuarioDb.Telefono = telefono;
                 ViewBag.DireccionDetalles = detalles;
                 await CargarListasDireccionAsync(usuarioDb, distritoId);
                 return View(usuarioDb);
@@ -371,6 +394,45 @@ namespace MultiserviciosPiscinas.Controllers
                 TempData["MensajeErrorContrasena"] = "Ocurrió un error al cambiar la contraseña. Inténtalo de nuevo.";
                 return RedirectToAction(nameof(Editar));
             }
+        }
+
+        private async Task AsegurarColumnaTelefonoUsuarioAsync()
+        {
+            const string sql = @"
+IF COL_LENGTH('seg.USUARIO', 'telefono') IS NULL
+    ALTER TABLE seg.USUARIO ADD telefono varchar(20) NULL;";
+            await _context.Database.ExecuteSqlRawAsync(sql);
+        }
+
+        private async Task<string?> ObtenerTelefonoUsuarioAsync(Usuario usuario)
+        {
+            var telefonoCliente = usuario.Cliente?.TelefonosCliente?
+                .FirstOrDefault(t => t.EsPrincipal == 1)?.NumeroTelefono;
+
+            if (!string.IsNullOrWhiteSpace(telefonoCliente))
+                return telefonoCliente.Trim();
+
+            await AsegurarColumnaTelefonoUsuarioAsync();
+
+            var telefonoUsuario = await _context.Database
+                .SqlQueryRaw<string>("SELECT COALESCE(telefono, '') AS [Value] FROM seg.USUARIO WHERE id = @p0", usuario.Id)
+                .FirstOrDefaultAsync();
+
+            return string.IsNullOrWhiteSpace(telefonoUsuario) ? null : telefonoUsuario.Trim();
+        }
+
+        private async Task GuardarTelefonoUsuarioAsync(Usuario usuario, string? telefono)
+        {
+            await AsegurarColumnaTelefonoUsuarioAsync();
+
+            object valorTelefono = string.IsNullOrWhiteSpace(telefono)
+                ? DBNull.Value
+                : telefono.Trim();
+
+            await _context.Database.ExecuteSqlRawAsync(
+                "UPDATE seg.USUARIO SET telefono = @p0 WHERE id = @p1",
+                valorTelefono,
+                usuario.Id);
         }
 
         // Si la cookie apunta a un correo que ya no existe (sesión vieja de antes

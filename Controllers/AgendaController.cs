@@ -1,11 +1,13 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using MultiserviciosPiscinas.Data;
 using MultiserviciosPiscinas.Models;
 using MultiserviciosPiscinas.Services;
 
 namespace MultiserviciosPiscinas.Controllers
 {
+    [Authorize(Roles = "1")]
     public class AgendaController(
         PiscinasYMultiserviciosContext context,
         BitacoraService bitacora) : Controller
@@ -15,6 +17,8 @@ namespace MultiserviciosPiscinas.Controllers
 
         public async Task<IActionResult> Index()
         {
+            await DivisionTerritorialSeeder.CerrarCitasVencidasAsync(_context);
+
             var citas = await _context.Cita
                 .Include(c => c.Piscina)
                     .ThenInclude(p => p.Cliente)
@@ -410,7 +414,7 @@ namespace MultiserviciosPiscinas.Controllers
         private async Task CargarTecnicosAsync()
         {
             var tecnicos = await _context.Usuario
-                .Where(u => u.RolId == 2 && u.Activo)
+                .Where(u => u.RolId == 2 && u.Activo && u.Cliente == null)
                 .OrderBy(u => u.ApellidoPaterno)
                 .Select(u => new
                 {

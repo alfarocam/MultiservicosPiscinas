@@ -74,7 +74,7 @@
         <div class="col-lg-8">
             <div class="o-form-card">
 
-                <form asp-action="RegistrarParametro" asp-controller="Piscinas" method="post">
+                <form id="formRegistrarParametro" asp-action="RegistrarParametro" asp-controller="Piscinas" method="post" novalidate>
                     @Html.AntiForgeryToken()
 
                     <input type="hidden" asp-for="CitaId" />
@@ -92,7 +92,11 @@
                         <div class="col-md-6">
                             <div class="m-form-field">
                                 <label asp-for="FechaInspeccion">Fecha de inspección</label>
-                                <input asp-for="FechaInspeccion" type="date" class="a-input" />
+                                <input asp-for="FechaInspeccion"
+                                       type="date"
+                                       min="2020-01-01"
+                                       max="@DateOnly.FromDateTime(DateTime.Today).ToString("yyyy-MM-dd")"
+                                       class="a-input" />
                                 <span asp-validation-for="FechaInspeccion" class="text-danger small"></span>
                             </div>
                         </div>
@@ -176,3 +180,7 @@
 
     </div>
 </div>
+
+@section Scripts {
+    <script src="~/js/registrar-parametro.js" asp-append-version="true"></script>
+}

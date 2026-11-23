@@ -2,9 +2,12 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using MultiserviciosPiscinas.Data;
 using MultiserviciosPiscinas.Models;
 using MultiserviciosPiscinas.Services;
 using System;
+using System.Collections.Concurrent;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
@@ -16,16 +19,26 @@ namespace MultiserviciosPiscinas.Controllers
     {
         private readonly PiscinasYMultiserviciosContext _context;
         private readonly BitacoraService _bitacora;
+        private readonly IWebHostEnvironment _env;
 
-        public RolesController(PiscinasYMultiserviciosContext context, BitacoraService bitacora)
+        private static readonly object MatrizLock = new();
+        private static readonly ConcurrentDictionary<string, (bool Tecnico, bool Cliente)> MatrizPermisosCache = new();
+
+        public RolesController(
+            PiscinasYMultiserviciosContext context,
+            BitacoraService bitacora,
+            IWebHostEnvironment env)
         {
             _context = context;
             _bitacora = bitacora;
+            _env = env;
         }
 
         [HttpGet]
         public async Task<IActionResult> Index(DateTime? fechaModificacion)
         {
+            await DivisionTerritorialSeeder.AsegurarIntegridadRolesYDescripcionesAsync(_context);
+
             var roles = await _context.Rol.Include(r => r.Usuario).ToListAsync();
             var usuarios = await _context.Usuario
                 .Include(u => u.Rol)
@@ -60,6 +73,7 @@ namespace MultiserviciosPiscinas.Controllers
             {
                 Roles = roles,
                 Usuarios = usuariosVm.ToList(),
+                MatrizPermisos = ObtenerMatrizPermisos(),
                 FechaModificacionFiltro = fechaModificacion
             };
 
@@ -113,6 +127,8 @@ namespace MultiserviciosPiscinas.Controllers
             {
                 _context.Usuario.Add(nuevoColaborador);
                 await _context.SaveChangesAsync();
+
+                await AsegurarRegistroClienteSiRol3Async(nuevoColaborador.Id, nuevoColaborador.RolId);
 
                 await _bitacora.RegistrarAsync(
                     User,
@@ -209,6 +225,10 @@ namespace MultiserviciosPiscinas.Controllers
             {
                 ModelState.AddModelError("RolId", "Debe seleccionar un rol válido.");
             }
+            else if (rolId == 2 && await _context.Cliente.AnyAsync(c => c.UsuarioId == id))
+            {
+                ModelState.AddModelError("RolId", "No se puede asignar el rol Técnico a una cuenta registrada como Cliente.");
+            }
 
             int nuevoRolId = rolId ?? usuarioDb.RolId;
             bool nuevoActivo = activo ?? usuarioDb.Activo;
@@ -241,6 +261,8 @@ namespace MultiserviciosPiscinas.Controllers
             {
                 _context.Update(usuarioDb);
                 await _context.SaveChangesAsync();
+
+                await AsegurarRegistroClienteSiRol3Async(usuarioDb.Id, nuevoRolId);
 
                 var valorNuevo = $"Nombre: {usuarioDb.Nombre} {usuarioDb.ApellidoPaterno} {usuarioDb.ApellidoMaterno} | Correo: {usuarioDb.Correo} | RolId: {usuarioDb.RolId} | Activo: {usuarioDb.Activo}";
                 await _bitacora.RegistrarAsync(
@@ -338,6 +360,12 @@ namespace MultiserviciosPiscinas.Controllers
                 return NotFound("El usuario seleccionado no existe.");
             }
 
+            if (rolId == 2 && await _context.Cliente.AnyAsync(c => c.UsuarioId == usuarioId))
+            {
+                TempData["MensajeError"] = "No se puede asignar el rol Técnico a una cuenta registrada como Cliente.";
+                return RedirectToAction(nameof(Index));
+            }
+
             var rolAnterior = await _context.Rol.FindAsync(usuarioDb.RolId);
             var rolNuevo = await _context.Rol.FindAsync(rolId);
 
@@ -349,6 +377,8 @@ namespace MultiserviciosPiscinas.Controllers
                 // guarda sql
                 _context.Update(usuarioDb);
                 await _context.SaveChangesAsync();
+
+                await AsegurarRegistroClienteSiRol3Async(usuarioDb.Id, rolId);
 
                 await _bitacora.RegistrarAsync(
                     userClaims: User,
@@ -368,5 +398,192 @@ namespace MultiserviciosPiscinas.Controllers
                 return RedirectToAction(nameof(Index));
             }
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditarRol(int id, string descripcion)
+        {
+            var rol = await _context.Rol.FindAsync(id);
+            if (rol == null)
+            {
+                TempData["MensajeError"] = "No se encontró el rol especificado.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            if (string.IsNullOrWhiteSpace(descripcion))
+            {
+                TempData["MensajeError"] = "La descripción del rol es obligatoria.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            string descripcionLimpia = descripcion.Trim();
+            if (descripcionLimpia.Length > 255)
+            {
+                TempData["MensajeError"] = "La descripción del rol no puede superar los 255 caracteres.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            string valorAnterior = $"Rol: {rol.Nombre} | Descripción: {rol.Descripcion ?? "Sin descripción"}";
+            rol.Descripcion = descripcionLimpia;
+
+            try
+            {
+                _context.Rol.Update(rol);
+                await _context.SaveChangesAsync();
+
+                await _bitacora.RegistrarAsync(
+                    userClaims: User,
+                    accion: "UPDATE",
+                    tablaAfectada: "seg.ROL",
+                    registroId: rol.Id,
+                    valorAnterior: valorAnterior,
+                    valorNuevo: $"Rol: {rol.Nombre} | Descripción: {rol.Descripcion}"
+                );
+
+                TempData["MensajeExito"] = $"Descripción del rol '{rol.Nombre}' actualizada correctamente.";
+            }
+            catch (Exception)
+            {
+                TempData["MensajeError"] = "No se pudo actualizar la descripción del rol.";
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> GuardarMatrizPermisos(List<string>? permisosTecnico, List<string>? permisosCliente)
+        {
+            var setTecnico = new HashSet<string>(permisosTecnico ?? Enumerable.Empty<string>(), StringComparer.OrdinalIgnoreCase);
+            var setCliente = new HashSet<string>(permisosCliente ?? Enumerable.Empty<string>(), StringComparer.OrdinalIgnoreCase);
+
+            var estadoPersistido = new Dictionary<string, PermisoRolEstado>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var item in PermisosBaseMatriz)
+            {
+                bool tec = setTecnico.Contains(item.Clave);
+                bool cli = setCliente.Contains(item.Clave);
+                MatrizPermisosCache[item.Clave] = (tec, cli);
+                estadoPersistido[item.Clave] = new PermisoRolEstado(tec, cli);
+            }
+
+            try
+            {
+                var ruta = ObtenerRutaMatrizPermisos();
+                var carpeta = Path.GetDirectoryName(ruta);
+                if (!string.IsNullOrEmpty(carpeta) && !Directory.Exists(carpeta))
+                {
+                    Directory.CreateDirectory(carpeta);
+                }
+
+                var json = JsonSerializer.Serialize(estadoPersistido, new JsonSerializerOptions { WriteIndented = true });
+                lock (MatrizLock)
+                {
+                    System.IO.File.WriteAllText(ruta, json);
+                }
+            }
+            catch
+            {
+                // Si el almacenamiento local no permite escritura, se mantiene en caché de aplicación.
+            }
+
+            await _bitacora.RegistrarAsync(
+                userClaims: User,
+                accion: "UPDATE",
+                tablaAfectada: "seg.ROL",
+                registroId: 0,
+                valorNuevo: $"Matriz de permisos actualizada | Técnico: [{string.Join(", ", setTecnico)}] | Cliente: [{string.Join(", ", setCliente)}]"
+            );
+
+            TempData["MensajeExito"] = "Matriz de permisos por rol actualizada correctamente.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        private async Task AsegurarRegistroClienteSiRol3Async(int usuarioId, int rolId)
+        {
+            if (rolId != 3)
+                return;
+
+            bool existeCliente = await _context.Cliente.AnyAsync(c => c.UsuarioId == usuarioId);
+            if (!existeCliente)
+            {
+                _context.Cliente.Add(new Cliente
+                {
+                    UsuarioId = usuarioId,
+                    Notas = "Cliente registrado desde gestión de usuarios y roles."
+                });
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        private string ObtenerRutaMatrizPermisos() =>
+            Path.Combine(_env.ContentRootPath, "App_Data", "matriz-permisos.json");
+
+        private List<PermisoModuloRolItemViewModel> ObtenerMatrizPermisos()
+        {
+            if (MatrizPermisosCache.IsEmpty)
+            {
+                try
+                {
+                    var ruta = ObtenerRutaMatrizPermisos();
+                    if (System.IO.File.Exists(ruta))
+                    {
+                        string contenido;
+                        lock (MatrizLock)
+                        {
+                            contenido = System.IO.File.ReadAllText(ruta);
+                        }
+
+                        var guardado = JsonSerializer.Deserialize<Dictionary<string, PermisoRolEstado>>(contenido);
+                        if (guardado != null)
+                        {
+                            foreach (var kv in guardado)
+                            {
+                                MatrizPermisosCache[kv.Key] = (kv.Value.Tecnico, kv.Value.Cliente);
+                            }
+                        }
+                    }
+                }
+                catch
+                {
+                    // Se usan los valores por defecto si no se puede leer el archivo.
+                }
+            }
+
+            return PermisosBaseMatriz.Select(p =>
+            {
+                var estado = MatrizPermisosCache.TryGetValue(p.Clave, out var custom)
+                    ? custom
+                    : (p.Tecnico, p.Cliente);
+
+                return new PermisoModuloRolItemViewModel
+                {
+                    Clave = p.Clave,
+                    Modulo = p.Modulo,
+                    Accion = p.Accion,
+                    Admin = p.Admin,
+                    Tecnico = estado.Tecnico,
+                    Cliente = estado.Cliente
+                };
+            }).ToList();
+        }
+
+        private sealed record PermisoRolEstado(bool Tecnico, bool Cliente);
+
+        private static readonly List<PermisoModuloRolItemViewModel> PermisosBaseMatriz = new()
+        {
+            new() { Clave = "clientes", Modulo = "Clientes", Accion = "Ver, crear, editar e inactivar clientes", Admin = true, Tecnico = false, Cliente = false },
+            new() { Clave = "piscinas_admin", Modulo = "Piscinas", Accion = "Ver listado general, crear, editar e historial", Admin = true, Tecnico = false, Cliente = false },
+            new() { Clave = "piscinas_tecnico", Modulo = "Piscinas", Accion = "Registrar parámetros del agua en visitas asignadas", Admin = false, Tecnico = true, Cliente = false },
+            new() { Clave = "piscinas_cliente", Modulo = "Piscinas", Accion = "Consultar mis piscinas y mediciones", Admin = false, Tecnico = false, Cliente = true },
+            new() { Clave = "agenda_vehiculos", Modulo = "Agenda y Vehículos", Accion = "Gestionar agenda general, vehículos y optimización de rutas", Admin = true, Tecnico = false, Cliente = false },
+            new() { Clave = "servicios_tecnico", Modulo = "Servicios Técnicos", Accion = "Consultar mi agenda, rutas del día y registrar tareas", Admin = true, Tecnico = true, Cliente = false },
+            new() { Clave = "inventario_consulta", Modulo = "Inventario", Accion = "Consultar catálogo y existencias de productos", Admin = true, Tecnico = true, Cliente = false },
+            new() { Clave = "inventario_gestion", Modulo = "Inventario", Accion = "Crear, editar, activar y desactivar productos", Admin = true, Tecnico = false, Cliente = false },
+            new() { Clave = "gastos_propios", Modulo = "Gastos", Accion = "Registrar y corregir mis gastos / viáticos", Admin = true, Tecnico = true, Cliente = false },
+            new() { Clave = "gastos_aprobacion", Modulo = "Gastos", Accion = "Aprobar/rechazar gastos y gestionar gastos operativos", Admin = true, Tecnico = false, Cliente = false },
+            new() { Clave = "seguridad_reportes", Modulo = "Seguridad y Reportes", Accion = "Consultar bitácora de auditoría, roles y reportes", Admin = true, Tecnico = false, Cliente = false },
+            new() { Clave = "tienda_portal", Modulo = "Tienda y Portal Cliente", Accion = "Comprar en tienda, ver cotizaciones, facturas y encuestas", Admin = true, Tecnico = false, Cliente = true }
+        };
     }
 }

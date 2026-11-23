@@ -1,7 +1,16 @@
 @model IEnumerable<MultiserviciosPiscinas.Models.Cliente>
 
 @{
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
     ViewData["Title"] = "Clientes";
+}
+
+@if (TempData["Exito"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show shadow-sm mb-3" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>@TempData["Exito"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+    </div>
 }
 
     <div class="c-page-header d-flex justify-content-between align-items-center">
@@ -25,10 +34,18 @@
             <tbody>
                 @foreach (var cliente in Model)
                 {
+                    var numeroTelefono = cliente.TelefonosCliente
+                        .OrderByDescending(t => t.EsPrincipal)
+                        .ThenBy(t => t.Id)
+                        .FirstOrDefault()?.NumeroTelefono;
+                    var telefonoFormateado = !string.IsNullOrWhiteSpace(numeroTelefono)
+                        ? MultiserviciosPiscinas.Services.Generales.FormatearTelefono(numeroTelefono)
+                        : "—";
+
                     <tr>
                         <td>@cliente.Usuario.Nombre @cliente.Usuario.ApellidoPaterno</td>
                         <td>@cliente.Usuario.Correo</td>
-                        <td>@(cliente.TelefonosCliente.FirstOrDefault()?.NumeroTelefono)</td>
+                        <td>@telefonoFormateado</td>
                         <td class="text-center">
                             <div class="dropdown">
                                 <button class="btn btn-sm btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -50,12 +67,12 @@
                                             <i class="bi bi-pencil me-2 text-warning"></i>Editar
                                         </a>
                                     </li>
-                            
+
                                 </ul>
                             </div>
-                            
-                           
-                            
+
+
+
                         </td>
                     </tr>
                 }
@@ -65,5 +82,5 @@
 </div>
 
 @section Scripts {
-    <script src="~/js/clientes-tabla.js"></script>
+    <script src="~/js/clientes-tabla.js" asp-append-version="true"></script>
 }

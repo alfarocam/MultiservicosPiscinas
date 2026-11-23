@@ -44,6 +44,14 @@ namespace MultiserviciosPiscinas.Controllers
                 usuario.Contrasena == contrasena &&
                 usuario.Activo == true)
             {
+                if (usuario.RolId == 2 &&
+                    !string.Equals(usuario.Correo, "admin@piscinas.com", StringComparison.OrdinalIgnoreCase) &&
+                    await _contexto.Cliente.AnyAsync(c => c.UsuarioId == usuario.Id))
+                {
+                    usuario.RolId = 3;
+                    await _contexto.SaveChangesAsync();
+                }
+
                 var declaraciones = new List<Claim>
                 {
                     new Claim(ClaimTypes.Name, usuario.Correo),
@@ -156,6 +164,10 @@ namespace MultiserviciosPiscinas.Controllers
             var correoLimpio = model.Correo.Trim();
             var telefonoLimpio = model.Telefono.Trim();
             var telefonoNormalizado = Generales.NormalizarTelefono(telefonoLimpio);
+            var telefonoFormateado = Generales.FormatearTelefono(telefonoLimpio);
+            var nombreLimpio = string.Join(" ", (model.Nombre ?? string.Empty).Split(' ', StringSplitOptions.RemoveEmptyEntries));
+            var paternoLimpio = string.Join(" ", (model.ApellidoPaterno ?? string.Empty).Split(' ', StringSplitOptions.RemoveEmptyEntries));
+            var maternoLimpio = string.Join(" ", (model.ApellidoMaterno ?? string.Empty).Split(' ', StringSplitOptions.RemoveEmptyEntries));
 
             bool correoExiste = await _contexto.Usuario
                 .AnyAsync(u => u.Correo == correoLimpio);
@@ -166,6 +178,16 @@ namespace MultiserviciosPiscinas.Controllers
 
             if (correoExiste || telefonoExiste)
             {
+                if (telefonoExiste)
+                {
+                    ModelState.AddModelError(nameof(model.Telefono), "Ya existe una cuenta registrada con ese número de teléfono.");
+                }
+
+                if (correoExiste)
+                {
+                    ModelState.AddModelError(nameof(model.Correo), "El correo ya está registrado. Por favor, elige otro.");
+                }
+
                 if (correoExiste && telefonoExiste)
                 {
                     ViewBag.Mensaje = "El correo y el teléfono ya están registrados. Por favor, verifica tus datos.";
@@ -173,12 +195,10 @@ namespace MultiserviciosPiscinas.Controllers
                 else if (telefonoExiste)
                 {
                     ViewBag.Mensaje = "Ya existe una cuenta registrada con ese número de teléfono.";
-                    ModelState.AddModelError(nameof(model.Telefono), ViewBag.Mensaje);
                 }
                 else
                 {
                     ViewBag.Mensaje = "El correo ya está registrado. Por favor, elige otro.";
-                    ModelState.AddModelError(nameof(model.Correo), ViewBag.Mensaje);
                 }
 
                 ViewBag.TipoMensaje = "danger";
@@ -197,9 +217,9 @@ namespace MultiserviciosPiscinas.Controllers
                     .SqlQueryRaw<int>(
                         "EXEC seg.InsertarUsuarioYCliente @p0, @p1, @p2, @p3, @p4, @p5, @p6",
                         rolCliente,
-                        model.Nombre.Trim(),
-                        model.ApellidoPaterno.Trim(),
-                        model.ApellidoMaterno.Trim(),
+                        nombreLimpio,
+                        paternoLimpio,
+                        maternoLimpio,
                         correoLimpio,
                         model.Contrasena,
                         fechaCreacion
@@ -232,7 +252,7 @@ namespace MultiserviciosPiscinas.Controllers
                 {
                     ClienteId = cliente.Id,
                     TipoTelefono = "Principal",
-                    NumeroTelefono = model.Telefono.Trim(),
+                    NumeroTelefono = telefonoFormateado,
                     EsPrincipal = 1
                 });
 
@@ -251,7 +271,7 @@ namespace MultiserviciosPiscinas.Controllers
                 await transaction.CommitAsync();
 
                 bool correoEnviado = await EnviarCorreoBienvenidaAsync(
-                    $"{model.Nombre.Trim()} {model.ApellidoPaterno.Trim()}",
+                    $"{nombreLimpio} {paternoLimpio}",
                     correoLimpio);
 
                 if (correoEnviado)

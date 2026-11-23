@@ -8,6 +8,24 @@ namespace MultiserviciosPiscinas.Services
     {
         private readonly PiscinasYMultiserviciosContext _context = context;
 
+        public static string ObtenerNombreModulo(string? tabla) => (tabla ?? string.Empty).Trim() switch
+        {
+            "inv.PRODUCTO" => "Inventario (productos)",
+            "inv.CATEGORIA_PRODUCTO" => "Inventario (categorías)",
+            "ops.CITA" => "Agenda (citas)",
+            "ops.SERVICIO" => "Servicios técnicos",
+            "seg.USUARIO" or "USUARIO" => "Usuarios y roles",
+            "seg.ROL" => "Roles y permisos",
+            "cli.CLIENTE" => "Clientes",
+            "fin.GASTO_OPERATIVO" => "Gastos operativos",
+            "fin.CATEGORIA_GASTO_OPERATIVO" => "Gastos operativos (categorías)",
+            "act.PISCINA" => "Piscinas",
+            "pry.PROYECTO_CONSTRUCCION" => "Proyectos",
+            "log.VEHICULO" => "Vehículos de la Empresa",
+            "" => "Sistema",
+            var t => t
+        };
+
         //Registra una accion en la bitacora de auditoria
         public async Task RegistrarAsync(
             ClaimsPrincipal userClaims,

@@ -62,12 +62,11 @@ namespace MultiserviciosPiscinas.Controllers
 
             if (orden == "antiguos")
             {
-                consulta = consulta.OrderBy(b => b.FechaHora);
+                consulta = consulta.OrderBy(b => b.FechaHora).ThenBy(b => b.Id);
             }
             else
             {
-
-                consulta = consulta.OrderByDescending(b => b.FechaHora);
+                consulta = consulta.OrderByDescending(b => b.FechaHora).ThenByDescending(b => b.Id);
             }
 
             var listaBitacora = await consulta.ToListAsync();

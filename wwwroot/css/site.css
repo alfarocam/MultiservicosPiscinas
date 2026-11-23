@@ -1840,3 +1840,65 @@ table.dataTable > tbody > tr.child ul.dtr-details > li span.dtr-data {
     white-space: normal !important;
 }
 
+/* ==========================================================================
+   BITÁCORA DETALLE — Tabla sin desplazamiento horizontal y apilable en móvil
+   ========================================================================== */
+table.c-bitacora-detalle-tabla {
+    table-layout: fixed;
+    width: 100%;
+}
+
+table.c-bitacora-detalle-tabla th,
+table.c-bitacora-detalle-tabla td {
+    white-space: normal !important;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    vertical-align: top;
+}
+
+@media (max-width: 767.98px) {
+    table.c-bitacora-detalle-tabla {
+        display: block;
+    }
+
+    table.c-bitacora-detalle-tabla thead {
+        display: none;
+    }
+
+    table.c-bitacora-detalle-tabla tbody {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    table.c-bitacora-detalle-tabla tbody tr {
+        display: block;
+        border: 1px solid #dee2e6;
+        border-radius: 0.5rem;
+        padding: 0.5rem 0.75rem;
+    }
+
+    table.c-bitacora-detalle-tabla tbody td {
+        display: block;
+        width: 100%;
+        border: none !important;
+        padding: 0.35rem 0 !important;
+        text-align: left !important;
+    }
+
+    table.c-bitacora-detalle-tabla tbody td + td {
+        border-top: 1px dashed rgba(0, 0, 0, 0.08) !important;
+    }
+
+    table.c-bitacora-detalle-tabla tbody td::before {
+        content: attr(data-label);
+        display: block;
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: var(--color-text-muted);
+        margin-bottom: 0.15rem;
+    }
+}
+

@@ -12,10 +12,21 @@ namespace MultiserviciosPiscinas.Models
         public DateTime? FechaModificacion { get; set; }
     }
 
+    public class PermisoModuloRolItemViewModel
+    {
+        public string Clave { get; set; } = string.Empty;
+        public string Modulo { get; set; } = string.Empty;
+        public string Accion { get; set; } = string.Empty;
+        public bool Admin { get; set; }
+        public bool Tecnico { get; set; }
+        public bool Cliente { get; set; }
+    }
+
     public class RolesIndexViewModel
     {
         public List<Rol> Roles { get; set; } = new();
         public List<UsuarioListadoItemViewModel> Usuarios { get; set; } = new();
+        public List<PermisoModuloRolItemViewModel> MatrizPermisos { get; set; } = new();
         public DateTime? FechaModificacionFiltro { get; set; }
     }
 }

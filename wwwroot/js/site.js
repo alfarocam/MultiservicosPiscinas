@@ -115,14 +115,46 @@ document.addEventListener("DOMContentLoaded", function () {
 // Configuración Global y Normalización de DataTables
 // ==========================================================================
 if (window.jQuery && $.fn.dataTable) {
+    // 0. Ordenamiento global para fechas en formato dd/MM/yyyy [HH:mm[:ss]]
+    (function () {
+        var regexFecha = /^(\d{2})\/(\d{2})\/(\d{4})(?:\s+(\d{2}):(\d{2})(?::(\d{2}))?)?$/;
+        var vaciosValidos = { '': true, '-': true, '—': true, 'sin modificaciones': true };
+
+        function limpiarTextoCelda(data) {
+            if (data === null || data === undefined) return '';
+            return String(data).replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+        }
+
+        $.fn.dataTable.ext.type.detect.unshift(function (data) {
+            var texto = limpiarTextoCelda(data);
+            if (regexFecha.test(texto)) {
+                return 'fecha-ddmmyyyy';
+            }
+            if (vaciosValidos[texto.toLowerCase()]) {
+                return 'fecha-ddmmyyyy';
+            }
+            return null;
+        });
+
+        $.fn.dataTable.ext.type.order['fecha-ddmmyyyy-pre'] = function (data) {
+            var texto = limpiarTextoCelda(data);
+            var match = texto.match(regexFecha);
+            if (!match) return 0;
+
+            var clave = match[3] + match[2] + match[1] +
+                (match[4] || '00') + (match[5] || '00') + (match[6] || '00');
+            return parseInt(clave, 10) || 0;
+        };
+    })();
+
     // 1. Opciones por defecto para todas las instancias de DataTables
     $.extend(true, $.fn.dataTable.defaults, {
         responsive: true,
         autoWidth: false,
         language: {
-            search: "",
+            search: "Buscar:",
             searchPlaceholder: "Buscar...",
-            lengthMenu: "Mostrar _MENU_",
+            lengthMenu: "Mostrar _MENU_ registros",
             info: "_START_ a _END_ de _TOTAL_",
             infoEmpty: "0 a 0 de 0",
             infoFiltered: "(de _MAX_)",

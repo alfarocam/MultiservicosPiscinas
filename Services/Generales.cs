@@ -48,6 +48,27 @@ namespace MultiserviciosPiscinas.Services
                 .Replace("-", "")
                 .Replace(" ", "");
         }
+
+        public static bool EsTelefonoValido(string? telefono)
+        {
+            if (string.IsNullOrWhiteSpace(telefono))
+                return false;
+
+            return System.Text.RegularExpressions.Regex.IsMatch(telefono.Trim(), @"^\d{4}-?\d{4}$");
+        }
+
+        public static string FormatearTelefono(string? telefono)
+        {
+            var normalizado = NormalizarTelefono(telefono);
+            if (normalizado.Length == 8 && normalizado.All(char.IsDigit))
+                return $"{normalizado[..4]}-{normalizado[4..8]}";
+
+            var soloDigitos = new string((telefono ?? string.Empty).Where(char.IsDigit).ToArray());
+            if (soloDigitos.Length == 8)
+                return $"{soloDigitos[..4]}-{soloDigitos[4..8]}";
+
+            return (telefono ?? string.Empty).Trim();
+        }
         #endregion
 
         #region Generar Contraseña

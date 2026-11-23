@@ -28,8 +28,8 @@ namespace MultiserviciosPiscinas.Models
         public string Contrasena { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "El teléfono es obligatorio.")]
-        [StringLength(8, ErrorMessage = "El teléfono debe tener máximo 8 dígitos.")]
-        [RegularExpression(@"^\d{1,8}$", ErrorMessage = "El teléfono debe contener solo números y máximo 8 dígitos.")]
+        [StringLength(9, ErrorMessage = "El teléfono debe tener el formato 8888-8888.")]
+        [RegularExpression(@"^\d{4}-?\d{4}$", ErrorMessage = "El teléfono debe contener 8 dígitos con el formato 8888-8888.")]
         public string Telefono { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "La dirección es obligatoria.")]

@@ -90,9 +90,9 @@
                                 }
                         </td>
 
-                        <td>@proyecto.FechaInicio.ToString("dd/MM/yyyy")</td>
+                        <td data-order="@proyecto.FechaInicio.ToString("yyyyMMdd")">@proyecto.FechaInicio.ToString("dd/MM/yyyy")</td>
 
-                        <td>
+                        <td data-order="@(proyecto.FechaFinEstimada.HasValue ? proyecto.FechaFinEstimada.Value.ToString("yyyyMMdd") : "0")">
                             @(proyecto.FechaFinEstimada.HasValue
                                                     ? proyecto.FechaFinEstimada.Value.ToString("dd/MM/yyyy")
                                                     : "—")
