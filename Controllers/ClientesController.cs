@@ -268,7 +268,7 @@ namespace MultiserviciosPiscinas.Controllers
                 ApellidoPaterno = model.ApellidoPaterno,
                 ApellidoMaterno = model.ApellidoMaterno,
                 Correo = model.Correo,
-                Contrasena = "Temporal123",
+                Contrasena = PasswordHelper.Hash("Temporal123"),
                 RolId = 3,
                 Activo = true,
                 FechaCreacion = DateTime.Now

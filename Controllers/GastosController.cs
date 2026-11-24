@@ -46,11 +46,11 @@ namespace MultiserviciosPiscinas.Controllers
             }
 
             var gastos = await query
-                .OrderBy(g => g.Estado == "Pendiente" ? 1 : (g.Estado == "Aprobado" ? 2 : 3))
-                .ThenByDescending(g => g.Fecha)
+                .OrderByDescending(g => g.Fecha)
                 .ThenByDescending(g => g.Id)
                 .ToListAsync();
 
+            ViewBag.Categorias = await ObtenerCategoriasAsync();
             return View(gastos);
         }
 
@@ -66,33 +66,60 @@ namespace MultiserviciosPiscinas.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Registrar(GastoOperativo gasto, IFormFile? comprobanteArchivo)
         {
+            ModelState.Remove(nameof(GastoOperativo.Estado));
+            ModelState.Remove(nameof(GastoOperativo.Categoria));
+            ModelState.Remove(nameof(GastoOperativo.Usuario));
+            ModelState.Remove(nameof(GastoOperativo.Fecha));
+            ModelState.Remove(nameof(GastoOperativo.Monto));
+            ModelState.Remove(nameof(GastoOperativo.CategoriaId));
+
+            gasto.Descripcion = gasto.Descripcion?.Trim();
+
+            if (gasto.CategoriaId <= 0 || !await _context.CategoriaGastoOperativo.AnyAsync(c => c.Id == gasto.CategoriaId))
+            {
+                ModelState.AddModelError(nameof(GastoOperativo.CategoriaId), "Debe seleccionar una categoría válida.");
+            }
+
+            if (gasto.Monto <= 0 || gasto.Monto > 999999999.99m)
+            {
+                ModelState.AddModelError(nameof(GastoOperativo.Monto), "El monto debe ser mayor a cero.");
+            }
+
+            if (gasto.Fecha == default || gasto.Fecha.Year < 1753)
+            {
+                ModelState.AddModelError(nameof(GastoOperativo.Fecha), "Debe seleccionar una fecha válida.");
+            }
+
+            if (!string.IsNullOrEmpty(gasto.Descripcion) && gasto.Descripcion.Length > 500)
+            {
+                ModelState.AddModelError(nameof(GastoOperativo.Descripcion), "La descripción no puede superar los 500 caracteres.");
+            }
+
+            if (comprobanteArchivo != null && comprobanteArchivo.Length > 0)
+            {
+                var extensionesPermitidas = new[] { ".jpg", ".jpeg", ".png", ".pdf" };
+                var extension = Path.GetExtension(comprobanteArchivo.FileName).ToLowerInvariant();
+                if (!extensionesPermitidas.Contains(extension))
+                {
+                    ModelState.AddModelError("comprobanteArchivo", "Solo se permiten archivos JPG, PNG o PDF.");
+                }
+            }
+
+            if (!ModelState.IsValid)
+            {
+                ViewBag.Categorias = new SelectList(await ObtenerCategoriasAsync(), "Id", "NombreCategoria", gasto.CategoriaId);
+                return View(gasto);
+            }
+
             try
             {
-                gasto.Estado = "Pendiente";
-                if (gasto.Fecha == default)
+                var usuarioId = await ObtenerUsuarioActualIdAsync();
+                if (usuarioId == null)
                 {
-                    gasto.Fecha = DateOnly.FromDateTime(DateTime.Now);
+                    return RedirectToAction("InicioSesion", "Auth");
                 }
 
-                var correo = User.FindFirst(ClaimTypes.Email)?.Value ?? User.Identity?.Name;
-                if (!string.IsNullOrEmpty(correo))
-                {
-                    var usuario = await _context.Usuario.FirstOrDefaultAsync(u => u.Correo == correo);
-                    if (usuario != null)
-                    {
-                        gasto.UsuarioId = usuario.Id;
-                    }
-                    else
-                    {
-                        var primerUsuario = await _context.Usuario.FirstOrDefaultAsync();
-                        gasto.UsuarioId = primerUsuario?.Id ?? 1;
-                    }
-                }
-                else
-                {
-                    var primerUsuario = await _context.Usuario.FirstOrDefaultAsync();
-                    gasto.UsuarioId = primerUsuario?.Id ?? 1;
-                }
+                gasto.UsuarioId = usuarioId.Value;
 
                 if (gasto.CitaId.HasValue && gasto.CitaId > 0)
                 {
@@ -114,19 +141,54 @@ namespace MultiserviciosPiscinas.Controllers
 
                 // Sin comprobante el gasto se rechaza automáticamente.
                 bool sinComprobante = string.IsNullOrEmpty(gasto.ComprobanteRuta);
+                bool esAdmin = User.IsInRole("1");
+
                 if (sinComprobante)
                 {
                     gasto.Estado = "Rechazado";
                     gasto.MotivoRechazo = MotivoSinComprobante;
                 }
+                else if (esAdmin)
+                {
+                    gasto.Estado = "Aprobado";
+                    gasto.MotivoRechazo = null;
+                }
+                else
+                {
+                    gasto.Estado = "Pendiente";
+                    gasto.MotivoRechazo = null;
+                }
 
                 _context.GastoOperativo.Add(gasto);
                 await _context.SaveChangesAsync();
 
+                var categoriaNombre = (await _context.CategoriaGastoOperativo
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(c => c.Id == gasto.CategoriaId))?.NombreCategoria ?? gasto.CategoriaId.ToString();
+
+                await _bitacora.RegistrarAsync(
+                    userClaims: User,
+                    accion: "INSERT",
+                    tablaAfectada: "fin.GASTO_OPERATIVO",
+                    registroId: gasto.Id,
+                    valorNuevo: $"Categoría: {categoriaNombre} | Monto: ₡{gasto.Monto:N2} | Fecha: {gasto.Fecha:dd/MM/yyyy} | Estado: {gasto.Estado}"
+                );
+
                 if (sinComprobante)
-                    TempData["MensajeError"] = "El gasto fue registrado pero quedó RECHAZADO automáticamente por no tener comprobante. Puede corregirlo adjuntando uno.";
+                {
+                    TempData["MensajeError"] = esAdmin
+                        ? "El gasto fue registrado pero quedó RECHAZADO automáticamente por no tener comprobante."
+                        : "El gasto fue registrado pero quedó RECHAZADO automáticamente por no tener comprobante. Puede corregirlo adjuntando uno.";
+                }
+                else if (esAdmin)
+                {
+                    TempData["MensajeExito"] = "El gasto operativo se registró y aprobó correctamente.";
+                }
                 else
+                {
                     TempData["MensajeExito"] = "El gasto se registró correctamente y quedó en estado PENDIENTE de aprobación.";
+                }
+
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
@@ -259,19 +321,66 @@ namespace MultiserviciosPiscinas.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Corregir(GastoOperativo gastoForm, IFormFile? comprobanteArchivo)
         {
+            var gastoExistente = await _context.GastoOperativo.FindAsync(gastoForm.Id);
+            if (gastoExistente == null) return NotFound();
+
+            if (!await PuedeAccederAGastoAsync(gastoExistente.UsuarioId))
+                return Forbid();
+
+            ModelState.Remove(nameof(GastoOperativo.Estado));
+            ModelState.Remove(nameof(GastoOperativo.Categoria));
+            ModelState.Remove(nameof(GastoOperativo.Usuario));
+            ModelState.Remove(nameof(GastoOperativo.Fecha));
+            ModelState.Remove(nameof(GastoOperativo.Monto));
+            ModelState.Remove(nameof(GastoOperativo.CategoriaId));
+
+            gastoForm.Descripcion = gastoForm.Descripcion?.Trim();
+
+            if (gastoForm.CategoriaId <= 0 || !await _context.CategoriaGastoOperativo.AnyAsync(c => c.Id == gastoForm.CategoriaId))
+            {
+                ModelState.AddModelError(nameof(GastoOperativo.CategoriaId), "Debe seleccionar una categoría válida.");
+            }
+
+            if (gastoForm.Monto <= 0 || gastoForm.Monto > 999999999.99m)
+            {
+                ModelState.AddModelError(nameof(GastoOperativo.Monto), "El monto debe ser mayor a cero.");
+            }
+
+            if (string.IsNullOrWhiteSpace(gastoForm.Descripcion))
+            {
+                ModelState.AddModelError(nameof(GastoOperativo.Descripcion), "La descripción corregida es obligatoria.");
+            }
+            else if (gastoForm.Descripcion.Length > 500)
+            {
+                ModelState.AddModelError(nameof(GastoOperativo.Descripcion), "La descripción no puede superar los 500 caracteres.");
+            }
+
+            if (comprobanteArchivo != null && comprobanteArchivo.Length > 0)
+            {
+                var extensionesPermitidas = new[] { ".jpg", ".jpeg", ".png", ".pdf" };
+                var extension = Path.GetExtension(comprobanteArchivo.FileName).ToLowerInvariant();
+                if (!extensionesPermitidas.Contains(extension))
+                {
+                    ModelState.AddModelError("comprobanteArchivo", "Solo se permiten archivos JPG, PNG o PDF.");
+                }
+            }
+
+            if (!ModelState.IsValid)
+            {
+                gastoForm.MotivoRechazo = gastoExistente.MotivoRechazo;
+                gastoForm.ComprobanteRuta = gastoExistente.ComprobanteRuta;
+                ViewBag.Categorias = new SelectList(await ObtenerCategoriasAsync(), "Id", "NombreCategoria", gastoForm.CategoriaId);
+                return View(gastoForm);
+            }
+
             try
             {
-                var gastoExistente = await _context.GastoOperativo.FindAsync(gastoForm.Id);
-                if (gastoExistente == null) return NotFound();
-
-                if (!await PuedeAccederAGastoAsync(gastoExistente.UsuarioId))
-                    return Forbid();
+                string valorAnterior = $"Estado: {gastoExistente.Estado} | Monto: ₡{gastoExistente.Monto:N2}";
 
                 gastoExistente.CategoriaId = gastoForm.CategoriaId;
                 gastoExistente.Monto = gastoForm.Monto;
                 gastoExistente.Descripcion = gastoForm.Descripcion;
 
-                // Valido la citaid
                 if (gastoForm.CitaId.HasValue && gastoForm.CitaId > 0)
                 {
                     var existeCita = await _context.Cita.AnyAsync(c => c.Id == gastoForm.CitaId.Value);
@@ -295,6 +404,15 @@ namespace MultiserviciosPiscinas.Controllers
                 _context.Update(gastoExistente);
                 await _context.SaveChangesAsync();
 
+                await _bitacora.RegistrarAsync(
+                    userClaims: User,
+                    accion: "UPDATE",
+                    tablaAfectada: "fin.GASTO_OPERATIVO",
+                    registroId: gastoExistente.Id,
+                    valorAnterior: valorAnterior,
+                    valorNuevo: $"Estado: {gastoExistente.Estado} | Monto: ₡{gastoExistente.Monto:N2}"
+                );
+
                 if (sinComprobante)
                 {
                     TempData["MensajeError"] = "El gasto sigue RECHAZADO porque no tiene comprobante. Adjunte uno para enviarlo a aprobación.";
@@ -310,6 +428,8 @@ namespace MultiserviciosPiscinas.Controllers
                 ModelState.AddModelError("", "Error al guardar la corrección: " + errorDetalle);
             }
 
+            gastoForm.MotivoRechazo = gastoExistente.MotivoRechazo;
+            gastoForm.ComprobanteRuta = gastoExistente.ComprobanteRuta;
             ViewBag.Categorias = new SelectList(await ObtenerCategoriasAsync(), "Id", "NombreCategoria", gastoForm.CategoriaId);
             return View(gastoForm);
         }
@@ -383,7 +503,7 @@ namespace MultiserviciosPiscinas.Controllers
             string carpetaSubidas = Path.Combine(_env.WebRootPath, "comprobantes");
             if (!Directory.Exists(carpetaSubidas)) Directory.CreateDirectory(carpetaSubidas);
 
-            string nombreArchivoUnique = Guid.NewGuid().ToString() + Path.GetExtension(archivo.FileName);
+            string nombreArchivoUnique = Guid.NewGuid().ToString() + Path.GetExtension(archivo.FileName).ToLowerInvariant();
             string rutaFisica = Path.Combine(carpetaSubidas, nombreArchivoUnique);
 
             using (var stream = new FileStream(rutaFisica, FileMode.Create))

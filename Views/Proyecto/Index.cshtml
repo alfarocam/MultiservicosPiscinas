@@ -3,6 +3,13 @@
 @{
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
     ViewData["Title"] = "Proyectos";
+
+    var hoy = DateOnly.FromDateTime(DateTime.Today);
+    int proyectosVencidos = Model.Count(p =>
+        p.Estado != "Completado" &&
+        p.Estado != "Cancelado" &&
+        p.FechaFinEstimada.HasValue &&
+        p.FechaFinEstimada.Value < hoy);
 }
 
 @if (TempData["MensajeExito"] != null)
@@ -30,6 +37,16 @@
         <i class="bi bi-plus-circle me-1"></i> Nuevo Proyecto
     </a>
 </div>
+
+@if (proyectosVencidos > 0)
+{
+    <div class="alert alert-warning d-flex align-items-center shadow-sm mb-3" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
+        <div>
+            Hay <strong>@proyectosVencidos</strong> proyecto(s) con fecha fin estimada vencida que aún siguen activos. Por favor, revise y actualice su estado o reprograme la fecha.
+        </div>
+    </div>
+}
 
 <div class="card">
     <div class="card-body">
@@ -61,6 +78,8 @@
                     @foreach (var proyecto in Model)
                     {
                         var esEditable = proyecto.Estado != "Completado" && proyecto.Estado != "Cancelado";
+                        var estaVencido = esEditable && proyecto.FechaFinEstimada.HasValue && proyecto.FechaFinEstimada.Value < hoy;
+                        var diasAtraso = estaVencido ? hoy.DayNumber - proyecto.FechaFinEstimada!.Value.DayNumber : 0;
 
                         var badgeClass = proyecto.Estado switch
                         {
@@ -72,7 +91,7 @@
                             _ => "c-badge-gray"
                         };
 
-                        <tr>
+                        <tr class="@(estaVencido ? "table-warning" : "")">
                             <td>
                                 @proyecto.Cliente.Usuario.Nombre
                                 @proyecto.Cliente.Usuario.ApellidoPaterno
@@ -93,9 +112,22 @@
                         <td data-order="@proyecto.FechaInicio.ToString("yyyyMMdd")">@proyecto.FechaInicio.ToString("dd/MM/yyyy")</td>
 
                         <td data-order="@(proyecto.FechaFinEstimada.HasValue ? proyecto.FechaFinEstimada.Value.ToString("yyyyMMdd") : "0")">
-                            @(proyecto.FechaFinEstimada.HasValue
-                                                    ? proyecto.FechaFinEstimada.Value.ToString("dd/MM/yyyy")
-                                                    : "—")
+                            @if (proyecto.FechaFinEstimada.HasValue)
+                            {
+                                <span class="@(estaVencido ? "text-danger fw-semibold" : "")">
+                                    @proyecto.FechaFinEstimada.Value.ToString("dd/MM/yyyy")
+                                </span>
+                                if (estaVencido)
+                                {
+                                    <div>
+                                        <span class="c-badge c-badge-red mt-1">Vencido (@diasAtraso d)</span>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <span>—</span>
+                            }
                     </td>
 
                             <td>

@@ -37,5 +37,23 @@ namespace MultiserviciosPiscinas.Controllers
             Response.StatusCode = StatusCodes.Status403Forbidden;
             return View();
         }
+
+        [AllowAnonymous]
+        [HttpGet("/Home/Error")]
+        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        public IActionResult Error(int? statusCode = null)
+        {
+            if (statusCode.HasValue && statusCode.Value >= 400 && statusCode.Value < 600)
+            {
+                Response.StatusCode = statusCode.Value;
+            }
+            else if (Response.StatusCode < 400)
+            {
+                Response.StatusCode = StatusCodes.Status500InternalServerError;
+            }
+
+            ViewBag.StatusCode = Response.StatusCode;
+            return View();
+        }
     }
 }

@@ -140,7 +140,9 @@ else
                             <form asp-action="Eliminar"
                                   asp-route-id="@anuncio.Id"
                                   method="post"
-                                  onsubmit="return confirm('¿Seguro que desea eliminar este comunicado?');">
+                                  data-titulo="¿Eliminar comunicado?"
+                                  data-texto="¿Seguro que desea eliminar este comunicado? Esta acción no se puede deshacer."
+                                  onsubmit="return ConfirmarEliminacion(event, this);">
                                 @Html.AntiForgeryToken()
 
                                 <button type="submit" class="c-btn-sm btn-danger">
@@ -154,4 +156,8 @@ else
             </div>
         }
     </div>
+}
+
+@section Scripts {
+    <script src="~/js/sweetAlerts.js" asp-append-version="true"></script>
 }

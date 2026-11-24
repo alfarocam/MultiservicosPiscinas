@@ -25,6 +25,7 @@ public class DivisionTerritorialSeeder(
         try
         {
             await AsegurarColumnasOperacionesAsync();
+            await MigrarContrasenasTextoPlanoABcryptSafeAsync();
             await AsegurarCategoriasGastoOperativoAsync();
             await AsegurarCategoriasProductoAsync();
             await AsegurarIntegridadRolesYDescripcionesSafeAsync();
@@ -283,6 +284,45 @@ IF COL_LENGTH('seg.USUARIO', 'telefono') IS NULL
         {
             logger.LogWarning("[SEEDER] No se pudo verificar integridad de clientes/teléfonos: {Error}", ex.Message);
         }
+    }
+
+    private async Task MigrarContrasenasTextoPlanoABcryptSafeAsync()
+    {
+        try
+        {
+            int migradas = await MigrarContrasenasTextoPlanoABcryptAsync(dbContext);
+            if (migradas > 0)
+            {
+                logger.LogInformation("[SEEDER] {Cantidad} contraseñas en texto plano migradas a BCrypt.", migradas);
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning("[SEEDER] No se pudieron migrar contraseñas legadas a BCrypt: {Error}", ex.Message);
+            dbContext.ChangeTracker.Clear();
+        }
+    }
+
+    public static async Task<int> MigrarContrasenasTextoPlanoABcryptAsync(PiscinasYMultiserviciosContext context)
+    {
+        var usuarios = await context.Usuario.ToListAsync();
+        int migradas = 0;
+
+        foreach (var usuario in usuarios)
+        {
+            if (!string.IsNullOrEmpty(usuario.Contrasena) && !PasswordHelper.EsHashBCrypt(usuario.Contrasena))
+            {
+                usuario.Contrasena = PasswordHelper.Hash(usuario.Contrasena);
+                migradas++;
+            }
+        }
+
+        if (migradas > 0)
+        {
+            await context.SaveChangesAsync();
+        }
+
+        return migradas;
     }
 
     private async Task CerrarCitasVencidasSafeAsync()

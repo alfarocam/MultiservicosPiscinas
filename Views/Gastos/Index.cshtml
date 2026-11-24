@@ -1,13 +1,14 @@
 @model IEnumerable<MultiserviciosPiscinas.Models.GastoOperativo>
 
 @{
-    // El rol Administrador es RolId 1 (antes se deducía por si el correo empezaba con "admin").
     bool esAdmin = User.IsInRole("1");
-    ViewData["Title"] = esAdmin ? "Gestión de Gastos" : "Mis Gastos";
+    ViewData["Title"] = esAdmin ? "Gestión de Gastos y Viáticos" : "Mis Gastos";
+    var categorias = ViewBag.Categorias as IEnumerable<MultiserviciosPiscinas.Models.CategoriaGastoOperativo>
+                     ?? Enumerable.Empty<MultiserviciosPiscinas.Models.CategoriaGastoOperativo>();
 }
 
 <div class="c-page-header d-flex justify-content-between align-items-center">
-    <h2 class="a-title">@(esAdmin ? "Gestión de Gastos (Viáticos / Materiales)" : "Mis Gastos (Viáticos / Materiales)")</h2>
+    <h2 class="a-title">@(esAdmin ? "Gestión de Gastos y Viáticos" : "Mis Gastos (Viáticos / Materiales)")</h2>
     <div class="d-flex flex-wrap gap-2">
         @if (esAdmin)
         {
@@ -36,12 +37,56 @@
     </div>
 }
 
+@if (esAdmin)
+{
+    <div class="o-form-card mb-3">
+        <div class="row g-3 align-items-end">
+            <div class="col-md-3">
+                <label for="filtroOrigen" class="form-label small fw-bold mb-1">Tipo / Origen</label>
+                <select id="filtroOrigen" class="form-select">
+                    <option value="">Todos</option>
+                    <option value="Operativo">Operativo</option>
+                    <option value="Viático">Viático / Técnico</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="filtroCategoria" class="form-label small fw-bold mb-1">Categoría</label>
+                <select id="filtroCategoria" class="form-select">
+                    <option value="">Todas</option>
+                    @foreach (var cat in categorias)
+                    {
+                        <option value="@cat.NombreCategoria">@cat.NombreCategoria</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="filtroEstado" class="form-label small fw-bold mb-1">Estado</label>
+                <select id="filtroEstado" class="form-select">
+                    <option value="">Todos</option>
+                    <option value="Pendiente">Pendiente</option>
+                    <option value="Aprobado">Aprobado</option>
+                    <option value="Rechazado">Rechazado</option>
+                </select>
+            </div>
+            <div class="col-md-3 d-flex justify-content-between align-items-center gap-2">
+                <button type="button" id="btnLimpiarFiltrosGastos" class="btn btn-outline-secondary w-100">
+                    <i class="bi bi-x-lg me-1"></i>Limpiar filtros
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
 <div class="o-form-card">
     <div class="table-responsive">
-        <table id="tablaGastos" class="table table-hover align-middle">
+        <table id="tablaGastos" class="table table-hover align-middle w-100">
             <thead class="table-light">
                 <tr>
                     <th class="a-text-muted small text-uppercase">Fecha</th>
+                    @if (esAdmin)
+                    {
+                        <th class="a-text-muted small text-uppercase">Tipo</th>
+                    }
                     <th class="a-text-muted small text-uppercase">Categoría</th>
                     <th class="a-text-muted small text-uppercase">Monto</th>
                     <th class="a-text-muted small text-uppercase">Descripción</th>
@@ -55,10 +100,27 @@
             <tbody>
                 @foreach (var g in Model)
                 {
-                    <tr>
+                    var origen = g.Usuario?.RolId == 1 ? "Operativo" : "Viático";
+                    var categoriaNombre = g.Categoria?.NombreCategoria ?? "General";
+                    <tr data-origen="@origen"
+                        data-categoria="@categoriaNombre"
+                        data-estado="@g.Estado">
                         <td data-order="@g.Fecha.ToString("yyyyMMdd")">@g.Fecha.ToString("dd/MM/yyyy")</td>
-                        <td>@(g.Categoria?.NombreCategoria ?? "General")</td>
-                        <td><strong>₡@g.Monto.ToString("N2")</strong></td>
+                        @if (esAdmin)
+                        {
+                            <td>
+                                @if (origen == "Operativo")
+                                {
+                                    <span class="c-badge c-badge-blue">Operativo</span>
+                                }
+                                else
+                                {
+                                    <span class="c-badge c-badge-teal">Viático</span>
+                                }
+                            </td>
+                        }
+                        <td>@categoriaNombre</td>
+                        <td class="c-price"><strong>₡@g.Monto.ToString("N2")</strong></td>
                         <td>@(g.Descripcion ?? "—")</td>
                         <td>@(g.Usuario != null ? $"{g.Usuario.Nombre} {g.Usuario.ApellidoPaterno}" : "—")</td>
                         <td>
@@ -159,43 +221,40 @@
     </div>
 </div>
 
-@* Sección de modales *@
-@if (Model != null && Model.Any())
+@if (esAdmin && Model != null && Model.Any())
 {
-    @foreach (var g in Model)
+    @foreach (var g in Model.Where(x => x.Estado == "Pendiente"))
     {
-        @if (g.Estado == "Pendiente")
-        {
-            <div class="modal fade" id="modalRechazar-@g.Id" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
-                <div class="modal-dialog modal-dialog-centered">
-                    <div class="modal-content text-start">
-                        <form asp-action="Rechazar" method="post">
-                            @Html.AntiForgeryToken()
-                            <input type="hidden" name="id" value="@g.Id" />
+        <div class="modal fade" id="modalRechazar-@g.Id" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content text-start">
+                    <form class="js-form-rechazar-gasto" asp-action="Rechazar" method="post" novalidate>
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@g.Id" />
 
-                            <div class="modal-header bg-danger text-white">
-                                <h5 class="modal-title fs-6"><i class="bi bi-exclamation-triangle-fill me-2"></i>Motivo de Rechazo</h5>
-                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
+                        <div class="modal-header bg-danger text-white">
+                            <h5 class="modal-title fs-6"><i class="bi bi-exclamation-triangle-fill me-2"></i>Motivo de Rechazo</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
 
-                            <div class="modal-body">
-                                <label class="form-label fw-bold text-dark">Escriba la justificación:</label>
-                                <textarea name="motivoRechazo" class="form-control" rows="3" required placeholder="Ej: La foto del comprobante no es legible..."></textarea>
-                            </div>
+                        <div class="modal-body">
+                            <label class="form-label fw-bold text-dark">Escriba la justificación:</label>
+                            <textarea name="motivoRechazo" class="form-control" rows="3" maxlength="500" placeholder="Ej: La foto del comprobante no es legible..."></textarea>
+                            <span class="text-danger small" data-valmsg-for="motivoRechazo"></span>
+                        </div>
 
-                            <div class="modal-footer bg-light d-flex justify-content-end">
-                                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
-                                    <i class="bi bi-x-circle me-1"></i>Cancelar
-                                </button>
-                                <button type="submit" class="btn btn-danger">
-                                    <i class="bi bi-check-circle-fill me-1"></i>Confirmar Rechazo
-                                </button>
-                            </div>
-                        </form>
-                    </div>
+                        <div class="modal-footer bg-light d-flex justify-content-end">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                                <i class="bi bi-x-circle me-1"></i>Cancelar
+                            </button>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="bi bi-check-circle-fill me-1"></i>Confirmar Rechazo
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
-        }
+        </div>
     }
 }
 
@@ -204,7 +263,7 @@
     <div class="modal fade" id="modalCrearCategoria" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content text-start">
-                <form asp-controller="Gastos" asp-action="CrearCategoria" method="post">
+                <form id="formCrearCategoria" asp-controller="Gastos" asp-action="CrearCategoria" method="post" novalidate>
                     @Html.AntiForgeryToken()
                     <input type="hidden" name="returnUrl" value="@Context.Request.Path" />
 
@@ -215,7 +274,8 @@
 
                     <div class="modal-body">
                         <label for="nombreCategoriaGastos" class="form-label fw-bold text-dark">Nombre de la categoría:</label>
-                        <input type="text" id="nombreCategoriaGastos" name="nombreCategoria" class="form-control" maxlength="100" required placeholder="Ej: Combustible, Viáticos, Materiales..." />
+                        <input type="text" id="nombreCategoriaGastos" name="nombreCategoria" class="form-control" maxlength="100" placeholder="Ej: Combustible, Viáticos, Materiales..." />
+                        <span class="text-danger small" data-valmsg-for="nombreCategoria"></span>
                     </div>
 
                     <div class="modal-footer bg-light d-flex justify-content-end">
@@ -233,5 +293,6 @@
 }
 
 @section Scripts {
+    <script src="~/js/gastos-form.js" asp-append-version="true"></script>
     <script src="~/js/gastos-tabla.js" asp-append-version="true"></script>
 }

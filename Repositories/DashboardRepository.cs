@@ -57,48 +57,50 @@ namespace MultiserviciosPiscinas.Repositories
             int tecnicosDisponibles = await _context.Usuario
                 .CountAsync(u => u.RolId == 2 && u.Activo && u.Cliente == null);
 
-            //------KPIs OPERATIVOS (trimestre)--------
+            //------KPIs OPERATIVOS (trimestre actual o año si el trimestre aún no tiene datos)--------
+            var inicioTrimestreDate = inicioTrimestre;
+            var finTrimestreDate = finTrimestre.AddDays(1); //exclusivo
 
-            //Servicios realizados en el trimestre (cualquier estado)
-            int serviciosRealizados = await _context.Servicio
+            int serviciosTrimestre = await _context.Servicio
                 .CountAsync(s => s.FechaApertura >= inicioTrimestre_DateOnly
                               && s.FechaApertura <= finTrimestre_DateOnly);
 
-            //Si no hay datos en el trimestre, se amplía al año actual
-            bool usandoTrimestre = serviciosRealizados > 0;
-            if (!usandoTrimestre)
-            {
-                serviciosRealizados = await _context.Servicio
-                    .CountAsync(s => s.FechaApertura >= inicioAnio_DateOnly
-                                  && s.FechaApertura <= finAnio_DateOnly);
-            }
-
-            //Proyectos activos en el trimestre (En ejecución o En planificación)
-            int proyectosActivos = await _context.ProyectoConstruccion
-                .CountAsync(p => (p.Estado == "En ejecución" || p.Estado == "En planificación")
-                              && p.FechaInicio >= inicioTrimestre_DateOnly
-                              && p.FechaInicio <= finTrimestre_DateOnly);
-
-            if (!usandoTrimestre || proyectosActivos == 0)
-            {
-                proyectosActivos = await _context.ProyectoConstruccion
-                    .CountAsync(p => p.Estado == "En ejecución" || p.Estado == "En planificación");
-            }
-
-            //Visitas técnicas (todas las citas) en el trimestre
-            var inicioTrimestreDate = inicioTrimestre;
-            var finTrimestreDate = finTrimestre.AddDays(1); //exclusivo
-            int visitasTecnicas = await _context.Cita
+            int visitasTrimestre = await _context.Cita
                 .CountAsync(c => c.FechaHora >= inicioTrimestreDate
-                              && c.FechaHora < finTrimestreDate);
+                              && c.FechaHora < finTrimestreDate
+                              && c.Tecnico.RolId == 2
+                              && c.Tecnico.Cliente == null);
 
-            if (!usandoTrimestre || visitasTecnicas == 0)
-            {
-                visitasTecnicas = await _context.Cita
-                    .CountAsync(c => c.FechaHora.Year == hoy.Year);
-            }
+            bool usandoTrimestre = serviciosTrimestre > 0 || visitasTrimestre > 0;
 
-            string periodoKpi = usandoTrimestre ? nombreTrimestre : nombreAnio;
+            var inicioPeriodoDateOnly = usandoTrimestre ? inicioTrimestre_DateOnly : inicioAnio_DateOnly;
+            var finPeriodoDateOnly = usandoTrimestre ? finTrimestre_DateOnly : finAnio_DateOnly;
+            var inicioPeriodoDateTime = usandoTrimestre ? inicioTrimestreDate : new DateTime(hoy.Year, 1, 1);
+            var finPeriodoExclusivoDateTime = usandoTrimestre ? finTrimestreDate : new DateTime(hoy.Year + 1, 1, 1);
+
+            string periodoKpi = usandoTrimestre ? nombreTrimestre : $"Año {nombreAnio}";
+
+            //Servicios realizados en el período operativo
+            int serviciosRealizados = usandoTrimestre
+                ? serviciosTrimestre
+                : await _context.Servicio
+                    .CountAsync(s => s.FechaApertura >= inicioPeriodoDateOnly
+                                  && s.FechaApertura <= finPeriodoDateOnly);
+
+            //Proyectos activos (coincide con los estados activos del gráfico Estado de Proyectos)
+            int proyectosActivos = await _context.ProyectoConstruccion
+                .CountAsync(p => p.Estado == "En ejecución"
+                              || p.Estado == "En Planificación"
+                              || p.Estado == "En planificación");
+
+            //Visitas técnicas del mismo período operativo y técnicos válidos (RolId = 2 sin perfil cliente)
+            var citasPeriodoQuery = _context.Cita
+                .Where(c => c.FechaHora >= inicioPeriodoDateTime
+                         && c.FechaHora < finPeriodoExclusivoDateTime
+                         && c.Tecnico.RolId == 2
+                         && c.Tecnico.Cliente == null);
+
+            int visitasTecnicas = await citasPeriodoQuery.CountAsync();
 
             //GRÁFICO 1: Servicios por mes (últimos 6 meses)
             var hace6Meses = DateOnly.FromDateTime(hoy.AddMonths(-5));
@@ -130,10 +132,9 @@ namespace MultiserviciosPiscinas.Repositories
                 .OrderByDescending(e => e.Cantidad)
                 .ToListAsync();
 
-            //GRÁFICO 3: Visitas técnicas por técnico (top 5)
-            var visitasPorTecnico = await _context.Cita
+            //GRÁFICO 3: Visitas técnicas por técnico en el mismo período operativo (top 5)
+            var visitasPorTecnico = await citasPeriodoQuery
                 .Include(c => c.Tecnico)
-                .Where(c => c.Tecnico.RolId == 2 && c.Tecnico.Cliente == null)
                 .GroupBy(c => new { c.TecnicoId, c.Tecnico.Nombre, c.Tecnico.ApellidoPaterno })
                 .Select(g => new VisitasPorTecnicoDto
                 {

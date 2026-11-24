@@ -191,6 +191,17 @@ if (window.jQuery && $.fn.dataTable) {
 }
 
 // ==========================================================================
+// Prevención global para modales detrás del navbar / stacking contexts
+// Mueve cualquier modal abierto hacia document.body para respetar su z-index
+// ==========================================================================
+document.addEventListener('show.bs.modal', function (e) {
+    var modal = e.target;
+    if (modal && modal.classList && modal.classList.contains('modal') && modal.parentElement !== document.body) {
+        document.body.appendChild(modal);
+    }
+});
+
+// ==========================================================================
 // Prevención global para menús desplegables (Dropdowns) en tablas y tarjetas
 // Evita que el overflow corte los menús usando Popper fixed strategy
 // ==========================================================================

@@ -12,6 +12,8 @@ namespace MultiserviciosPiscinas.Services
         {
             "inv.PRODUCTO" => "Inventario (productos)",
             "inv.CATEGORIA_PRODUCTO" => "Inventario (categorías)",
+            "ven.COTIZACION" => "Cotizaciones",
+            "ven.FACTURA" => "Facturación",
             "ops.CITA" => "Agenda (citas)",
             "ops.SERVICIO" => "Servicios técnicos",
             "seg.USUARIO" or "USUARIO" => "Usuarios y roles",
@@ -22,6 +24,7 @@ namespace MultiserviciosPiscinas.Services
             "act.PISCINA" => "Piscinas",
             "pry.PROYECTO_CONSTRUCCION" => "Proyectos",
             "log.VEHICULO" => "Vehículos de la Empresa",
+            "log.RUTA_OPTIMIZADA" => "Ruta Optimizada",
             "" => "Sistema",
             var t => t
         };

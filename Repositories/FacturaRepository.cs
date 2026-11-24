@@ -249,20 +249,122 @@ public class FacturaRepository : IFacturaRepository
             CondicionPago = factura.CondicionPago,
             ComprobanteSinpeRuta = factura.ComprobanteSinpeRuta,
             Estado = factura.Estado,
-            Lineas = factura.DetalleFactura
-                .Select(d => new DetalleFacturarDto
-                {
-                    ProductoId = d.ProductoId,
-                    Nombre = d.Producto.Nombre,
-                    Descripcion = d.Producto.Descripcion,
-                    PrecioUnitario = d.PrecioUnitarioFinal,
-                    Cantidad = d.CantidadVendida,
-                    LineaImpuesto = d.Impuesto
-                })
-                .ToList(),
+            Lineas = MapearLineasFactura(factura),
             Subtotal = factura.Subtotal,
             ImpuestoTotal = factura.ImpuestoTotal,
             Total = factura.Total
         };
+    }
+
+    public async Task<List<FacturaAdminListadoDto>> ObtenerTodasLasFacturasAsync()
+    {
+        var filas = await _context.Factura
+            .AsNoTracking()
+            .Include(f => f.Cliente)
+                .ThenInclude(c => c.Usuario)
+            .OrderByDescending(f => f.FechaEmision)
+            .ThenByDescending(f => f.Id)
+            .Select(f => new
+            {
+                f.Id,
+                f.NumeroConsecutivo,
+                f.Cliente.Usuario.Nombre,
+                f.Cliente.Usuario.ApellidoPaterno,
+                f.Cliente.Usuario.ApellidoMaterno,
+                f.Cliente.Usuario.Correo,
+                f.CotizacionId,
+                f.FechaEmision,
+                f.FechaVencimiento,
+                f.CondicionPago,
+                f.Total,
+                f.Estado
+            })
+            .ToListAsync();
+
+        return filas
+            .Select(f => new FacturaAdminListadoDto
+            {
+                Id = f.Id,
+                NumeroFactura = f.NumeroConsecutivo,
+                NombreCliente = FormatearNombreCompleto(f.Nombre, f.ApellidoPaterno, f.ApellidoMaterno),
+                CorreoCliente = f.Correo,
+                NumeroCotizacion = f.CotizacionId.HasValue ? $"COT-{f.CotizacionId.Value:D5}" : null,
+                FechaEmision = f.FechaEmision,
+                FechaVencimiento = f.FechaVencimiento,
+                CondicionPago = f.CondicionPago,
+                Total = f.Total,
+                Estado = f.Estado
+            })
+            .ToList();
+    }
+
+    public async Task<FacturaAdminDetalleViewModel?> ObtenerDetalleFacturaAdminAsync(int facturaId)
+    {
+        var factura = await _context.Factura
+            .AsNoTracking()
+            .Include(f => f.Cliente)
+                .ThenInclude(c => c.Usuario)
+            .Include(f => f.DetalleFactura)
+                .ThenInclude(d => d.Producto)
+            .FirstOrDefaultAsync(f => f.Id == facturaId);
+
+        if (factura == null)
+            return null;
+
+        return new FacturaAdminDetalleViewModel
+        {
+            Id = factura.Id,
+            NumeroFactura = factura.NumeroConsecutivo,
+            NumeroCotizacion = factura.CotizacionId.HasValue ? $"COT-{factura.CotizacionId.Value:D5}" : null,
+            NombreCliente = FormatearNombreCompleto(
+                factura.Cliente.Usuario.Nombre,
+                factura.Cliente.Usuario.ApellidoPaterno,
+                factura.Cliente.Usuario.ApellidoMaterno),
+            CorreoCliente = factura.Cliente.Usuario.Correo,
+            FechaEmision = factura.FechaEmision,
+            FechaVencimiento = factura.FechaVencimiento,
+            CondicionPago = factura.CondicionPago,
+            ComprobanteSinpeRuta = factura.ComprobanteSinpeRuta,
+            Estado = factura.Estado,
+            Lineas = MapearLineasFactura(factura),
+            Subtotal = factura.Subtotal,
+            DescuentoTotal = factura.DescuentoTotal,
+            ImpuestoTotal = factura.ImpuestoTotal,
+            Total = factura.Total
+        };
+    }
+
+    public async Task<(bool Exito, string? EstadoAnterior, string? NumeroFactura)> ActualizarEstadoFacturaAsync(int facturaId, string nuevoEstado)
+    {
+        var factura = await _context.Factura.FindAsync(facturaId);
+        if (factura == null)
+            return (false, null, null);
+
+        var estadoAnterior = factura.Estado;
+        factura.Estado = nuevoEstado;
+        await _context.SaveChangesAsync();
+
+        return (true, estadoAnterior, factura.NumeroConsecutivo);
+    }
+
+    private static string FormatearNombreCompleto(string? nombre, string? apellidoPaterno, string? apellidoMaterno)
+    {
+        return string.Join(" ", new[] { nombre, apellidoPaterno, apellidoMaterno }
+            .Where(s => !string.IsNullOrWhiteSpace(s)));
+    }
+
+    private static List<DetalleFacturarDto> MapearLineasFactura(Factura factura)
+    {
+        return factura.DetalleFactura
+            .Select(d => new DetalleFacturarDto
+            {
+                ProductoId = d.ProductoId,
+                Nombre = d.Producto.Nombre,
+                Descripcion = d.Producto.Descripcion,
+                PrecioUnitario = d.PrecioUnitarioFinal,
+                Cantidad = d.CantidadVendida,
+                LineaImpuesto = d.Impuesto
+            })
+            .ToList();
     }
 }

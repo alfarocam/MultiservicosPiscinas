@@ -20,4 +20,11 @@ public interface IFacturaRepository
 
     // Obtener detalle de una compra específica, validando pertenencia al cliente
     Task<CompraDetalleViewModel?> ObtenerDetalleCompraClienteAsync(int facturaId, string correo);
+
+    // Administración de facturas
+    Task<List<FacturaAdminListadoDto>> ObtenerTodasLasFacturasAsync();
+
+    Task<FacturaAdminDetalleViewModel?> ObtenerDetalleFacturaAdminAsync(int facturaId);
+
+    Task<(bool Exito, string? EstadoAnterior, string? NumeroFactura)> ActualizarEstadoFacturaAsync(int facturaId, string nuevoEstado);
 }

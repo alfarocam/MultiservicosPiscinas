@@ -64,4 +64,30 @@
 
         public string GoogleMapsApiKey { get; set; } = string.Empty;
     }
+
+    public class GuardarParadaRequest
+    {
+        public int CitaId { get; set; }
+
+        public int OrdenVisita { get; set; }
+
+        public double? DistanciaTramoKm { get; set; }
+
+        public int? DuracionTramoMin { get; set; }
+    }
+
+    public class GuardarRutaRequest
+    {
+        public int TecnicoId { get; set; }
+
+        public DateOnly Fecha { get; set; }
+
+        public double DistanciaTotalKm { get; set; }
+
+        public int DuracionTotalMin { get; set; }
+
+        public string? EnlaceGoogleMaps { get; set; }
+
+        public List<GuardarParadaRequest> Paradas { get; set; } = new();
+    }
 }

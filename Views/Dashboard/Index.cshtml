@@ -84,9 +84,9 @@
             <h1 class="c-op-kpi-num c-op-kpi-num-green">@Model.ServiciosRealizados</h1>
         </div>
         <div class="col-md-4 p-4 text-center border-end">
-            <p class="c-op-kpi-label">Proyectos Activos
-            </p>
+            <p class="c-op-kpi-label">Proyectos Activos</p>
             <h1 class="c-op-kpi-num c-op-kpi-num-amber">@Model.ProyectosActivos</h1>
+            <small class="text-muted">En ejecución / Planificación</small>
         </div>
         <div class="col-md-4 p-4 text-center">
             <p class="c-op-kpi-label">
@@ -107,6 +107,7 @@
                 <div class="c-card-header-title">
                     <span>Servicios Últimos 6 Meses</span>
                 </div>
+                <span class="badge bg-secondary c-badge-sm">Últimos 6 meses</span>
             </div>
             <div class="c-card-body">
                 @if (Model.ServiciosPorMes.Count == 0)
@@ -128,6 +129,7 @@
                 <div class="c-card-header-title">
                     <span>Estado de Proyectos</span>
                 </div>
+                <span class="badge bg-secondary c-badge-sm">Estado actual</span>
             </div>
             <div class="c-card-body-centered">
                 @if (Model.EstadosProyectos.Count == 0)
@@ -152,6 +154,7 @@
                 <div class="c-card-header-title">
                     <span>Visitas Técnicas por Técnico (Top 5)</span>
                 </div>
+                <span class="badge bg-secondary c-badge-sm">@Model.PeriodoKpi</span>
             </div>
             <div class="c-card-body">
                 @if (Model.VisitasPorTecnico.Count == 0)
