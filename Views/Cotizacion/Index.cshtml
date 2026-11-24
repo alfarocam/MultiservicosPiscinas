@@ -22,6 +22,11 @@
     </div>
 }
 
+@if (TempData["CotizacionDescargarId"] != null)
+{
+    <a id="linkDescargaAutoCotizacion" href="@Url.Action("DescargarPdf", "Cotizacion", new { id = TempData["CotizacionDescargarId"] })" class="d-none"></a>
+}
+
 <div class="o-form-card">
     <div class="table-responsive">
         <table id="tablaCotizaciones" class="table table-hover align-middle w-100">

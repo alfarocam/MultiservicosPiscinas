@@ -11,50 +11,51 @@
     </h2>
 </div>
 
-    @if (TempData["Exito"] != null)
-    {
-        <div class="alert alert-success shadow-sm">
-            <i class="bi bi-check-circle me-1"></i>
-            @TempData["Exito"]
-        </div>
-    }
+@if (TempData["Exito"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show shadow-sm mb-3" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>@TempData["Exito"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+    </div>
+}
 
-    @if (TempData["Error"] != null)
-    {
-        <div class="alert alert-danger shadow-sm">
-            <i class="bi bi-exclamation-triangle me-1"></i>
-            @TempData["Error"]
-        </div>
-    }
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show shadow-sm mb-3" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+    </div>
+}
 
-    @if (!Model.Visitas.Any())
-    {
-        <div class="o-form-card text-center py-5">
-            <i class="bi bi-calendar-x c-empty-state-icon"></i>
+@if (!Model.Visitas.Any())
+{
+    <div class="o-form-card text-center py-5">
+        <i class="bi bi-calendar-x c-empty-state-icon"></i>
 
-            <h4 class="mt-3 mb-2">
-                No hay visitas disponibles
-            </h4>
+        <h4 class="mt-3 mb-2">
+            No hay visitas disponibles
+        </h4>
 
-            <p class="a-text-muted mb-0">
-                Actualmente no tienes visitas de mantenimiento o inspección pendientes para registrar parámetros.
-            </p>
-        </div>
-    }
-    else
-    {
-        <div class="o-form-card">
+        <p class="a-text-muted mb-0">
+            Actualmente no tienes visitas de mantenimiento o inspección pendientes para registrar parámetros.
+        </p>
+    </div>
+}
+else
+{
+    <div class="card shadow-sm">
+        <div class="card-body">
             <div class="table-responsive">
-                <table class="table table-hover align-middle">
+                <table id="tablaRegistroParametros" class="table table-hover align-middle c-data-table w-100">
                     <thead class="table-light">
                         <tr>
-                            <th class="a-text-muted small text-uppercase">Fecha</th>
-                            <th class="a-text-muted small text-uppercase">Cliente</th>
-                            <th class="a-text-muted small text-uppercase">Piscina</th>
-                            <th class="a-text-muted small text-uppercase">Dirección</th>
-                            <th class="a-text-muted small text-uppercase">Estado</th>
-                            <th class="a-text-muted small text-uppercase">Mediciones</th>
-                            <th class="a-text-muted small text-uppercase text-end">Acción</th>
+                            <th>Fecha</th>
+                            <th>Cliente</th>
+                            <th>Piscina</th>
+                            <th>Dirección</th>
+                            <th>Estado</th>
+                            <th>Mediciones</th>
+                            <th class="text-center">Acción</th>
                         </tr>
                     </thead>
 
@@ -71,21 +72,21 @@
                             };
 
                             <tr>
-                                <td>
+                                <td data-order="@visita.FechaHora.ToString("yyyyMMddHHmm")">
                                     <strong>@visita.FechaHora.ToString("dd/MM/yyyy")</strong>
                                     <div class="a-text-muted small">
                                         @visita.FechaHora.ToString("HH:mm")
                                     </div>
                                 </td>
 
-                                <td>@visita.Cliente</td>
+                                <td class="fw-semibold">@visita.Cliente</td>
 
                                 <td>
                                     <strong>@visita.Piscina</strong>
                                     <div class="a-text-muted small">@visita.TipoCita</div>
                                 </td>
 
-                                <td class="small">@visita.Direccion</td>
+                                <td class="small text-wrap">@visita.Direccion</td>
 
                                 <td>
                                     <span class="c-badge @badgeClass">
@@ -107,23 +108,23 @@
                                     }
                                 </td>
 
-                                <td>
-                                    <div class="d-flex justify-content-end">
-                                        <a asp-action="RegistrarParametro"
-                                           asp-controller="Piscinas"
-                                           asp-route-citaId="@visita.CitaId"
-                                           class="btn btn-primary">
-                                           <i class="bi bi-plus-circle me-1"></i>
-                                            Registrar parámetros
-                                        </a>
-                                    </div>
+                                <td class="text-center">
+                                    <a asp-action="RegistrarParametro"
+                                       asp-controller="Piscinas"
+                                       asp-route-citaId="@visita.CitaId"
+                                       class="btn btn-sm btn-primary">
+                                        <i class="bi bi-plus-circle me-1"></i>Registrar parámetros
+                                    </a>
                                 </td>
                             </tr>
                         }
                     </tbody>
-
                 </table>
             </div>
         </div>
-    }
-</div>
+    </div>
+}
+
+@section Scripts {
+    <script src="~/js/registro-parametros-tabla.js" asp-append-version="true"></script>
+}

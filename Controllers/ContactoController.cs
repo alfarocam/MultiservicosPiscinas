@@ -23,7 +23,7 @@ namespace MultiserviciosPiscinas.Controllers
 
             if (!ModelState.IsValid)
             {
-                return View(model);
+                return View("Index", model);
             }
 
             var usuarioEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
@@ -38,7 +38,7 @@ namespace MultiserviciosPiscinas.Controllers
             {
                 TempData["Mensaje"] = "Error interno: No se encontró la plantilla de correo.";
                 TempData["TipoMensaje"] = "danger";
-                return View(model);
+                return View("Index", model);
             }
 
             string contenidoHtml = await System.IO.File.ReadAllTextAsync(rutaHtml);
@@ -63,7 +63,7 @@ namespace MultiserviciosPiscinas.Controllers
                 _logger.LogError(ex, "Falló el envío de la consulta de contacto de {Usuario}", usuarioEmail);
                 TempData["Mensaje"] = "No se pudo enviar tu mensaje en este momento. Por favor, intenta de nuevo más tarde.";
                 TempData["TipoMensaje"] = "danger";
-                return View(model);
+                return View("Index", model);
             }
 
             if (string.IsNullOrEmpty(usuarioEmail))
@@ -76,6 +76,9 @@ namespace MultiserviciosPiscinas.Controllers
                 TempData["Mensaje"] = "Tu mensaje ha sido enviado correctamente. Nos pondremos en contacto contigo lo antes posible.";
                 TempData["TipoMensaje"] = "success"; // Alerta verde
             }
+
+            TempData["CorreoConfirmacion"] = TempData["Mensaje"];
+            TempData["CorreoConfirmacionTipo"] = TempData["TipoMensaje"];
 
             return RedirectToAction("Index", "Contacto");
         }

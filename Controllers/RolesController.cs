@@ -106,6 +106,14 @@ namespace MultiserviciosPiscinas.Controllers
             nuevoColaborador.Activo = true;
             nuevoColaborador.FechaCreacion = DateTime.Now;
 
+            if (string.IsNullOrWhiteSpace(nuevoColaborador.Contrasena))
+            {
+                ModelState.AddModelError("Contrasena", "La contraseña temporal es obligatoria.");
+                var listaRoles = await _context.Rol.ToListAsync();
+                ViewBag.Roles = new SelectList(listaRoles, "Id", "Nombre", nuevoColaborador.RolId);
+                return View(nuevoColaborador);
+            }
+
             if (string.IsNullOrWhiteSpace(nuevoColaborador.Correo) || !EsCorreoValido(nuevoColaborador.Correo))
             {
                 ModelState.AddModelError("Correo", "Ingresá un correo válido (@gmail.com, @hotmail.com, @yahoo.com, @outlook.com o institucional).");
@@ -125,6 +133,7 @@ namespace MultiserviciosPiscinas.Controllers
 
             try
             {
+                nuevoColaborador.Contrasena = PasswordHelper.Hash(nuevoColaborador.Contrasena);
                 _context.Usuario.Add(nuevoColaborador);
                 await _context.SaveChangesAsync();
 

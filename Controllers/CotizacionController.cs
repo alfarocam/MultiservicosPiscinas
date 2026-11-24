@@ -4,6 +4,7 @@ using MultiserviciosPiscinas.DTOs.Cotizacion;
 using MultiserviciosPiscinas.Interfaces;
 using MultiserviciosPiscinas.Services;
 using System.Globalization;
+using System.Net;
 using System.Text.RegularExpressions;
 
 namespace MultiserviciosPiscinas.Controllers
@@ -15,6 +16,8 @@ namespace MultiserviciosPiscinas.Controllers
         private readonly CotizacionPdfService _pdfService;
         private readonly IConfiguration _configuracion;
         private readonly BitacoraService _bitacora;
+        private readonly Generales _generales;
+        private readonly IWebHostEnvironment _entornoWeb;
         private readonly ILogger<CotizacionController> _logger;
 
         public CotizacionController(
@@ -22,12 +25,16 @@ namespace MultiserviciosPiscinas.Controllers
             CotizacionPdfService pdfService,
             IConfiguration configuracion,
             BitacoraService bitacora,
+            Generales generales,
+            IWebHostEnvironment entornoWeb,
             ILogger<CotizacionController> logger)
         {
             _cotizacionRepositorio = cotizacionRepositorio;
             _pdfService = pdfService;
             _configuracion = configuracion;
             _bitacora = bitacora;
+            _generales = generales;
+            _entornoWeb = entornoWeb;
             _logger = logger;
         }
 
@@ -283,6 +290,9 @@ namespace MultiserviciosPiscinas.Controllers
 
                 // Buscar o crear cliente (por correo o teléfono para evitar duplicados)
                 int clienteId;
+                bool esClienteNuevo = false;
+                string? contrasenaTemporal = null;
+
                 var clienteExistente = await _cotizacionRepositorio.BuscarClientePorCorreoOTelefonoAsync(model.CorreoCliente)
                     ?? await _cotizacionRepositorio.BuscarClientePorCorreoOTelefonoAsync(telefonoFormateado);
 
@@ -292,13 +302,16 @@ namespace MultiserviciosPiscinas.Controllers
                 }
                 else
                 {
-                    clienteId = await _cotizacionRepositorio.RegistrarClienteRapidoAsync(
+                    var registroCliente = await _cotizacionRepositorio.RegistrarClienteRapidoAsync(
                         model.NombreCliente,
                         model.ApellidoPaterno,
                         model.ApellidoMaterno,
                         model.CorreoCliente,
                         telefonoFormateado
                     );
+                    clienteId = registroCliente.ClienteId;
+                    contrasenaTemporal = registroCliente.ContrasenaTemporal;
+                    esClienteNuevo = true;
                 }
 
                 // Crear cotización
@@ -306,32 +319,42 @@ namespace MultiserviciosPiscinas.Controllers
                 var diasVigencia = int.Parse(_configuracion["Facturacion:DiasVigenciaCotizacion"] ?? "5", CultureInfo.InvariantCulture);
 
                 var cotizacion = await _cotizacionRepositorio.CrearCotizacionAsync(clienteId, carrito, tasaIva, diasVigencia);
-
-                // Armar datos para PDF
                 var numeroCotizacion = $"COT-{cotizacion.Id:D5}";
-                var pdfDto = new CotizacionPdfDto
-                {
-                    NumeroCotizacion = numeroCotizacion,
-                    NombreCliente = model.NombreCliente,
-                    CorreoCliente = model.CorreoCliente,
-                    TelefonoCliente = telefonoFormateado,
-                    FechaEmision = cotizacion.FechaEmision,
-                    FechaVigencia = cotizacion.FechaVigencia,
-                    NumeroSinpe = _configuracion["DatosContacto:NumeroSinpe"],
-                    Lineas = carrito,
-                    Subtotal = cotizacion.Subtotal,
-                    ImpuestoTotal = cotizacion.ImpuestoTotal,
-                    Total = cotizacion.Total
-                };
-
-                // Generar PDF
-                var bytes = _pdfService.GenerarPdf(pdfDto);
 
                 // Limpiar carrito
                 HttpContext.Session.LimpiarCarrito();
 
-                // Descargar PDF
-                return File(bytes, "application/pdf", $"Cotizacion-{numeroCotizacion}.pdf");
+                if (esClienteNuevo && !string.IsNullOrEmpty(contrasenaTemporal))
+                {
+                    bool correoEnviado = await EnviarCorreoCuentaCreadaAsync(
+                        $"{model.NombreCliente} {model.ApellidoPaterno}".Trim(),
+                        model.CorreoCliente,
+                        contrasenaTemporal,
+                        numeroCotizacion);
+
+                    if (correoEnviado)
+                    {
+                        TempData["Mensaje"] = $"Cotización {numeroCotizacion} generada correctamente. Se creó la cuenta de usuario y se envió un correo de confirmación a {model.CorreoCliente} con su contraseña temporal.";
+                        TempData["TipoMensaje"] = "success";
+                        TempData["CorreoConfirmacion"] = $"Se envió un correo a {model.CorreoCliente} con las credenciales de acceso para el nuevo usuario.";
+                        TempData["CorreoConfirmacionTipo"] = "success";
+                    }
+                    else
+                    {
+                        TempData["Mensaje"] = $"Cotización {numeroCotizacion} generada y cuenta creada para {model.CorreoCliente}, pero no se pudo enviar el correo con la contraseña temporal.";
+                        TempData["TipoMensaje"] = "warning";
+                        TempData["CorreoConfirmacion"] = $"La cotización {numeroCotizacion} se creó, pero no se pudo enviar el correo con la contraseña temporal a {model.CorreoCliente}.";
+                        TempData["CorreoConfirmacionTipo"] = "warning";
+                    }
+                }
+                else
+                {
+                    TempData["Mensaje"] = $"Cotización {numeroCotizacion} generada correctamente.";
+                    TempData["TipoMensaje"] = "success";
+                }
+
+                TempData["CotizacionDescargarId"] = cotizacion.Id;
+                return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
@@ -339,6 +362,47 @@ namespace MultiserviciosPiscinas.Controllers
                 TempData["Mensaje"] = "Ocurrió un error al generar la cotización. Intenta de nuevo.";
                 TempData["TipoMensaje"] = "danger";
                 return RedirectToAction("Crear");
+            }
+        }
+
+        private async Task<bool> EnviarCorreoCuentaCreadaAsync(
+            string nombreCompleto,
+            string correoDestino,
+            string contrasenaTemporal,
+            string numeroCotizacion)
+        {
+            try
+            {
+                string rutaHtml = Path.Combine(
+                    _entornoWeb.ContentRootPath,
+                    "Template",
+                    "CuentaCreadaCotizacion.html");
+
+                if (!System.IO.File.Exists(rutaHtml))
+                {
+                    _logger.LogError("No se encontró la plantilla de correo de cuenta creada en cotización en {Ruta}", rutaHtml);
+                    return false;
+                }
+
+                string contenidoHtml = await System.IO.File.ReadAllTextAsync(rutaHtml);
+
+                string htmlFinal = contenidoHtml
+                    .Replace("{{NOMBRE_USUARIO}}", WebUtility.HtmlEncode(nombreCompleto))
+                    .Replace("{{NUMERO_COTIZACION}}", WebUtility.HtmlEncode(numeroCotizacion))
+                    .Replace("{{CORREO_USUARIO}}", WebUtility.HtmlEncode(correoDestino))
+                    .Replace("{{CONTRASENA_TEMPORAL}}", WebUtility.HtmlEncode(contrasenaTemporal));
+
+                _generales.EnviarCorreo(
+                    correoDestino,
+                    $"Tu cuenta y cotización {numeroCotizacion} — Multiservicios y Piscinas",
+                    htmlFinal);
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Falló el envío del correo de credenciales al crear cuenta en cotización para {Correo}", correoDestino);
+                return false;
             }
         }
     }

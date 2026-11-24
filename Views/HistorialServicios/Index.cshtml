@@ -4,12 +4,12 @@
     ViewData["Title"] = "Registro de Servicios";
 }
 
-<div class="container mt-4 u-container-max-lg">
-    
-    <div class="mb-4">
-        <h2 class="fw-bold text-dark"><i class="bi bi-file-earmark-text text-primary"></i> HU-5.6 – Consultar Registro de Servicios</h2>
-        <p class="text-muted">Historial oficial de los servicios técnicos, mantenimientos y reparaciones contratados por el cliente.</p>
+<div class="c-page-header d-flex justify-content-between align-items-center">
+    <div>
+        <h2 class="mb-0">Registro de Servicios</h2>
+        <p class="a-text-light mb-0 small opacity-75">Historial oficial de los servicios técnicos, mantenimientos y reparaciones contratados por el cliente.</p>
     </div>
+</div>
 
     <div class="row g-3">
         @if (!Model.Any())
@@ -78,4 +78,3 @@
             }
         }
     </div>
-</div>

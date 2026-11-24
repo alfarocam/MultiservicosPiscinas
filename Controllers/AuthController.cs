@@ -41,9 +41,15 @@ namespace MultiserviciosPiscinas.Controllers
             // Validar existencia y contraseña
             if (usuario != null &&
                 string.Equals(usuario.Correo, correoLimpio, StringComparison.OrdinalIgnoreCase) &&
-                usuario.Contrasena == contrasena &&
+                PasswordHelper.Verificar(contrasena, usuario.Contrasena) &&
                 usuario.Activo == true)
             {
+                if (!PasswordHelper.EsHashBCrypt(usuario.Contrasena))
+                {
+                    usuario.Contrasena = PasswordHelper.Hash(contrasena);
+                    await _contexto.SaveChangesAsync();
+                }
+
                 if (usuario.RolId == 2 &&
                     !string.Equals(usuario.Correo, "admin@piscinas.com", StringComparison.OrdinalIgnoreCase) &&
                     await _contexto.Cliente.AnyAsync(c => c.UsuarioId == usuario.Id))
@@ -221,7 +227,7 @@ namespace MultiserviciosPiscinas.Controllers
                         paternoLimpio,
                         maternoLimpio,
                         correoLimpio,
-                        model.Contrasena,
+                        PasswordHelper.Hash(model.Contrasena),
                         fechaCreacion
                     )
                     .ToListAsync();
@@ -278,11 +284,15 @@ namespace MultiserviciosPiscinas.Controllers
                 {
                     TempData["Mensaje"] = "Usuario creado correctamente. Te hemos enviado un correo de bienvenida.";
                     TempData["TipoMensaje"] = "success";
+                    TempData["CorreoConfirmacion"] = TempData["Mensaje"];
+                    TempData["CorreoConfirmacionTipo"] = "success";
                 }
                 else
                 {
                     TempData["Mensaje"] = "Usuario creado correctamente, pero no se pudo enviar el correo de bienvenida en este momento.";
                     TempData["TipoMensaje"] = "warning";
+                    TempData["CorreoConfirmacion"] = TempData["Mensaje"];
+                    TempData["CorreoConfirmacionTipo"] = "warning";
                 }
 
                 return RedirectToAction("InicioSesion", "Auth");
@@ -397,11 +407,13 @@ namespace MultiserviciosPiscinas.Controllers
                 return View();
             }
 
+            var contrasenaHash = PasswordHelper.Hash(nuevaContrasena);
+
             // El SP usa SET NOCOUNT ON, así que ExecuteSql devolvería -1 siempre.
             // El conteo real viene en el SELECT @@ROWCOUNT que retorna el SP.
             var actualizacion = await _contexto.Database
                 .SqlQuery<ResultadoActualizacionContrasena>(
-                    $"EXEC seg.ActualizarContrasena @Contrasena={nuevaContrasena}, @IdUsuario={resultado.Id}")
+                    $"EXEC seg.ActualizarContrasena @Contrasena={contrasenaHash}, @IdUsuario={resultado.Id}")
                 .AsAsyncEnumerable()
                 .FirstOrDefaultAsync();
 
@@ -410,6 +422,11 @@ namespace MultiserviciosPiscinas.Controllers
                 ViewBag.Mensaje = "Su información no se actualizó correctamente. Intente de nuevo.";
                 return View();
             }
+
+            TempData["Mensaje"] = $"Se ha enviado un correo a {resultado.Correo} con tu nueva contraseña temporal. Revisá tu bandeja de entrada.";
+            TempData["TipoMensaje"] = "success";
+            TempData["CorreoConfirmacion"] = TempData["Mensaje"];
+            TempData["CorreoConfirmacionTipo"] = "success";
 
             return RedirectToAction("InicioSesion", "Auth");
         }

@@ -16,7 +16,7 @@ public interface ICotizacionRepository
     Task<List<ClienteBusquedaDto>> BuscarClientesAsync(string filtro);
 
     Task<ClienteBusquedaDto?> BuscarClientePorCorreoOTelefonoAsync(string valor);
-    Task<int> RegistrarClienteRapidoAsync(string nombre, string apellidoPaterno, string apellidoMaterno, string correo, string telefono);
+    Task<(int ClienteId, string ContrasenaTemporal)> RegistrarClienteRapidoAsync(string nombre, string apellidoPaterno, string apellidoMaterno, string correo, string telefono);
 
     Task<Cotizacion> CrearCotizacionAsync(int clienteId, List<ItemCarritoDto> items, decimal tasaIva, int diasVigencia);
 

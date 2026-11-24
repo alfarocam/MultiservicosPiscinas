@@ -372,7 +372,7 @@ namespace MultiserviciosPiscinas.Controllers
                 return RedirectToAction(nameof(Editar));
             }
 
-            usuarioDb.Contrasena = contrasena;
+            usuarioDb.Contrasena = PasswordHelper.Hash(contrasena);
 
             try
             {

@@ -1,59 +1,75 @@
 @{
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
     ViewData["Title"] = "Registrar Piscina";
 }
 
-<div class="container my-5 u-container-max-sm">
-    <div class="mb-4">
-        <h1 class="a-title">Registrar Nueva Piscina</h1>
-        <p class="a-text-muted">Introduzca los datos correspondientes para dar de alta la estructura en el sistema.</p>
+<div class="c-page-header d-flex justify-content-between align-items-center">
+    <div>
+        <h2 class="mb-0">Registrar Nueva Piscina</h2>
+        <p class="a-text-light mb-0 small opacity-75">
+            Introduzca los datos correspondientes para dar de alta la estructura en el sistema.
+        </p>
     </div>
+    <a asp-action="Index" asp-controller="Piscinas" class="btn btn-success">
+        <i class="bi bi-arrow-left me-1"></i>Volver
+    </a>
+</div>
 
-    <div class="o-form-card">
+<div class="card border-0 shadow-sm">
+    <div class="card-body">
         <form asp-action="Crear" asp-controller="Piscinas" method="post">
+            @Html.AntiForgeryToken()
 
-            <div class="m-form-field">
-                <label>Cliente</label>
-                <input type="text" class="a-input c-input-disabled" value="@ViewBag.NombreCliente" readonly />
-                <input type="hidden" name="ClienteId" value="@ViewBag.ClienteId" />
+            <h5 class="fw-bold mb-3 c-section-title">
+                <i class="bi bi-water me-2"></i>Datos de la piscina
+            </h5>
+            <hr class="c-hr-accent" />
+
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Cliente</label>
+                    <input type="text" class="form-control c-input-disabled" value="@ViewBag.NombreCliente" readonly />
+                    <input type="hidden" name="ClienteId" value="@ViewBag.ClienteId" />
+                </div>
+
+                <div class="col-md-6">
+                    <label for="DireccionId" class="form-label fw-semibold">Dirección</label>
+                    <select id="DireccionId" name="DireccionId" class="form-select" asp-items="@ViewBag.Direcciones" required>
+                        <option value="" disabled selected>Seleccione una dirección...</option>
+                    </select>
+                </div>
+
+                <div class="col-md-4">
+                    <label for="Tipo" class="form-label fw-semibold">Tipo de Piscina</label>
+                    <select id="Tipo" name="Tipo" class="form-select" required>
+                        <option value="" disabled selected>Seleccione una opción...</option>
+                        <option value="Residencial">Residencial</option>
+                        <option value="Comercial">Comercial</option>
+                        <option value="Semiolímpica">Semiolímpica</option>
+                        <option value="Olímpica">Olímpica</option>
+                        <option value="Jacuzzi">Jacuzzi</option>
+                        <option value="Otro">Otro</option>
+                    </select>
+                </div>
+
+                <div class="col-md-4">
+                    <label for="VolumenM3" class="form-label fw-semibold">Volumen (m³)</label>
+                    <input type="number" step="0.01" min="0" id="VolumenM3" name="VolumenM3" class="form-control" placeholder="Ej. 45.50" required />
+                </div>
+
+                <div class="col-md-4">
+                    <label for="Estado" class="form-label fw-semibold">Estado Inicial</label>
+                    <select id="Estado" name="Estado" class="form-select" required>
+                        <option value="" disabled selected>Seleccione un estado...</option>
+                        <option value="Activa">Activa</option>
+                        <option value="Inactiva">Inactiva</option>
+                        <option value="En mantenimiento">En mantenimiento</option>
+                        <option value="En construcción">En construcción</option>
+                    </select>
+                </div>
             </div>
 
-            <div class="m-form-field">
-                <label for="DireccionId">Dirección</label>
-                <select id="DireccionId" name="DireccionId" class="a-input" asp-items="@ViewBag.Direcciones" required>
-                    <option value="" disabled selected>Seleccione una dirección...</option>
-                </select>
-            </div>
-
-            <div class="m-form-field">
-                <label for="Tipo">Tipo de Piscina</label>
-                <select id="Tipo" name="Tipo" class="a-input" required>
-                    <option value="" disabled selected>Seleccione una opción...</option>
-                    <option value="Residencial">Residencial</option>
-                    <option value="Comercial">Comercial</option>
-                    <option value="Semiolímpica">Semiolímpica</option>
-                    <option value="Olímpica">Olímpica</option>
-                    <option value="Jacuzzi">Jacuzzi</option>
-                    <option value="Otro">Otro</option>
-                </select>
-            </div>
-
-            <div class="m-form-field">
-                <label for="VolumenM3">Volumen (m³)</label>
-                <input type="number" step="0.01" min="0" id="VolumenM3" name="VolumenM3" class="a-input" placeholder="Ej. 45.50" required />
-            </div>
-
-            <div class="m-form-field">
-                <label for="Estado">Estado Inicial</label>
-                <select id="Estado" name="Estado" class="a-input" required>
-                    <option value="" disabled selected>Seleccione un estado...</option>
-                    <option value="Activa">Activa</option>
-                    <option value="Inactiva">Inactiva</option>
-                    <option value="En mantenimiento">En mantenimiento</option>
-                    <option value="En construcción">En construcción</option>
-                </select>
-            </div>
-
-            <div class="d-flex justify-content-end gap-2 mt-4">
+            <div class="d-flex justify-content-end gap-2 mt-2">
                 <a asp-action="Index" asp-controller="Clientes" class="btn btn-outline-secondary">
                     <i class="bi bi-x-circle me-1"></i>Cancelar
                 </a>

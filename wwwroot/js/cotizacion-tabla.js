@@ -1,4 +1,9 @@
 $(document).ready(function () {
+    var linkDescarga = document.getElementById('linkDescargaAutoCotizacion');
+    if (linkDescarga) {
+        linkDescarga.click();
+    }
+
     var $tabla = $('#tablaCotizaciones');
     if ($tabla.length) {
         $tabla.DataTable({

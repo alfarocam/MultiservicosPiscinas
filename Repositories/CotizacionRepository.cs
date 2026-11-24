@@ -3,6 +3,7 @@ using MultiserviciosPiscinas.DTOs.Cotizacion;
 using MultiserviciosPiscinas.Interfaces;
 using MultiserviciosPiscinas.Models;
 using MultiserviciosPiscinas.Services;
+using System.Security.Cryptography;
 
 namespace MultiserviciosPiscinas.Repositories;
 
@@ -180,9 +181,10 @@ public class CotizacionRepository : ICotizacionRepository
         return null;
     }
 
-    public async Task<int> RegistrarClienteRapidoAsync(string nombre, string apellidoPaterno, string apellidoMaterno, string correo, string telefono)
+    public async Task<(int ClienteId, string ContrasenaTemporal)> RegistrarClienteRapidoAsync(string nombre, string apellidoPaterno, string apellidoMaterno, string correo, string telefono)
     {
         var contrasenaAleatoria = GenerarContrasenAleatoria();
+        var contrasenaHash = PasswordHelper.Hash(contrasenaAleatoria);
         var fechaCreacion = DateTime.Now;
         var rolId = 3; // Cliente
 
@@ -197,7 +199,7 @@ public class CotizacionRepository : ICotizacionRepository
                     apellidoPaterno,
                     apellidoMaterno,
                     correo,
-                    contrasenaAleatoria,
+                    contrasenaHash,
                     fechaCreacion
                 )
                 .ToListAsync();
@@ -231,7 +233,7 @@ public class CotizacionRepository : ICotizacionRepository
                 );
             }
 
-            return clienteId;
+            return (clienteId, contrasenaAleatoria);
         }
         catch (Exception ex)
         {
@@ -488,9 +490,8 @@ public class CotizacionRepository : ICotizacionRepository
     private string GenerarContrasenAleatoria(int longitud = 12)
     {
         const string caracteres = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%";
-        var random = new Random();
         return new string(Enumerable.Range(0, longitud)
-            .Select(_ => caracteres[random.Next(caracteres.Length)])
+            .Select(_ => caracteres[RandomNumberGenerator.GetInt32(caracteres.Length)])
             .ToArray());
     }
 }
